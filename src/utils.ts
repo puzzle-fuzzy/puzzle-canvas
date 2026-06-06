@@ -72,11 +72,25 @@ function getApiUrl(path: string): string {
 }
 
 /**
- * 非 upload 的 API 调用用 Vite proxy 即可（无大文件问题）
- * 这样即使后端独立启动也能通过代理工作
+ * 非 upload 的 API 调用优先走 Vite proxy
+ * 如果 proxy 不可用（后端未启动），fallback 到直连
  */
 function getApiPath(path: string): string {
   return path
+}
+
+/** 带自动 fallback 的 fetch：proxy 失败则直连后端 */
+async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
+  try {
+    const res = await fetch(path, init)
+    return res
+  } catch {
+    // proxy 失败，尝试直连后端
+    if (import.meta.env.DEV) {
+      return fetch(`http://localhost:3001${path}`, init)
+    }
+    throw new Error('请求失败')
+  }
 }
 
 /** 上传文件到后端 */
@@ -103,7 +117,7 @@ async function uploadFile(file: File): Promise<{
 
 /** 持久化：创建节点到后端（fire-and-forget） */
 function persistNode(node: AppNode): void {
-  fetch(getApiPath('/api/nodes'), {
+  apiFetch(getApiPath('/api/nodes'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -118,7 +132,7 @@ function persistNode(node: AppNode): void {
 
 /** 持久化：更新节点位置（fire-and-forget） */
 function persistNodePosition(id: string, x: number, y: number): void {
-  fetch(getApiPath(`/api/nodes/${id}`), {
+  apiFetch(getApiPath(`/api/nodes/${id}`), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ positionX: x, positionY: y }),
@@ -127,14 +141,14 @@ function persistNodePosition(id: string, x: number, y: number): void {
 
 /** 持久化：删除节点（fire-and-forget） */
 function persistNodeDelete(id: string): void {
-  fetch(getApiPath(`/api/nodes/${id}`), {
+  apiFetch(getApiPath(`/api/nodes/${id}`), {
     method: 'DELETE',
   }).catch((err) => console.error('Failed to persist delete:', err))
 }
 
 /** 从后端加载所有节点 */
 async function loadNodes(): Promise<AppNode[]> {
-  const res = await fetch(getApiPath('/api/nodes'))
+  const res = await apiFetch(getApiPath('/api/nodes'))
   if (!res.ok) return []
 
   const rows = await res.json()
