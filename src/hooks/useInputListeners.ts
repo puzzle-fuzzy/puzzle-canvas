@@ -15,11 +15,19 @@ export function useInputListeners() {
     }
     const onSpaceDown = (e: KeyboardEvent) => {
       if (e.code === 'Space' && !e.repeat) {
+        const target = e.target as HTMLElement | null
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+          return
+        }
         useInputStore.getState().setSpaceHeld(true)
       }
     }
     const onSpaceUp = (e: KeyboardEvent) => {
       if (e.code === 'Space') {
+        const target = e.target as HTMLElement | null
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+          return
+        }
         useInputStore.getState().setSpaceHeld(false)
       }
     }
