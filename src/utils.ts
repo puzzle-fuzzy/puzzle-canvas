@@ -5,6 +5,11 @@ const GAP_Y = 36
 const COL_COUNT = 3
 const MEDIA_NODE_WIDTH = 320
 
+/** 选区瀑布流布局参数 */
+const SEL_GAP_X = 20
+const SEL_GAP_Y = 20
+const SEL_COL_COUNT = 3
+
 /**
  * 局部瀑布流布局生成器
  * 给定起始坐标，每次调用 next(height) 传入实际节点高度
@@ -28,6 +33,60 @@ function localWaterfallLayout(origin: { x: number; y: number }) {
       return pos
     },
   }
+}
+
+/**
+ * 选区瀑布流布局
+ * 给定一组已选节点，以它们包围盒左上角为原点
+ * 按 3 列 masonry 排列，返回每个节点的新位置
+ */
+function selectionWaterfallLayout(
+  nodes: AppNode[],
+): Map<string, { x: number; y: number }> {
+  const result = new Map<string, { x: number; y: number }>()
+  if (nodes.length === 0) return result
+
+  // 包围盒左上角作为起点
+  const minX = Math.min(...nodes.map((n) => n.position.x))
+  const minY = Math.min(...nodes.map((n) => n.position.y))
+
+  // 获取节点默认尺寸
+  const defaultSize = (n: AppNode) => {
+    if (n.measured?.width && n.measured?.height) return n.measured
+    return n.type === 'urlNode'
+      ? { width: 280, height: 200 }
+      : { width: 320, height: 200 }
+  }
+
+  // 按高度降序排列，让大块先放，布局更紧凑
+  const sorted = [...nodes].sort((a, b) => {
+    const hA = defaultSize(a).height
+    const hB = defaultSize(b).height
+    return hB - hA
+  })
+
+  // 列宽取最宽节点
+  const maxWidth = Math.max(...nodes.map((n) => defaultSize(n).width))
+  const colStep = maxWidth + SEL_GAP_X
+  const colTops: number[] = new Array(SEL_COL_COUNT).fill(minY)
+
+  for (const node of sorted) {
+    const { height } = defaultSize(node)
+
+    // 找最短列
+    let minCol = 0
+    for (let i = 1; i < SEL_COL_COUNT; i++) {
+      if (colTops[i] < colTops[minCol]) minCol = i
+    }
+
+    result.set(node.id, {
+      x: minX + minCol * colStep,
+      y: colTops[minCol],
+    })
+    colTops[minCol] += height + SEL_GAP_Y
+  }
+
+  return result
 }
 
 /** 加载图片获取渲染高度（宽度固定 320px） */
@@ -153,6 +212,7 @@ export {
   isValidUrl,
   getDomain,
   localWaterfallLayout,
+  selectionWaterfallLayout,
   getImageRenderHeight,
   uploadFile,
   getApiUrl,

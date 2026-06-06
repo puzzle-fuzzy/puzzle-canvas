@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { LayoutGrid, Download, Trash2 } from 'lucide-react'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -7,6 +8,7 @@ import {
   Controls,
   MiniMap,
   useReactFlow,
+  useStore,
   type OnNodesChange,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
@@ -28,6 +30,7 @@ import {
   persistNodeDelete,
   loadNodes,
   localWaterfallLayout,
+  selectionWaterfallLayout,
   getImageRenderHeight,
   getApiUrl,
 } from './utils'
@@ -44,10 +47,20 @@ function Canvas() {
   const [loading, setLoading] = useState(false)
   const [initialized, setInitialized] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([])
   const nodesRef = useRef<AppNode[]>(nodes)
   nodesRef.current = nodes
   const mouseRef = useRef({ x: 0, y: 0 })
   const { screenToFlowPosition, getViewport } = useReactFlow()
+  const transform = useStore((s) => s.transform) // [x, y, zoom] — 视口变化时重新计算按钮位置
+
+  // 追踪选中的节点
+  const handleSelectionChange = useCallback(
+    ({ nodes: sel }: { nodes: { id: string }[] }) => {
+      setSelectedNodeIds(sel.map((n) => n.id))
+    },
+    [],
+  )
 
   // 追踪鼠标位置
   useEffect(() => {
@@ -107,6 +120,69 @@ function Canvas() {
     },
     [],
   )
+
+  // ========== 选区整理（瀑布流）==========
+  const handleOrganize = useCallback(() => {
+    const allNodes = nodesRef.current
+    const selected = allNodes.filter((n) => selectedNodeIds.includes(n.id))
+    if (selected.length < 2) return
+
+    const positions = selectionWaterfallLayout(selected)
+
+    setNodes((prev) => {
+      const updated = prev.map((node) => {
+        const newPos = positions.get(node.id)
+        if (!newPos) return node
+        return { ...node, position: newPos }
+      })
+      nodesRef.current = updated
+      return updated
+    })
+
+    for (const [id, pos] of positions.entries()) {
+      persistNodePosition(id, pos.x, pos.y)
+    }
+  }, [selectedNodeIds])
+
+  // ========== 选区删除 ==========
+  const handleDeleteSelected = useCallback(() => {
+    setNodes((prev) => {
+      const updated = prev.filter((n) => !selectedNodeIds.includes(n.id))
+      nodesRef.current = updated
+      return updated
+    })
+    for (const id of selectedNodeIds) {
+      persistNodeDelete(id)
+    }
+    setSelectedNodeIds([])
+  }, [selectedNodeIds])
+
+  // ========== 选区下载（图片/视频）==========
+  const handleDownloadSelected = useCallback(async () => {
+    const selected = nodesRef.current.filter((n) => selectedNodeIds.includes(n.id))
+    const mediaNodes = selected.filter(
+      (n) => n.type === 'imageNode' || n.type === 'videoNode',
+    ) as (ImageNodeType | VideoNodeType)[]
+
+    if (mediaNodes.length === 0) return
+
+    for (const node of mediaNodes) {
+      try {
+        const url = getApiUrl(node.data.src)
+        const res = await fetch(url)
+        const blob = await res.blob()
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = node.data.fileName || `download-${node.id}`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(a.href)
+      } catch (err) {
+        console.error('Failed to download:', node.data.fileName, err)
+      }
+    }
+  }, [selectedNodeIds])
 
   // ========== 视口变化时保存到 localStorage ==========
   const handleMoveEnd = useCallback(() => {
@@ -269,6 +345,27 @@ function Canvas() {
     )
   }
 
+  // 计算选区工具栏位置（包围盒右上角，屏幕坐标）
+  const toolbarPos = (() => {
+    if (selectedNodeIds.length < 2) return null
+    const selected = nodesRef.current.filter((n) => selectedNodeIds.includes(n.id))
+    if (selected.length === 0) return null
+
+    let maxX = -Infinity
+    let minY = Infinity
+    for (const n of selected) {
+      const w = n.measured?.width ?? (n.type === 'urlNode' ? 280 : 320)
+      maxX = Math.max(maxX, n.position.x + w)
+      minY = Math.min(minY, n.position.y)
+    }
+
+    const [vx, vy, zoom] = transform
+    return {
+      x: maxX * zoom + vx,
+      y: minY * zoom + vy,
+    }
+  })()
+
   return (
     <div
       className="canvas-container"
@@ -280,6 +377,7 @@ function Canvas() {
         onNodesChange={onNodesChange}
         onNodeDragStop={handleNodeDragStop}
         onMoveEnd={handleMoveEnd}
+        onSelectionChange={handleSelectionChange}
         nodeTypes={nodeTypes}
         defaultViewport={savedViewport}
         minZoom={0.01}
@@ -300,6 +398,28 @@ function Canvas() {
           style={{ background: 'var(--minimap-bg, #f0f0f0)' }}
         />
       </ReactFlow>
+
+      {toolbarPos && (
+        <div
+          className="selection-toolbar"
+          style={{
+            position: 'absolute',
+            left: toolbarPos.x,
+            top: toolbarPos.y - 44,
+            transform: 'translateX(-100%)',
+          }}
+        >
+          <button className="selection-toolbar-btn" onClick={handleOrganize} title="整理">
+            <LayoutGrid size={15} />
+          </button>
+          <button className="selection-toolbar-btn" onClick={handleDownloadSelected} title="下载">
+            <Download size={15} />
+          </button>
+          <button className="selection-toolbar-btn selection-toolbar-btn--danger" onClick={handleDeleteSelected} title="删除">
+            <Trash2 size={15} />
+          </button>
+        </div>
+      )}
 
       {loading && (
         <div className="loading-indicator">处理中...</div>

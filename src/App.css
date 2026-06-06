@@ -368,3 +368,39 @@
     background-color: #1a1a24;
   }
 }
+
+/* ========== 选区操作工具栏 ========== */
+.selection-toolbar {
+  z-index: 5;
+  pointer-events: auto;
+  display: flex;
+  gap: 2px;
+  background: #000;
+  border-radius: 50px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.selection-toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.selection-toolbar-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.selection-toolbar-btn--danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
