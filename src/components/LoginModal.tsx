@@ -5,6 +5,7 @@ import { useUIStore } from '../stores/uiStore'
 import { useCanvasStore } from '../stores/canvasStore'
 import { register, login } from '../utils/auth'
 import { loadNodes } from '../utils/api'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 
 type Tab = 'login' | 'register'
 
@@ -24,6 +25,8 @@ function LoginModal() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const trapRef = useFocusTrap(showLoginModal)
 
   if (!showLoginModal) return null
 
@@ -86,7 +89,14 @@ function LoginModal() {
 
   return (
     <div className="auth-modal-overlay" onClick={handleClose}>
-      <div className={`auth-modal ${darkMode ? 'dark' : 'light'}`} onClick={(e) => e.stopPropagation()}>
+      <div
+        ref={trapRef}
+        className={`auth-modal ${darkMode ? 'dark' : 'light'}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={tab === 'login' ? '登录' : '注册'}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="auth-modal-header">
           <span className="auth-modal-title">
             <Icon size={16}><UserIcon /></Icon>
@@ -119,6 +129,7 @@ function LoginModal() {
             className="auth-modal-input"
             type="email"
             placeholder="邮箱"
+            aria-label="邮箱"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
@@ -129,6 +140,7 @@ function LoginModal() {
               className="auth-modal-input"
               type="text"
               placeholder="用户名（2-20 个字符）"
+              aria-label="用户名"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               disabled={loading}
@@ -141,7 +153,7 @@ function LoginModal() {
             className="auth-modal-input"
             type="password"
             placeholder="密码"
-            value={password}
+            aria-label="密码"
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
             minLength={6}
@@ -152,6 +164,7 @@ function LoginModal() {
               className="auth-modal-input"
               type="password"
               placeholder="确认密码"
+              aria-label="确认密码"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={loading}

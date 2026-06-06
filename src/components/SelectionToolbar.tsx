@@ -56,23 +56,23 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
     >
       {selectedCount > 1 && (
         <button className="selection-toolbar-btn" onClick={handleOrganize} title="整理">
-          <Icon size={Math.round(iconSize * 0.75)}><BoardIcon /></Icon>
+          <Icon size={iconSize}><BoardIcon /></Icon>
         </button>
       )}
       {hasMedia && (
         <button className="selection-toolbar-btn" onClick={handleFullscreen} title="全屏预览">
-          <Icon size={Math.round(iconSize * 0.75)}><FullscreenIcon /></Icon>
+          <Icon size={iconSize}><FullscreenIcon /></Icon>
         </button>
       )}
       <button className="selection-toolbar-btn" onClick={onDownload} title="下载">
-        <Icon size={Math.round(iconSize * 0.75)}><DownloadIcon /></Icon>
+        <Icon size={iconSize}><DownloadIcon /></Icon>
         </button>
       <button
         className="selection-toolbar-btn selection-toolbar-btn--danger"
         onClick={handleDeleteSelected}
         title="删除"
       >
-        <Icon size={Math.round(iconSize * 0.75)}><DeleteIcon /></Icon>
+        <Icon size={iconSize}><DeleteIcon /></Icon>
       </button>
     </div>
   )

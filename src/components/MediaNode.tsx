@@ -45,7 +45,7 @@ function MediaNode({ data, type, id }: MediaNodeProps) {
           <div className="upload-progress-bar-track">
             <div
               className="upload-progress-bar-fill"
-              style={{ width: `${percent}%` }}
+              style={{ transform: `scaleX(${percent / 100})` }}
             />
           </div>
           <span className="upload-progress-percent">{percent}%</span>

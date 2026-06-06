@@ -6,8 +6,7 @@
   overflow: hidden;
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.06),
-    0 4px 16px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(0, 0, 0, 0.04);
+    0 4px 12px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   transition: box-shadow 0.2s ease;
@@ -16,8 +15,7 @@
 .url-node:hover {
   box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.08),
-    0 8px 24px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.06);
+    0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 /* 头部：favicon + 域名 */
@@ -117,15 +115,13 @@ html.dark {
     background: #1e1f28;
     box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.2),
-      0 4px 16px rgba(0, 0, 0, 0.3),
-      0 0 0 1px rgba(255, 255, 255, 0.06);
+      0 4px 12px rgba(0, 0, 0, 0.3);
   }
 
   .url-node:hover {
     box-shadow:
       0 2px 6px rgba(0, 0, 0, 0.25),
-      0 8px 24px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(255, 255, 255, 0.08);
+      0 8px 16px rgba(0, 0, 0, 0.4);
   }
 
   .node-domain {
@@ -160,16 +156,14 @@ html.dark {
   padding: 16px;
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.06),
-    0 4px 16px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(0, 0, 0, 0.04);
+    0 4px 12px rgba(0, 0, 0, 0.06);
   transition: box-shadow 0.2s ease;
 }
 
 .doc-node:hover {
   box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.08),
-    0 8px 24px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.06);
+    0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .doc-node-icon {
@@ -199,7 +193,7 @@ html.dark {
 
 .doc-node-size {
   font-size: 11px;
-  color: #9ca3af;
+  color: #737373;
 }
 
 html.dark {
@@ -207,15 +201,13 @@ html.dark {
     background: #1e1f28;
     box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.2),
-      0 4px 16px rgba(0, 0, 0, 0.3),
-      0 0 0 1px rgba(255, 255, 255, 0.06);
+      0 4px 12px rgba(0, 0, 0, 0.3);
   }
 
   .doc-node:hover {
     box-shadow:
       0 2px 6px rgba(0, 0, 0, 0.25),
-      0 8px 24px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(255, 255, 255, 0.08);
+      0 8px 16px rgba(0, 0, 0, 0.4);
   }
 
   .doc-node-icon {
@@ -227,7 +219,7 @@ html.dark {
   }
 
   .doc-node-size {
-    color: #6b7280;
+    color: #9ca3af;
   }
 }
 
@@ -242,16 +234,14 @@ html.dark {
   background: #ffffff;
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.06),
-    0 4px 16px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(0, 0, 0, 0.04);
+    0 4px 12px rgba(0, 0, 0, 0.06);
   transition: box-shadow 0.2s ease;
 }
 
 .media-node:hover {
   box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.08),
-    0 8px 24px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.06);
+    0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .media-image-wrapper {
@@ -289,7 +279,7 @@ html.dark {
   bottom: -22px;
   max-width: 100%;
   font-size: 11px;
-  color: #9ca3af;
+  color: #737373;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -302,15 +292,13 @@ html.dark {
     background: #1e1f28;
     box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.2),
-      0 4px 16px rgba(0, 0, 0, 0.3),
-      0 0 0 1px rgba(255, 255, 255, 0.06);
+      0 4px 12px rgba(0, 0, 0, 0.3);
   }
 
   .media-node:hover {
     box-shadow:
       0 2px 6px rgba(0, 0, 0, 0.25),
-      0 8px 24px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(255, 255, 255, 0.08);
+      0 8px 16px rgba(0, 0, 0, 0.4);
   }
 
   .media-image-wrapper {
@@ -318,7 +306,7 @@ html.dark {
   }
 
   .media-file-name {
-    color: #6b7280;
+    color: #9ca3af;
   }
 }
 /* ========== 上传进度节点 ========== */
@@ -334,16 +322,14 @@ html.dark {
   position: relative;
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.06),
-    0 4px 16px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(0, 0, 0, 0.04);
+    0 4px 12px rgba(0, 0, 0, 0.06);
   transition: box-shadow 0.2s ease;
 }
 
 .media-node--uploading:hover {
   box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.08),
-    0 8px 24px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.06);
+    0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .upload-progress-content {
@@ -381,7 +367,8 @@ html.dark {
   height: 100%;
   background: var(--color-primary);
   border-radius: 3px;
-  transition: width 0.2s ease;
+  transform-origin: left;
+  transition: transform 0.2s ease;
 }
 
 .upload-progress-percent {
@@ -401,7 +388,7 @@ html.dark {
   border: none;
   border-radius: 4px;
   background: transparent;
-  color: #9ca3af;
+  color: #737373;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -416,15 +403,13 @@ html.dark {
     background: #1e1f28;
     box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.2),
-      0 4px 16px rgba(0, 0, 0, 0.3),
-      0 0 0 1px rgba(255, 255, 255, 0.06);
+      0 4px 12px rgba(0, 0, 0, 0.3);
   }
 
   .media-node--uploading:hover {
     box-shadow:
       0 2px 6px rgba(0, 0, 0, 0.25),
-      0 8px 24px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(255, 255, 255, 0.08);
+      0 8px 16px rgba(0, 0, 0, 0.4);
   }
 
   .upload-progress-filename {
@@ -444,7 +429,7 @@ html.dark {
   }
 
   .upload-cancel-btn {
-    color: #6b7280;
+    color: #9ca3af;
   }
 
   .upload-cancel-btn:hover {

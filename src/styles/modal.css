@@ -46,7 +46,7 @@
 }
 
 .ai-modal.dark .ai-modal-input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 /* 亮色弹窗 */
@@ -76,7 +76,7 @@
 }
 
 .ai-modal.light .ai-modal-input::placeholder {
-  color: rgba(0, 0, 0, 0.3);
+  color: rgba(0, 0, 0, 0.55);
 }
 
 /* 共用弹窗子元素样式 */
@@ -403,7 +403,7 @@
 }
 
 .settings-modal.light .settings-sidebar-item {
-  color: rgba(0, 0, 0, 0.45);
+  color: #525252;
 }
 
 .settings-modal.light .settings-sidebar-item:hover {
@@ -666,7 +666,7 @@
 }
 
 .auth-modal.dark .auth-modal-input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .auth-modal.dark .auth-modal-tab {
@@ -710,11 +710,11 @@
 }
 
 .auth-modal.light .auth-modal-input::placeholder {
-  color: rgba(0, 0, 0, 0.3);
+  color: rgba(0, 0, 0, 0.55);
 }
 
 .auth-modal.light .auth-modal-tab {
-  color: rgba(0, 0, 0, 0.45);
+  color: #525252;
 }
 
 .auth-modal.light .auth-modal-tab:hover {
@@ -1133,9 +1133,48 @@
 }
 
 .appearance-panel.dark .appearance-slider-labels {
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ========== Focus visible (所有弹窗按钮) ========== */
+button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ========== 响应式弹窗 ========== */
+.settings-modal {
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+}
+
+.ai-modal {
+  max-width: calc(100vw - 32px);
+}
+
+.auth-modal {
+  max-width: calc(100vw - 32px);
+}
+
+/* ========== 减少动画 ========== */
+@media (prefers-reduced-motion: reduce) {
+  .settings-modal,
+  .fullscreen-preview-overlay,
+  .model-select-dropdown {
+    animation: none !important;
+  }
+
+  .mode-toolbar-btn,
+  .selection-toolbar-btn,
+  .upload-progress-bar-fill,
+  .upload-cancel-btn,
+  .settings-close-btn,
+  .auth-modal-close,
+  .ai-modal-close {
+    transition: none !important;
+  }
 }
 
 .appearance-panel.light .appearance-slider-labels {
-  color: rgba(0, 0, 0, 0.3);
+  color: rgba(0, 0, 0, 0.55);
 }

@@ -1,6 +1,7 @@
 import { Icon } from '@ricons/utils'
 import { useAppIcon } from '../icons'
 import { useUIStore } from '../stores/uiStore'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 import ModelSelect from './ModelSelect'
 
 interface AIModalProps {
@@ -21,11 +22,20 @@ function AIModal({ onGenerate }: AIModalProps) {
   const DismissIcon = useAppIcon('dismiss')
   const SpinnerIcon = useAppIcon('spinner')
 
+  const trapRef = useFocusTrap(showAIModal)
+
   if (!showAIModal) return null
 
   return (
     <div className="ai-modal-overlay" onClick={() => !aiGenerating && setShowAIModal(false)}>
-      <div className={`ai-modal ${darkMode ? 'dark' : 'light'}`} onClick={(e) => e.stopPropagation()}>
+      <div
+        ref={trapRef}
+        className={`ai-modal ${darkMode ? 'dark' : 'light'}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="AI 生图"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="ai-modal-header">
           <span className="ai-modal-title">
             <Icon size={16}><SparkleIcon /></Icon>
@@ -43,6 +53,7 @@ function AIModal({ onGenerate }: AIModalProps) {
         <textarea
           className="ai-modal-input"
           placeholder="描述你想要的图片..."
+          aria-label="图片描述"
           value={aiPrompt}
           onChange={(e) => setAiPrompt(e.target.value)}
           rows={3}

@@ -4,6 +4,7 @@ import { useAppIcon } from '../icons'
 import { useUIStore } from '../stores/uiStore'
 import { useAuthStore } from '../stores/authStore'
 import { logout } from '../utils/auth'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 import IconPanel from './IconPanel'
 import AppearancePanel from './AppearancePanel'
 
@@ -29,6 +30,8 @@ function SettingsModal({ onClose }: SettingsModalProps) {
     (sections.some((s) => s.id === initialSection) ? initialSection : 'icons') as SectionId,
   )
 
+  const trapRef = useFocusTrap(true)
+
   const DismissIcon = useAppIcon('dismiss')
   const SignOutIcon = useAppIcon('signOut')
 
@@ -49,7 +52,11 @@ function SettingsModal({ onClose }: SettingsModalProps) {
   return (
     <div className="settings-modal-overlay" onClick={onClose}>
       <div
+        ref={trapRef}
         className={`settings-modal ${darkMode ? 'dark' : 'light'}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="设置"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 左侧菜单 */}

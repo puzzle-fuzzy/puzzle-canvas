@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 
 interface FullscreenPreviewProps {
   src: string
@@ -16,6 +17,7 @@ interface FullscreenPreviewProps {
  */
 function FullscreenPreview({ src, fileName, mediaType, onClose }: FullscreenPreviewProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const trapRef = useFocusTrap(true)
 
   // Escape 关闭
   useEffect(() => {
@@ -34,8 +36,18 @@ function FullscreenPreview({ src, fileName, mediaType, onClose }: FullscreenPrev
   }, [mediaType])
 
   return createPortal(
-    <div className="fullscreen-preview-overlay" onClick={onClose}>
-      <div className="fullscreen-preview-content" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fullscreen-preview-overlay"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="全屏预览"
+    >
+      <div
+        ref={trapRef}
+        className="fullscreen-preview-content"
+        onClick={(e) => e.stopPropagation()}
+      >
         {mediaType === 'image' ? (
           <img src={src} alt={fileName} />
         ) : (
@@ -45,6 +57,7 @@ function FullscreenPreview({ src, fileName, mediaType, onClose }: FullscreenPrev
             controls
             autoPlay
             loop
+            aria-label={fileName}
           />
         )}
       </div>
