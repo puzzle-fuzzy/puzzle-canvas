@@ -89,19 +89,6 @@ function selectionWaterfallLayout(
   return result
 }
 
-/** 加载图片获取渲染高度（宽度固定 320px） */
-function getImageRenderHeight(src: string): Promise<number> {
-  return new Promise((resolve) => {
-    const img = new Image()
-    img.onload = () => {
-      const ratio = img.naturalHeight / img.naturalWidth
-      resolve(Math.round(NODE_WIDTH * ratio))
-    }
-    img.onerror = () => resolve(NODE_WIDTH)
-    img.src = src
-  })
-}
-
 /** 从本地 File 预计算图片渲染高度 */
 function getImageFileHeight(file: File): Promise<number> {
   return new Promise((resolve) => {
@@ -185,28 +172,6 @@ function getApiUrl(path: string): string {
     return `http://localhost:3001${path}`
   }
   return path
-}
-
-/** 上传文件到后端（旧接口，保留兼容） */
-async function uploadFile(file: File): Promise<{
-  src: string
-  fileName: string
-  mediaType: 'image' | 'video'
-}> {
-  const formData = new FormData()
-  formData.append('file', file)
-
-  const res = await fetch(getApiUrl('/api/upload'), {
-    method: 'POST',
-    body: formData,
-  })
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: '上传失败' }))
-    throw new Error(err.error ?? `上传失败 (${res.status})`)
-  }
-
-  return await res.json()
 }
 
 // ========== 分片上传 ==========
@@ -410,10 +375,8 @@ export {
   getDomain,
   localWaterfallLayout,
   selectionWaterfallLayout,
-  getImageRenderHeight,
   getImageFileHeight,
   getVideoFileHeight,
-  uploadFile,
   uploadFileChunked,
   registerUploadController,
   cancelUpload,
