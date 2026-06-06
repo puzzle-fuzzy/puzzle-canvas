@@ -1,15 +1,19 @@
 /**
  * 元数据辅助函数 + 路由集成测试
+ *
+ * 辅助函数部分为纯单元测试（不依赖 Hono），
+ * 路由集成测试使用 hono/testing 的 testClient，
+ * 无需手动类型断言。
  */
-import { describe, it, expect, beforeEach } from 'bun:test'
-import { createTestApp } from '../setup'
+import { describe, it, expect } from 'bun:test'
+import { testClient } from 'hono/testing'
+import { createTestApp, type TestApp } from '../setup'
 import {
   extractMeta,
   extractTitle,
   extractFavicon,
   isPrivateUrl,
 } from '../../routes/metadata'
-import type { Hono } from 'hono'
 
 // ===== 辅助函数单元测试 =====
 
@@ -156,42 +160,58 @@ describe('isPrivateUrl', () => {
 // ===== 路由集成测试 =====
 
 describe('GET /api/metadata', () => {
-  let app: Hono
-
-  beforeEach(() => {
-    const test = createTestApp()
-    app = test.app
-  })
+  const setup = () => {
+    const { app } = createTestApp()
+    return testClient<TestApp>(app)
+  }
 
   it('缺少 url 参数返回 400', async () => {
-    const res = await app.request('/api/metadata')
+    const client = setup()
+    const res = await client.api.metadata.$get({
+      query: {} as { url: string },
+    })
     expect(res.status).toBe(400)
   })
 
   it('无效 URL 返回 400', async () => {
-    const res = await app.request('/api/metadata?url=not-a-url')
+    const client = setup()
+    const res = await client.api.metadata.$get({
+      query: { url: 'not-a-url' },
+    })
     expect(res.status).toBe(400)
   })
 
   it('非 HTTP 协议返回 400', async () => {
-    const res = await app.request('/api/metadata?url=ftp://example.com')
+    const client = setup()
+    const res = await client.api.metadata.$get({
+      query: { url: 'ftp://example.com' },
+    })
     expect(res.status).toBe(400)
   })
 
   it('SSRF 私有 IP 被拦截', async () => {
-    const res = await app.request('/api/metadata?url=http://192.168.1.1')
+    const client = setup()
+    const res = await client.api.metadata.$get({
+      query: { url: 'http://192.168.1.1' },
+    })
     expect(res.status).toBe(400)
-    const data = await res.json() as Record<string, unknown>
+    const data = await res.json() as Record<string, any>
     expect(data.error).toContain('私有网络')
   })
 
   it('SSRF localhost 被拦截', async () => {
-    const res = await app.request('/api/metadata?url=http://localhost:3001/api/nodes')
+    const client = setup()
+    const res = await client.api.metadata.$get({
+      query: { url: 'http://localhost:3001/api/nodes' },
+    })
     expect(res.status).toBe(400)
   })
 
   it('SSRF 169.254 被拦截', async () => {
-    const res = await app.request('/api/metadata?url=http://169.254.169.254/latest/meta-data/')
+    const client = setup()
+    const res = await client.api.metadata.$get({
+      query: { url: 'http://169.254.169.254/latest/meta-data/' },
+    })
     expect(res.status).toBe(400)
   })
 })

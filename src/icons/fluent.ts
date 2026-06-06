@@ -17,6 +17,8 @@ import {
   Image20Regular,
   Globe16Regular,
   Settings20Regular,
+  Person20Regular,
+  SignOut20Regular,
 } from '@ricons/fluent'
 import type { IconRegistry } from './index'
 
@@ -39,4 +41,6 @@ export const fluentRegistry: IconRegistry = {
   image: Image20Regular,
   globe: Globe16Regular,
   settings: Settings20Regular,
+  user: Person20Regular,
+  signOut: SignOut20Regular,
 }

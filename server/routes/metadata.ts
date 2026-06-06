@@ -2,7 +2,7 @@
  * URL 元数据提取路由模块
  *
  * 根据 URL 抓取网页 HTML，提取 OpenGraph 元数据和 favicon。
- *   GET /api/metadata?url=xxx
+ *   GET /            — 提取 URL 元数据（query: ?url=xxx）
  *
  * 返回字段：url, title, description, image, favicon
  *
@@ -10,8 +10,11 @@
  *   - SSRF 防护：拦截私有网络地址（localhost / 内网 IP）
  *   - 响应体大小限制：最大 1MB，防止大文件耗尽内存
  *   - 请求超时：10 秒
+ *
+ * 通过 createMetadataRoutes() 返回类型化的 Hono 子路由，
+ * 在 server/index.ts 中以 app.route('/api/metadata', ...) 挂载。
  */
-import type { Hono } from 'hono'
+import { Hono } from 'hono'
 
 /** 响应体大小上限：1 MB */
 const MAX_HTML_SIZE = 1024 * 1024
@@ -115,84 +118,85 @@ export function extractFavicon(html: string, pageUrl: string): string | null {
   }
 }
 
-export function registerMetadataRoutes(app: Hono) {
-  app.get('/api/metadata', async (c) => {
-    const url = c.req.query('url')
+export function createMetadataRoutes() {
+  return new Hono()
+    .get('/', async (c) => {
+      const url = c.req.query('url')
 
-    if (!url) {
-      return c.json({ error: '缺少 url 参数' }, 400)
-    }
-
-    // 仅允许 HTTP/HTTPS 协议
-    let parsed: URL
-    try {
-      parsed = new URL(url)
-      if (!['http:', 'https:'].includes(parsed.protocol)) {
-        return c.json({ error: '仅支持 HTTP/HTTPS 协议' }, 400)
-      }
-    } catch {
-      return c.json({ error: '无效的 URL' }, 400)
-    }
-
-    // SSRF 防护：禁止访问私有网络地址
-    if (isPrivateUrl(parsed)) {
-      return c.json({ error: '不允许访问私有网络地址' }, 400)
-    }
-
-    // 抓取目标网页，超时 10 秒
-    let html: string
-    try {
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; PuzzleCanvas/1.0; +https://github.com/puzzle-canvas)',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        },
-        signal: AbortSignal.timeout(10_000),
-        redirect: 'follow',
-      })
-      if (!response.ok) {
-        return c.json({ error: `目标网站返回 ${response.status}` }, 502)
+      if (!url) {
+        return c.json({ error: '缺少 url 参数' }, 400)
       }
 
-      // 检查 Content-Length 是否超过限制
-      const contentLength = response.headers.get('content-length')
-      if (contentLength && parseInt(contentLength, 10) > MAX_HTML_SIZE) {
-        return c.json({ error: '目标网页过大' }, 502)
-      }
-
-      html = await response.text()
-
-      // 实际内容超过限制时截断
-      if (html.length > MAX_HTML_SIZE) {
-        html = html.slice(0, MAX_HTML_SIZE)
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : '请求失败'
-      return c.json({ error: `无法获取网页: ${message}` }, 502)
-    }
-
-    // 按优先级提取元数据：OpenGraph > HTML 原生标签 > 回退值
-    const title = extractMeta(html, 'og:title') ?? extractTitle(html) ?? new URL(url).hostname
-    const description = extractMeta(html, 'og:description') ?? extractMeta(html, 'description') ?? ''
-    const image = extractMeta(html, 'og:image')
-    const favicon = extractFavicon(html, url)
-
-    // 将相对路径的图片地址解析为绝对路径
-    let resolvedImage = image
-    if (image) {
+      // 仅允许 HTTP/HTTPS 协议
+      let parsed: URL
       try {
-        resolvedImage = new URL(image, url).href
+        parsed = new URL(url)
+        if (!['http:', 'https:'].includes(parsed.protocol)) {
+          return c.json({ error: '仅支持 HTTP/HTTPS 协议' }, 400)
+        }
       } catch {
-        // URL 解析失败，保持原样
+        return c.json({ error: '无效的 URL' }, 400)
       }
-    }
 
-    return c.json({
-      url,
-      title,
-      description,
-      image: resolvedImage ?? null,
-      favicon,
+      // SSRF 防护：禁止访问私有网络地址
+      if (isPrivateUrl(parsed)) {
+        return c.json({ error: '不允许访问私有网络地址' }, 400)
+      }
+
+      // 抓取目标网页，超时 10 秒
+      let html: string
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; PuzzleCanvas/1.0; +https://github.com/puzzle-canvas)',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          },
+          signal: AbortSignal.timeout(10_000),
+          redirect: 'follow',
+        })
+        if (!response.ok) {
+          return c.json({ error: `目标网站返回 ${response.status}` }, 502)
+        }
+
+        // 检查 Content-Length 是否超过限制
+        const contentLength = response.headers.get('content-length')
+        if (contentLength && parseInt(contentLength, 10) > MAX_HTML_SIZE) {
+          return c.json({ error: '目标网页过大' }, 502)
+        }
+
+        html = await response.text()
+
+        // 实际内容超过限制时截断
+        if (html.length > MAX_HTML_SIZE) {
+          html = html.slice(0, MAX_HTML_SIZE)
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : '请求失败'
+        return c.json({ error: `无法获取网页: ${message}` }, 502)
+      }
+
+      // 按优先级提取元数据：OpenGraph > HTML 原生标签 > 回退值
+      const title = extractMeta(html, 'og:title') ?? extractTitle(html) ?? new URL(url).hostname
+      const description = extractMeta(html, 'og:description') ?? extractMeta(html, 'description') ?? ''
+      const image = extractMeta(html, 'og:image')
+      const favicon = extractFavicon(html, url)
+
+      // 将相对路径的图片地址解析为绝对路径
+      let resolvedImage = image
+      if (image) {
+        try {
+          resolvedImage = new URL(image, url).href
+        } catch {
+          // URL 解析失败，保持原样
+        }
+      }
+
+      return c.json({
+        url,
+        title,
+        description,
+        image: resolvedImage ?? null,
+        favicon,
+      })
     })
-  })
 }

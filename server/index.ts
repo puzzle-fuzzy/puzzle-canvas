@@ -14,10 +14,14 @@ import { serveStatic } from 'hono/bun'
 import './utils/upload'
 
 // 路由模块
-import { registerNodeRoutes } from './routes/nodes'
-import { registerUploadRoutes } from './routes/upload'
-import { registerMetadataRoutes } from './routes/metadata'
-import { registerAIRoutes } from './routes/ai'
+import { createAuthRoutes } from './routes/auth'
+import { createNodeRoutes } from './routes/nodes'
+import { createUploadRoutes } from './routes/upload'
+import { createMetadataRoutes } from './routes/metadata'
+import { createAIRoutes } from './routes/ai'
+
+// 认证中间件
+import { createAuthMiddleware } from './middleware/auth'
 
 const app = new Hono()
 
@@ -27,9 +31,10 @@ const app = new Hono()
 app.use('*', cors({
   origin: '*',
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type'],
+  allowHeaders: ['Content-Type', 'Authorization'],
   exposeHeaders: ['Content-Length'],
   maxAge: 86400,
+  credentials: true,
 }))
 
 // 全局错误处理：捕获未处理的异常，返回 JSON 错误响应
@@ -49,10 +54,13 @@ app.use('/uploads/*', serveStatic({ root: './' }))
 
 // ===== 业务路由 =====
 
-registerNodeRoutes(app)        // 节点 CRUD
-registerUploadRoutes(app)      // 文件上传（分片 + 简单）
-registerMetadataRoutes(app)    // URL 元数据提取
-registerAIRoutes(app)          // AI 生图（预留）
+app.route('/api/auth', createAuthRoutes())             // 认证（注册/登录/刷新/登出/me）
+
+const auth = createAuthMiddleware()
+app.route('/api/nodes', createNodeRoutes({ auth }))    // 节点 CRUD（需认证）
+app.route('/api/upload', createUploadRoutes({ auth })) // 文件上传（需认证）
+app.route('/api/metadata', createMetadataRoutes())     // URL 元数据提取（公开）
+app.route('/api/generate-image', createAIRoutes())     // AI 生图（预留）
 
 // ===== 前端静态服务（生产模式）=====
 

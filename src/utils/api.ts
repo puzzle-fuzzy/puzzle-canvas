@@ -1,4 +1,5 @@
 import type { AppNode } from '../types'
+import { useAuthStore } from '../stores/authStore'
 
 /** 获取 API URL（开发环境直连后端） */
 export function getApiUrl(path: string): string {
@@ -9,9 +10,71 @@ export function getApiUrl(path: string): string {
   return normalized
 }
 
+/**
+ * 带认证的 fetch 包装器
+ *
+ * 自动注入 Authorization header，收到 401 时尝试刷新 token 并重试。
+ * 刷新失败时清除认证状态并弹出登录弹窗。
+ */
+export async function authFetch(path: string, options: RequestInit = {}): Promise<Response> {
+  const { accessToken } = useAuthStore.getState()
+
+  // 注入 Authorization header
+  const headers = new Headers(options.headers)
+  if (accessToken) {
+    headers.set('Authorization', `Bearer ${accessToken}`)
+  }
+  // 如果没有手动设置 Content-Type 且不是 FormData，默认 JSON
+  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json')
+  }
+
+  let response = await fetch(getApiUrl(path), {
+    ...options,
+    headers,
+    credentials: 'include',
+  })
+
+  // 收到 401 → 尝试刷新 token
+  if (response.status === 401 && accessToken) {
+    const refreshed = await tryRefreshToken()
+    if (refreshed) {
+      // 用新 token 重试原请求
+      headers.set('Authorization', `Bearer ${refreshed}`)
+      response = await fetch(getApiUrl(path), {
+        ...options,
+        headers,
+        credentials: 'include',
+      })
+    }
+  }
+
+  return response
+}
+
+/** 尝试刷新 access token，成功返回新 token，失败返回 null */
+async function tryRefreshToken(): Promise<string | null> {
+  try {
+    const res = await fetch(getApiUrl('/api/auth/refresh'), {
+      method: 'POST',
+      credentials: 'include',
+    })
+
+    if (!res.ok) return null
+
+    const data = await res.json()
+    if (!data.accessToken) return null
+
+    useAuthStore.getState().setAccessToken(data.accessToken)
+    return data.accessToken
+  } catch {
+    return null
+  }
+}
+
 /** 持久化：创建节点到后端（fire-and-forget） */
 export function persistNode(node: AppNode): void {
-  fetch(getApiUrl('/api/nodes'), {
+  authFetch('/api/nodes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -26,7 +89,7 @@ export function persistNode(node: AppNode): void {
 
 /** 持久化：更新节点位置（fire-and-forget） */
 export function persistNodePosition(id: string, x: number, y: number): void {
-  fetch(getApiUrl(`/api/nodes/${id}`), {
+  authFetch(`/api/nodes/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ positionX: x, positionY: y }),
@@ -35,15 +98,15 @@ export function persistNodePosition(id: string, x: number, y: number): void {
 
 /** 持久化：删除节点（fire-and-forget） */
 export function persistNodeDelete(id: string): void {
-  fetch(getApiUrl(`/api/nodes/${id}`), {
+  authFetch(`/api/nodes/${id}`, {
     method: 'DELETE',
   }).catch((err) => console.error('Failed to persist delete:', err))
 }
 
-/** 从后端加载所有节点 */
+/** 从后端加载当前用户的所有节点 */
 export async function loadNodes(): Promise<AppNode[]> {
   try {
-    const res = await fetch(getApiUrl('/api/nodes'))
+    const res = await authFetch('/api/nodes')
     if (!res.ok) return []
 
     const rows = await res.json()

@@ -1,17 +1,23 @@
 /**
  * 测试辅助模块
  *
- * 提供内存数据库和 Hono 应用实例的工厂函数，
+ * 提供内存数据库和类型化 Hono 应用实例的工厂函数，
  * 供各路由集成测试使用。
+ *
+ * 通过 app.route() 挂载子路由后，导出完整 app 类型，
+ * 可用于 testClient<T> 实现端到端类型安全的测试。
  */
 import { Hono } from 'hono'
 import { drizzle } from 'drizzle-orm/bun-sqlite'
 import { Database } from 'bun:sqlite'
 import * as schema from '../db/schema'
-import { registerNodeRoutes } from '../routes/nodes'
-import { registerUploadRoutes } from '../routes/upload'
-import { registerMetadataRoutes } from '../routes/metadata'
-import { registerAIRoutes } from '../routes/ai'
+import { createAuthRoutes } from '../routes/auth'
+import { createNodeRoutes } from '../routes/nodes'
+import { createUploadRoutes } from '../routes/upload'
+import { createMetadataRoutes } from '../routes/metadata'
+import { createAIRoutes } from '../routes/ai'
+import { createAuthMiddleware } from '../middleware/auth'
+import { signAccessToken } from '../utils/auth'
 
 /** 测试用固定用户信息 */
 export const TEST_USER = {
@@ -105,13 +111,14 @@ export function createTestDb() {
 }
 
 /**
- * 创建测试用 Hono 应用实例
+ * 创建测试用 Hono 应用实例（无认证，兼容旧测试）
  *
- * 使用内存数据库，注册所有路由，支持依赖注入。
- * 返回 app 和 db 供测试用例使用。
+ * 使用内存数据库，通过 app.route() 挂载所有子路由，
+ * 返回类型化的 app 供 testClient 使用。
  */
 export function createTestApp() {
   const { db, sqlite } = createTestDb()
+
   const app = new Hono()
 
   // 全局错误处理（与生产一致）
@@ -122,10 +129,56 @@ export function createTestApp() {
     return c.json({ error: err.message || '服务器内部错误' }, 500)
   })
 
-  registerNodeRoutes(app, { db })
-  registerUploadRoutes(app)
-  registerMetadataRoutes(app)
-  registerAIRoutes(app)
+  // 挂载子路由（链式调用以保留类型信息）
+  const fullApp = app
+    .route('/api/auth', createAuthRoutes({ db }))
+    .route('/api/nodes', createNodeRoutes({ db }))
+    .route('/api/upload', createUploadRoutes())
+    .route('/api/metadata', createMetadataRoutes())
+    .route('/api/generate-image', createAIRoutes())
 
-  return { app, db, sqlite }
+  return { app: fullApp, db, sqlite }
 }
+
+/**
+ * 创建带认证的测试用 Hono 应用实例
+ *
+ * 与 createTestApp 类似，但 nodes 和 upload 路由应用了认证中间件。
+ * 请求需携带 Authorization header。
+ */
+export function createAuthenticatedTestApp() {
+  const { db, sqlite } = createTestDb()
+  const auth = createAuthMiddleware({ db })
+
+  const app = new Hono()
+
+  // 全局错误处理（与生产一致）
+  app.onError((err, c) => {
+    if (err instanceof SyntaxError) {
+      return c.json({ error: '请求体 JSON 格式错误' }, 400)
+    }
+    return c.json({ error: err.message || '服务器内部错误' }, 500)
+  })
+
+  const fullApp = app
+    .route('/api/auth', createAuthRoutes({ db }))
+    .route('/api/nodes', createNodeRoutes({ db, auth }))
+    .route('/api/upload', createUploadRoutes({ auth }))
+    .route('/api/metadata', createMetadataRoutes())
+    .route('/api/generate-image', createAIRoutes())
+
+  return { app: fullApp, db, sqlite }
+}
+
+/**
+ * 生成测试用 Authorization header
+ *
+ * 签发一个有效的 access token 供带认证的测试使用。
+ */
+export function getAuthHeaders(userId: string = TEST_USER.id): Record<string, string> {
+  const token = signAccessToken({ userId, email: TEST_USER.email })
+  return { Authorization: `Bearer ${token}` }
+}
+
+/** 测试用完整 app 类型，供 testClient 泛型参数使用 */
+export type TestApp = ReturnType<typeof createTestApp>['app']

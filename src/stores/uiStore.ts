@@ -15,6 +15,7 @@ interface UIStore {
   error: string | null
   showAIModal: boolean
   showSettingsModal: boolean
+  showLoginModal: boolean
   aiPrompt: string
   aiModel: string
   aiGenerating: boolean
@@ -26,6 +27,7 @@ interface UIStore {
   setError: (error: string | null) => void
   setShowAIModal: (v: boolean) => void
   setShowSettingsModal: (v: boolean) => void
+  setShowLoginModal: (v: boolean) => void
   setAiPrompt: (v: string) => void
   setAiModel: (v: string) => void
   setAiGenerating: (v: boolean) => void
@@ -43,6 +45,7 @@ export const useUIStore = create<UIStore>((set) => ({
   error: null,
   showAIModal: false,
   showSettingsModal: false,
+  showLoginModal: false,
   aiPrompt: '',
   aiModel: 'dall-e-3',
   aiGenerating: false,
@@ -73,6 +76,7 @@ export const useUIStore = create<UIStore>((set) => ({
   setError: (error) => set({ error }),
   setShowAIModal: (v) => set({ showAIModal: v }),
   setShowSettingsModal: (v) => set({ showSettingsModal: v }),
+  setShowLoginModal: (v) => set({ showLoginModal: v }),
   setAiPrompt: (v) => set({ aiPrompt: v }),
   setAiModel: (v) => set({ aiModel: v }),
   setAiGenerating: (v) => set({ aiGenerating: v }),

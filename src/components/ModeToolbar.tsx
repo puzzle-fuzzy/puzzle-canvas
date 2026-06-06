@@ -2,7 +2,9 @@ import { Icon } from '@ricons/utils'
 import { useAppIcon } from '../icons'
 import { useCanvasStore } from '../stores/canvasStore'
 import { useUIStore } from '../stores/uiStore'
+import { useAuthStore } from '../stores/authStore'
 import { useInputStore } from '../stores/inputStore'
+import { logout } from '../utils/auth'
 
 function ModeToolbar() {
   const interactionMode = useCanvasStore((s) => s.interactionMode)
@@ -11,7 +13,11 @@ function ModeToolbar() {
   const toggleDarkMode = useUIStore((s) => s.toggleDarkMode)
   const setShowAIModal = useUIStore((s) => s.setShowAIModal)
   const setShowSettingsModal = useUIStore((s) => s.setShowSettingsModal)
+  const setShowLoginModal = useUIStore((s) => s.setShowLoginModal)
   const spaceHeld = useInputStore((s) => s.spaceHeld)
+
+  const user = useAuthStore((s) => s.user)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
 
   const HandIcon = useAppIcon('hand')
   const CursorIcon = useAppIcon('cursor')
@@ -19,9 +25,29 @@ function ModeToolbar() {
   const SunIcon = useAppIcon('sun')
   const MoonIcon = useAppIcon('moon')
   const SettingsIcon = useAppIcon('settings')
+  const UserIcon = useAppIcon('user')
+
+  const handleUserClick = () => {
+    if (isAuthenticated) {
+      logout()
+    } else {
+      setShowLoginModal(true)
+    }
+  }
 
   return (
     <div className={`mode-toolbar ${darkMode ? 'dark' : 'light'}`}>
+      <button
+        className={`mode-toolbar-btn ${!isAuthenticated ? 'active' : ''}`}
+        onClick={handleUserClick}
+        title={isAuthenticated ? `${user?.username} · 退出登录` : '登录 / 注册'}
+      >
+        {isAuthenticated
+          ? <span style={{ fontSize: '14px', fontWeight: 600 }}>{user?.username?.charAt(0).toUpperCase()}</span>
+          : <Icon size={20}><UserIcon /></Icon>
+        }
+      </button>
+      <div className="mode-toolbar-divider" />
       <button
         className={`mode-toolbar-btn ${interactionMode === 'pan' && !spaceHeld ? 'active' : ''}`}
         onClick={() => setInteractionMode('pan')}

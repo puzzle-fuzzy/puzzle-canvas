@@ -1,23 +1,21 @@
 /**
  * 上传路由集成测试
+ *
+ * 使用 hono/testing 的 testClient 进行类型安全的端到端测试，
+ * 无需手动类型断言，响应体类型由路由定义自动推断。
  */
-import { describe, it, expect, beforeEach } from 'bun:test'
-import { createTestApp } from '../setup'
+import { describe, it, expect } from 'bun:test'
+import { testClient } from 'hono/testing'
+import { createTestApp, type TestApp } from '../setup'
 import { uploadSessions } from '../../utils/upload'
-import type { Hono } from 'hono'
-
-/** 从响应中解析 JSON 并断言类型 */
-const json = (res: Response) => res.json() as Promise<Record<string, unknown>>
 
 describe('上传路由', () => {
-  let app: Hono
-
-  beforeEach(() => {
-    const test = createTestApp()
-    app = test.app
+  const setup = () => {
+    const { app } = createTestApp()
     // 清理上传会话，避免测试间状态泄漏
     uploadSessions.clear()
-  })
+    return testClient<TestApp>(app)
+  }
 
   // ===== POST /api/upload/init =====
 
@@ -30,104 +28,93 @@ describe('上传路由', () => {
     }
 
     it('正常初始化上传', async () => {
-      const res = await app.request('/api/upload/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(validInit),
+      const client = setup()
+      const res = await client.api.upload.init.$post({
+        json: validInit,
       })
       expect(res.status).toBe(200)
-      const data = await json(res)
+      const data = await res.json() as Record<string, any>
       expect(data.uploadId).toBeDefined()
       expect(data.existingChunks).toEqual([])
     })
 
     it('缺少 fileName 返回 400', async () => {
+      const client = setup()
       const { fileName: _, ...withoutName } = validInit
-      const res = await app.request('/api/upload/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(withoutName),
+      const res = await client.api.upload.init.$post({
+        json: withoutName,
       })
       expect(res.status).toBe(400)
     })
 
     it('危险文件类型返回 400', async () => {
-      const res = await app.request('/api/upload/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...validInit, fileName: 'virus.exe' }),
+      const client = setup()
+      const res = await client.api.upload.init.$post({
+        json: { ...validInit, fileName: 'virus.exe' },
       })
       expect(res.status).toBe(400)
     })
 
     it('文件过大返回 413', async () => {
-      const res = await app.request('/api/upload/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...validInit, fileSize: 900 * 1024 * 1024 }),
+      const client = setup()
+      const res = await client.api.upload.init.$post({
+        json: { ...validInit, fileSize: 900 * 1024 * 1024 },
       })
       expect(res.status).toBe(413)
     })
 
     it('totalChunks 为 0 返回 400', async () => {
-      const res = await app.request('/api/upload/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...validInit, totalChunks: 0 }),
+      const client = setup()
+      const res = await client.api.upload.init.$post({
+        json: { ...validInit, totalChunks: 0 },
       })
       expect(res.status).toBe(400)
     })
 
     it('totalChunks 为负数返回 400', async () => {
-      const res = await app.request('/api/upload/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...validInit, totalChunks: -1 }),
+      const client = setup()
+      const res = await client.api.upload.init.$post({
+        json: { ...validInit, totalChunks: -1 },
       })
       expect(res.status).toBe(400)
     })
 
     it('totalChunks 为小数返回 400', async () => {
-      const res = await app.request('/api/upload/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...validInit, totalChunks: 2.5 }),
+      const client = setup()
+      const res = await client.api.upload.init.$post({
+        json: { ...validInit, totalChunks: 2.5 },
       })
       expect(res.status).toBe(400)
     })
 
     it('fileSize 为字符串返回 400', async () => {
-      const res = await app.request('/api/upload/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...validInit, fileSize: 'abc' }),
+      const client = setup()
+      const res = await client.api.upload.init.$post({
+        json: { ...validInit, fileSize: 'abc' } as unknown as typeof validInit,
       })
       expect(res.status).toBe(400)
     })
 
     it('fingerprint 含路径遍历返回 400', async () => {
-      const res = await app.request('/api/upload/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...validInit, fingerprint: '../../etc/passwd' }),
+      const client = setup()
+      const res = await client.api.upload.init.$post({
+        json: { ...validInit, fingerprint: '../../etc/passwd' },
       })
       expect(res.status).toBe(400)
     })
 
     it('fingerprint 含大写字母返回 400', async () => {
-      const res = await app.request('/api/upload/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...validInit, fingerprint: 'ABC123' }),
+      const client = setup()
+      const res = await client.api.upload.init.$post({
+        json: { ...validInit, fingerprint: 'ABC123' },
       })
       expect(res.status).toBe(400)
     })
 
     it('fingerprint 含点号返回 400', async () => {
-      const res = await app.request('/api/upload/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...validInit, fingerprint: 'abc.def' }),
+      const client = setup()
+      const res = await client.api.upload.init.$post({
+        json: { ...validInit, fingerprint: 'abc.def' },
       })
       expect(res.status).toBe(400)
     })
@@ -137,15 +124,15 @@ describe('上传路由', () => {
 
   describe('PUT /api/upload/chunk', () => {
     it('无效的 uploadId 返回 400', async () => {
+      const client = setup()
       const formData = new FormData()
       formData.append('uploadId', 'nonexistent')
       formData.append('chunkIndex', '0')
       formData.append('chunk', new File(['data'], 'chunk.bin'))
 
-      const res = await app.request('/api/upload/chunk', {
-        method: 'PUT',
+      const res = await client.api.upload.chunk.$put({
         body: formData,
-      })
+      } as unknown as Parameters<typeof client.api.upload.chunk.$put>[0])
       expect(res.status).toBe(400)
     })
   })
@@ -154,15 +141,15 @@ describe('上传路由', () => {
 
   describe('POST /api/upload/complete', () => {
     it('无效的 uploadId 返回 400', async () => {
-      const res = await app.request('/api/upload/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uploadId: 'nonexistent', fileName: 'test.jpg' }),
+      const client = setup()
+      const res = await client.api.upload.complete.$post({
+        json: { uploadId: 'nonexistent', fileName: 'test.jpg' },
       })
       expect(res.status).toBe(400)
     })
 
     it('缺少 fileName 返回 400', async () => {
+      const client = setup()
       const sessionId = 'test-session-id'
       uploadSessions.set(sessionId, {
         fingerprint: 'a1b2c3d4',
@@ -170,15 +157,14 @@ describe('上传路由', () => {
         createdAt: Date.now(),
       })
 
-      const res = await app.request('/api/upload/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uploadId: sessionId }),
+      const res = await client.api.upload.complete.$post({
+        json: { uploadId: sessionId } as unknown as { uploadId: string; fileName: string },
       })
       expect(res.status).toBe(400)
     })
 
     it('fileName 为危险类型返回 400', async () => {
+      const client = setup()
       const sessionId = 'test-session-id'
       uploadSessions.set(sessionId, {
         fingerprint: 'a1b2c3d4',
@@ -186,10 +172,8 @@ describe('上传路由', () => {
         createdAt: Date.now(),
       })
 
-      const res = await app.request('/api/upload/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uploadId: sessionId, fileName: 'virus.exe' }),
+      const res = await client.api.upload.complete.$post({
+        json: { uploadId: sessionId, fileName: 'virus.exe' },
       })
       expect(res.status).toBe(400)
     })
@@ -199,15 +183,15 @@ describe('上传路由', () => {
 
   describe('DELETE /api/upload/cancel', () => {
     it('无效的 uploadId 返回 400', async () => {
-      const res = await app.request('/api/upload/cancel', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uploadId: 'nonexistent' }),
+      const client = setup()
+      const res = await client.api.upload.cancel.$delete({
+        json: { uploadId: 'nonexistent' },
       })
       expect(res.status).toBe(400)
     })
 
     it('有效 uploadId 取消成功', async () => {
+      const client = setup()
       const sessionId = 'cancel-test-id'
       uploadSessions.set(sessionId, {
         fingerprint: 'deadbeef',
@@ -215,10 +199,8 @@ describe('上传路由', () => {
         createdAt: Date.now(),
       })
 
-      const res = await app.request('/api/upload/cancel', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uploadId: sessionId }),
+      const res = await client.api.upload.cancel.$delete({
+        json: { uploadId: sessionId },
       })
       expect(res.status).toBe(200)
       expect(uploadSessions.has(sessionId)).toBe(false)
@@ -229,22 +211,23 @@ describe('上传路由', () => {
 
   describe('POST /api/upload', () => {
     it('未提供文件返回 400', async () => {
+      const client = setup()
       const formData = new FormData()
-      const res = await app.request('/api/upload', {
-        method: 'POST',
+
+      const res = await client.api.upload.$post({
         body: formData,
-      })
+      } as unknown as Parameters<typeof client.api.upload.$post>[0])
       expect(res.status).toBe(400)
     })
 
     it('危险文件类型返回 400', async () => {
+      const client = setup()
       const formData = new FormData()
       formData.append('file', new File(['data'], 'virus.exe'))
 
-      const res = await app.request('/api/upload', {
-        method: 'POST',
+      const res = await client.api.upload.$post({
         body: formData,
-      })
+      } as unknown as Parameters<typeof client.api.upload.$post>[0])
       expect(res.status).toBe(400)
     })
   })

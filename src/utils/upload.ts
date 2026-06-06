@@ -1,5 +1,5 @@
 import type { UploadInitResponse } from '../types'
-import { getApiUrl } from './api'
+import { authFetch } from './api'
 
 const CHUNK_SIZE = 5 * 1024 * 1024 // 5 MB
 
@@ -47,7 +47,7 @@ export async function uploadFileChunked(
 
   // 2. 初始化
   signal?.throwIfAborted()
-  const initRes = await fetch(getApiUrl('/api/upload/init'), {
+  const initRes = await authFetch('/api/upload/init', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -93,7 +93,7 @@ export async function uploadFileChunked(
         formData.append('chunkIndex', String(i))
         formData.append('chunk', chunkBlob, file.name)
 
-        const chunkRes = await fetch(getApiUrl('/api/upload/chunk'), {
+        const chunkRes = await authFetch('/api/upload/chunk', {
           method: 'PUT',
           body: formData,
           signal,
@@ -121,7 +121,7 @@ export async function uploadFileChunked(
 
   // 4. 完成合并
   signal?.throwIfAborted()
-  const completeRes = await fetch(getApiUrl('/api/upload/complete'), {
+  const completeRes = await authFetch('/api/upload/complete', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ uploadId, fileName: file.name }),

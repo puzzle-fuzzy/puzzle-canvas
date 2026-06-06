@@ -16,6 +16,7 @@ import SettingsModal from './components/SettingsModal'
 import SelectionToolbar from './components/SelectionToolbar'
 import ModeToolbar from './components/ModeToolbar'
 import AIModal from './components/AIModal'
+import LoginModal from './components/LoginModal'
 import ErrorToast from './components/ErrorToast'
 import LoadingIndicator from './components/LoadingIndicator'
 import EmptyHint from './components/EmptyHint'
@@ -133,6 +134,7 @@ function Canvas() {
       <EmptyHint />
 
       <AIModal onGenerate={actions.handleAIGenerate} />
+      <LoginModal />
       <ModeToolbar />
 
       {showSettingsModal && (

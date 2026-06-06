@@ -17,6 +17,8 @@ import {
   PictureOutlined,
   GlobalOutlined,
   SettingOutlined,
+  UserOutlined,
+  LogoutOutlined,
 } from '@ricons/antd'
 import type { IconRegistry } from './index'
 
@@ -43,4 +45,6 @@ export const antdRegistry: IconRegistry = {
   image: wrap(PictureOutlined),
   globe: wrap(GlobalOutlined),
   settings: wrap(SettingOutlined),
+  user: wrap(UserOutlined),
+  signOut: wrap(LogoutOutlined),
 }

@@ -17,6 +17,8 @@ import {
   ImageIcon,
   Globe,
   Settings,
+  User,
+  LogOut,
 } from 'lucide-react'
 import type { IconRegistry } from './index'
 
@@ -46,4 +48,6 @@ export const lucideRegistry: IconRegistry = {
   image: wrap(ImageIcon),
   globe: wrap(Globe),
   settings: wrap(Settings),
+  user: wrap(User),
+  signOut: wrap(LogOut),
 }

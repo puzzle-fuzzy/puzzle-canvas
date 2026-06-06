@@ -1,5 +1,19 @@
 import { vi } from 'vitest'
 
+// jsdom 不提供 window.matchMedia（uiStore 初始化需要）
+if (!window.matchMedia) {
+  window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }))
+}
+
 // jsdom 不提供 URL.createObjectURL / revokeObjectURL
 if (!URL.createObjectURL) {
   URL.createObjectURL = vi.fn(() => 'blob:mock-url')
