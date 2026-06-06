@@ -63,11 +63,19 @@ function getDomain(url: string): string {
   }
 }
 
-/** 获取 API 基础 URL（开发环境直连后端，避免 Vite 代理问题） */
+/** 获取 API 基础 URL（开发环境直连后端，避免 Vite 代理大文件 EPIPE 问题） */
 function getApiUrl(path: string): string {
   if (import.meta.env.DEV) {
     return `http://localhost:3001${path}`
   }
+  return path
+}
+
+/**
+ * 非 upload 的 API 调用用 Vite proxy 即可（无大文件问题）
+ * 这样即使后端独立启动也能通过代理工作
+ */
+function getApiPath(path: string): string {
   return path
 }
 
@@ -95,7 +103,7 @@ async function uploadFile(file: File): Promise<{
 
 /** 持久化：创建节点到后端（fire-and-forget） */
 function persistNode(node: AppNode): void {
-  fetch(getApiUrl('/api/nodes'), {
+  fetch(getApiPath('/api/nodes'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -110,7 +118,7 @@ function persistNode(node: AppNode): void {
 
 /** 持久化：更新节点位置（fire-and-forget） */
 function persistNodePosition(id: string, x: number, y: number): void {
-  fetch(getApiUrl(`/api/nodes/${id}`), {
+  fetch(getApiPath(`/api/nodes/${id}`), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ positionX: x, positionY: y }),
@@ -119,14 +127,14 @@ function persistNodePosition(id: string, x: number, y: number): void {
 
 /** 持久化：删除节点（fire-and-forget） */
 function persistNodeDelete(id: string): void {
-  fetch(getApiUrl(`/api/nodes/${id}`), {
+  fetch(getApiPath(`/api/nodes/${id}`), {
     method: 'DELETE',
   }).catch((err) => console.error('Failed to persist delete:', err))
 }
 
 /** 从后端加载所有节点 */
 async function loadNodes(): Promise<AppNode[]> {
-  const res = await fetch(getApiUrl('/api/nodes'))
+  const res = await fetch(getApiPath('/api/nodes'))
   if (!res.ok) return []
 
   const rows = await res.json()
@@ -157,6 +165,7 @@ export {
   getImageRenderHeight,
   uploadFile,
   getApiUrl,
+  getApiPath,
   persistNode,
   persistNodePosition,
   persistNodeDelete,
