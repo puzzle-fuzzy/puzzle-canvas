@@ -5,10 +5,10 @@ const GAP_Y = 36
 const COL_COUNT = 3
 const MEDIA_NODE_WIDTH = 320
 
-/** 选区瀑布流布局参数 */
-const SEL_GAP_X = 20
-const SEL_GAP_Y = 20
-const SEL_COL_COUNT = 3
+/** 选区瀑布流布局参数（与上传多文件瀑布流一致） */
+const SEL_GAP_X = GAP_X
+const SEL_GAP_Y = GAP_Y
+const SEL_COL_COUNT = COL_COUNT
 
 /**
  * 局部瀑布流布局生成器
