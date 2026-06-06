@@ -10,7 +10,6 @@
   top: 45px;
   right: 10px;
   width: var(--mode-toolbar-size);
-  background: #000;
   border-radius: var(--mode-toolbar-size);
   display: flex;
   flex-direction: column;
@@ -19,7 +18,55 @@
   gap: 4px;
   padding: 8px 0;
   z-index: 10;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+/* 暗色工具栏 */
+.mode-toolbar.dark {
+  background: #000;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.mode-toolbar.dark .mode-toolbar-btn {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mode-toolbar.dark .mode-toolbar-btn:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mode-toolbar.dark .mode-toolbar-btn.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.mode-toolbar.dark .mode-toolbar-divider {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* 亮色工具栏 */
+.mode-toolbar.light {
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.mode-toolbar.light .mode-toolbar-btn {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.mode-toolbar.light .mode-toolbar-btn:hover {
+  color: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.mode-toolbar.light .mode-toolbar-btn.active {
+  color: #000;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.mode-toolbar.light .mode-toolbar-divider {
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .mode-toolbar-btn {
@@ -31,25 +78,13 @@
   border: none;
   border-radius: 30px;
   background: transparent;
-  color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   transition: all 0.15s;
-}
-
-.mode-toolbar-btn:hover {
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.mode-toolbar-btn.active {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.15);
 }
 
 .mode-toolbar-divider {
   width: 32px;
   height: 1px;
-  background: rgba(255, 255, 255, 0.12);
   margin: 2px 0;
 }
 
@@ -208,7 +243,7 @@
   background: #fafafa;
 }
 
-@media (prefers-color-scheme: dark) {
+html.dark {
   .canvas-loading {
     color: #6b7280;
     background: #111118;
@@ -229,7 +264,7 @@
   border-radius: 6px;
 }
 
-@media (prefers-color-scheme: dark) {
+html.dark {
   .loading-indicator {
     color: #a5b4fc;
     background: #312e81;
@@ -264,7 +299,7 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
+html.dark {
   .error-toast {
     background: #450a0a;
     color: #fca5a5;
@@ -294,7 +329,7 @@
   color: #d1d5db;
 }
 
-@media (prefers-color-scheme: dark) {
+html.dark {
   .empty-hint {
     color: #6b7280;
   }
@@ -415,7 +450,7 @@
 }
 
 /* ========== 暗色模式 ========== */
-@media (prefers-color-scheme: dark) {
+html.dark {
   .url-node {
     background: #1e1f28;
     box-shadow:
@@ -505,7 +540,7 @@
   color: #9ca3af;
 }
 
-@media (prefers-color-scheme: dark) {
+html.dark {
   .doc-node {
     background: #1e1f28;
     box-shadow:
@@ -600,7 +635,7 @@
 }
 
 /* ========== 暗色模式 ========== */
-@media (prefers-color-scheme: dark) {
+html.dark {
   .media-node {
     background: #1e1f28;
     box-shadow:
@@ -634,7 +669,7 @@
   background-color: #f0f0f0;
 }
 
-@media (prefers-color-scheme: dark) {
+html.dark {
   .react-flow__background {
     background-color: #111118;
   }
@@ -769,7 +804,7 @@
   color: #ef4444;
 }
 
-@media (prefers-color-scheme: dark) {
+html.dark {
   .media-node--uploading {
     background: #1e1f28;
     box-shadow:

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { LayoutGrid, Download, Trash2, Hand, MousePointer2, Sparkles, X, Loader2 } from 'lucide-react'
+import { LayoutGrid, Download, Trash2, Hand, MousePointer2, Sparkles, X, Loader2, Sun, Moon } from 'lucide-react'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -63,6 +63,15 @@ function Canvas() {
   const [aiPrompt, setAiPrompt] = useState('')
   const [aiModel, setAiModel] = useState('dall-e-3')
   const [aiGenerating, setAiGenerating] = useState(false)
+  // 日夜模式（默认跟随系统）
+  const [darkMode, setDarkMode] = useState(
+    () => window.matchMedia('(prefers-color-scheme: dark)').matches,
+  )
+
+  // 同步 darkMode 到 <html> class
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode)
+  }, [darkMode])
   const nodesRef = useRef<AppNode[]>(nodes)
   nodesRef.current = nodes
   const mouseRef = useRef({ x: 0, y: 0 })
@@ -705,7 +714,7 @@ function Canvas() {
       )}
 
       {/* 右侧模式切换工具栏 */}
-      <div className="mode-toolbar">
+      <div className={`mode-toolbar ${darkMode ? 'dark' : 'light'}`}>
         <button
           className={`mode-toolbar-btn ${interactionMode === 'pan' ? 'active' : ''}`}
           onClick={() => setInteractionMode('pan')}
@@ -727,6 +736,14 @@ function Canvas() {
           title="AI 生图"
         >
           <Sparkles size={20} />
+        </button>
+        <div className="mode-toolbar-divider" />
+        <button
+          className="mode-toolbar-btn"
+          onClick={() => setDarkMode((d) => !d)}
+          title={darkMode ? '切换到日间模式' : '切换到夜间模式'}
+        >
+          {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
       </div>
     </div>
