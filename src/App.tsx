@@ -271,6 +271,8 @@ function Canvas() {
         onNodeDragStop={handleNodeDragStop}
         nodeTypes={nodeTypes}
         fitView
+        minZoom={0.01}
+        maxZoom={4}
       >
         <Background />
         <Controls />

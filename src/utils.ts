@@ -1,6 +1,6 @@
 import type { AppNode } from './types'
 
-const GAP = 16
+const GAP = 36
 const COL_COUNT = 3
 const MEDIA_NODE_WIDTH = 320
 
