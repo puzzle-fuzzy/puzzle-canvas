@@ -47,7 +47,7 @@ function Canvas() {
   const nodesRef = useRef<AppNode[]>(nodes)
   nodesRef.current = nodes
   const mouseRef = useRef({ x: 0, y: 0 })
-  const { screenToFlowPosition, fitView, setViewport, getViewport } = useReactFlow()
+  const { screenToFlowPosition, getViewport } = useReactFlow()
 
   // 追踪鼠标位置
   useEffect(() => {
@@ -58,26 +58,24 @@ function Canvas() {
     return () => window.removeEventListener('mousemove', track)
   }, [])
 
+  // ========== 初始视口（渲染前从 localStorage 读取，避免闪烁）==========
+  const savedViewport = useRef(() => {
+    try {
+      const raw = localStorage.getItem('viewport')
+      if (raw) {
+        const { x, y, zoom } = JSON.parse(raw)
+        return { x, y, zoom }
+      }
+    } catch { /* ignore */ }
+    return { x: 0, y: 0, zoom: 0.5 }
+  }).current()
+
   // ========== 初始加载节点 ==========
   useEffect(() => {
     loadNodes()
       .then((loaded) => {
+        setNodes(loaded)
         setInitialized(true)
-          setNodes(loaded)
-        // 恢复上次保存的视口，没有则 fitView 展示全部
-        setTimeout(() => {
-          const saved = localStorage.getItem('viewport')
-          if (saved) {
-            try {
-              const { x, y, zoom } = JSON.parse(saved)
-              setViewport({ x, y, zoom })
-            } catch {
-              fitView({ padding: 0.2 })
-            }
-          } else {
-            fitView({ padding: 0.2 })
-          }
-        }, 200)
       })
       .catch((err) => {
         console.error('Failed to load nodes:', err)
@@ -283,6 +281,7 @@ function Canvas() {
         onNodeDragStop={handleNodeDragStop}
         onMoveEnd={handleMoveEnd}
         nodeTypes={nodeTypes}
+        defaultViewport={savedViewport}
         minZoom={0.01}
         maxZoom={4}
         panOnDrag
