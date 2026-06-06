@@ -5,6 +5,7 @@ import {
   applyNodeChanges,
   Background,
   Controls,
+  MiniMap,
   useReactFlow,
   type OnNodesChange,
 } from '@xyflow/react'
@@ -43,7 +44,6 @@ function Canvas() {
   const [loading, setLoading] = useState(false)
   const [initialized, setInitialized] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
   const nodesRef = useRef<AppNode[]>(nodes)
   nodesRef.current = nodes
   const mouseRef = useRef({ x: 0, y: 0 })
@@ -200,8 +200,6 @@ function Canvas() {
   // ========== 粘贴事件 ==========
   const handlePaste = useCallback(
     (e: ClipboardEvent) => {
-      if (inputRef.current && inputRef.current === document.activeElement) return
-
       const files = e.clipboardData?.files
       if (files && files.length > 0) {
         e.preventDefault()
@@ -242,23 +240,6 @@ function Canvas() {
     [addNodeFromFiles, screenToFlowPosition],
   )
 
-  // ========== 输入框 ==========
-  const handleInputKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        const value = e.currentTarget.value.trim()
-        if (value && isValidUrl(value)) {
-          addNodeFromUrl(value)
-          e.currentTarget.value = ''
-        } else if (value) {
-          setError('请输入有效的网址')
-          setTimeout(() => setError(null), 3000)
-        }
-      }
-    },
-    [addNodeFromUrl],
-  )
-
   if (!initialized) {
     return (
       <div className="canvas-loading">
@@ -283,18 +264,16 @@ function Canvas() {
       >
         <Background />
         <Controls />
+        <MiniMap
+          pannable
+          zoomable
+          style={{ background: 'var(--minimap-bg, #f0f0f0)' }}
+        />
       </ReactFlow>
 
-      <div className="url-input-bar">
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="粘贴或输入网址，按回车创建节点..."
-          onKeyDown={handleInputKeyDown}
-          disabled={loading}
-        />
-        {loading && <span className="loading-indicator">处理中...</span>}
-      </div>
+      {loading && (
+        <div className="loading-indicator">处理中...</div>
+      )}
 
       {error && <div className="error-toast">{error}</div>}
 
