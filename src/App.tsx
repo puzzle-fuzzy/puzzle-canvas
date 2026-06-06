@@ -626,7 +626,7 @@ function Canvas() {
 
       {toolbarPos && (
         <div
-          className="selection-toolbar"
+          className={`selection-toolbar ${darkMode ? 'dark' : 'light'}`}
           style={{
             position: 'absolute',
             left: toolbarPos.x,
