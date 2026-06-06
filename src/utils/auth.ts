@@ -65,13 +65,29 @@ export async function login(
 
 // ========== 检查/恢复会话 ==========
 
+/** 当前进行中的 refresh 请求（用于去重，防止 StrictMode 双重调用导致 token 旋转竞态） */
+let refreshInFlight: Promise<AuthUser | null> | null = null
+
 /**
  * 尝试用 httpOnly refresh cookie 恢复会话
  *
  * 页面加载时调用。如果 refresh cookie 仍有效，后端会签发新的
  * access token 并返回用户信息。失败时返回 null。
+ *
+ * 内置去重：并发调用共享同一个请求，避免 token 旋转竞态。
  */
 export async function checkAuth(): Promise<AuthUser | null> {
+  if (refreshInFlight) return refreshInFlight
+
+  refreshInFlight = _doRefresh()
+  try {
+    return await refreshInFlight
+  } finally {
+    refreshInFlight = null
+  }
+}
+
+async function _doRefresh(): Promise<AuthUser | null> {
   try {
     const res = await fetch(getApiUrl('/api/auth/refresh'), {
       method: 'POST',

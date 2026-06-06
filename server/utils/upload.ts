@@ -64,13 +64,16 @@ export function isDangerousFile(fileName: string): boolean {
 }
 
 /**
- * 校验 fingerprint 是否合法（仅允许 SHA-256 hex 字符）
+ * 校验 fingerprint 是否合法
+ *
+ * 前端生成格式为 `{sha256Hex}-{fileSize}`，例如：
+ *   b77b1a81371cec393d971adb88b0a35be803bedd1940d687fabf187b7caad82c-2165899
  *
  * 防止路径遍历攻击：fingerprint 被用于拼接到文件路径中，
  * 必须确保不含 / \ . \x00 等危险字符。
  */
 export function isValidFingerprint(fingerprint: string): boolean {
-  return /^[0-9a-f]{1,128}$/.test(fingerprint)
+  return /^[0-9a-f]{64}-\d{1,20}$/.test(fingerprint)
 }
 
 /**

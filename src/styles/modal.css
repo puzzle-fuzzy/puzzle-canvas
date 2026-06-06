@@ -844,3 +844,145 @@
   text-align: center;
   min-height: 18px;
 }
+
+/* ========== 设置 - 账户面板 ========== */
+.account-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.account-panel-hint {
+  font-size: 13px;
+  margin: 0;
+}
+
+.account-panel.dark .account-panel-hint {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.account-panel.light .account-panel-hint {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.account-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.account-panel.dark .account-profile {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.account-panel.light .account-profile {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.account-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  background: #6366f1;
+  flex-shrink: 0;
+}
+
+.account-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-username {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.account-panel.dark .account-username {
+  color: #f3f4f6;
+}
+
+.account-panel.light .account-username {
+  color: #111827;
+}
+
+.account-email {
+  font-size: 12px;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-panel.dark .account-email {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.account-panel.light .account-email {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.account-role-badge {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.account-panel.dark .account-role-badge {
+  color: #a5b4fc;
+  background: rgba(99, 102, 241, 0.15);
+}
+
+.account-panel.light .account-role-badge {
+  color: #4f46e5;
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.account-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.account-panel.dark .account-logout-btn {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.15);
+}
+
+.account-panel.dark .account-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.account-panel.light .account-logout-btn {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.04);
+  border-color: rgba(239, 68, 68, 0.12);
+}
+
+.account-panel.light .account-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.2);
+}

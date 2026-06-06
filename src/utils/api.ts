@@ -1,13 +1,15 @@
 import type { AppNode } from '../types'
 import { useAuthStore } from '../stores/authStore'
 
-/** 获取 API URL（开发环境直连后端） */
+/**
+ * 获取 API URL
+ *
+ * 开发环境和生产环境都使用相对路径，由 Vite 代理（dev）或
+ * Hono 静态服务（prod）转发到后端。保持同源，避免 CORS 问题，
+ * 确保 httpOnly cookie 正常读写。
+ */
 export function getApiUrl(path: string): string {
-  const normalized = path.startsWith('/') ? path : `/${path}`
-  if (import.meta.env.DEV) {
-    return `http://localhost:3001${normalized}`
-  }
-  return normalized
+  return path.startsWith('/') ? path : `/${path}`
 }
 
 /**
@@ -52,8 +54,20 @@ export async function authFetch(path: string, options: RequestInit = {}): Promis
   return response
 }
 
+/** 当前进行中的 refresh 请求（去重：多个 401 并发时只发一次刷新） */
+let tokenRefreshInFlight: Promise<string | null> | null = null
+
 /** 尝试刷新 access token，成功返回新 token，失败返回 null */
-async function tryRefreshToken(): Promise<string | null> {
+function tryRefreshToken(): Promise<string | null> {
+  if (tokenRefreshInFlight) return tokenRefreshInFlight
+
+  tokenRefreshInFlight = _doTokenRefresh()
+  tokenRefreshInFlight.finally(() => { tokenRefreshInFlight = null })
+
+  return tokenRefreshInFlight
+}
+
+async function _doTokenRefresh(): Promise<string | null> {
   try {
     const res = await fetch(getApiUrl('/api/auth/refresh'), {
       method: 'POST',

@@ -4,7 +4,6 @@ import { useCanvasStore } from '../stores/canvasStore'
 import { useUIStore } from '../stores/uiStore'
 import { useAuthStore } from '../stores/authStore'
 import { useInputStore } from '../stores/inputStore'
-import { logout } from '../utils/auth'
 
 function ModeToolbar() {
   const interactionMode = useCanvasStore((s) => s.interactionMode)
@@ -14,6 +13,7 @@ function ModeToolbar() {
   const setShowAIModal = useUIStore((s) => s.setShowAIModal)
   const setShowSettingsModal = useUIStore((s) => s.setShowSettingsModal)
   const setShowLoginModal = useUIStore((s) => s.setShowLoginModal)
+  const setSettingsSection = useUIStore((s) => s.setSettingsSection)
   const spaceHeld = useInputStore((s) => s.spaceHeld)
 
   const user = useAuthStore((s) => s.user)
@@ -29,7 +29,8 @@ function ModeToolbar() {
 
   const handleUserClick = () => {
     if (isAuthenticated) {
-      logout()
+      setSettingsSection('account')
+      setShowSettingsModal(true)
     } else {
       setShowLoginModal(true)
     }
@@ -40,7 +41,7 @@ function ModeToolbar() {
       <button
         className={`mode-toolbar-btn ${!isAuthenticated ? 'active' : ''}`}
         onClick={handleUserClick}
-        title={isAuthenticated ? `${user?.username} · 退出登录` : '登录 / 注册'}
+        title={isAuthenticated ? `${user?.username} · 账户设置` : '登录 / 注册'}
       >
         {isAuthenticated
           ? <span style={{ fontSize: '14px', fontWeight: 600 }}>{user?.username?.charAt(0).toUpperCase()}</span>
