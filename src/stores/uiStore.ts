@@ -1,5 +1,10 @@
 import { create } from 'zustand'
 
+function syncDarkModeToDOM(dark: boolean) {
+  document.documentElement.classList.toggle('dark', dark)
+  localStorage.setItem('theme', dark ? 'dark' : 'light')
+}
+
 interface UIStore {
   // State
   darkMode: boolean
@@ -22,10 +27,7 @@ interface UIStore {
   setAiGenerating: (v: boolean) => void
 }
 
-function syncDarkModeToDOM(dark: boolean) {
-  document.documentElement.classList.toggle('dark', dark)
-  localStorage.setItem('theme', dark ? 'dark' : 'light')
-}
+let errorTimer: ReturnType<typeof setTimeout> | null = null
 
 export const useUIStore = create<UIStore>((set) => ({
   // ========== State ==========
@@ -56,8 +58,12 @@ export const useUIStore = create<UIStore>((set) => ({
   },
 
   showError: (msg, durationMs = 3000) => {
+    if (errorTimer) clearTimeout(errorTimer)
     set({ error: msg })
-    setTimeout(() => set({ error: null }), durationMs)
+    errorTimer = setTimeout(() => {
+      set({ error: null })
+      errorTimer = null
+    }, durationMs)
   },
 
   setError: (error) => set({ error }),
