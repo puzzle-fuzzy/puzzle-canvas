@@ -493,7 +493,6 @@ function Canvas() {
   const handleAIGenerate = useCallback(async () => {
     if (!aiPrompt.trim() || aiGenerating) return
 
-    // 在屏幕中间创建生成中的节点
     const center = screenToFlowPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 })
     const nodeId = `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
@@ -529,7 +528,6 @@ function Canvas() {
       // 模拟生成过程（后端接入后移除）
       await new Promise((r) => setTimeout(r, 3000))
 
-      // 生成完成 → 替换为占位图
       const placeholderSrc = 'https://placehold.co/640x640/1a1a2e/818cf8?text=AI+Generated'
 
       setNodes((prev) => {
@@ -560,6 +558,14 @@ function Canvas() {
       setAiPrompt('')
     }
   }, [aiPrompt, aiModel, aiGenerating, screenToFlowPosition])
+
+  if (!initialized) {
+    return (
+      <div className="canvas-loading">
+        <span>加载中...</span>
+      </div>
+    )
+  }
 
   return (
     <div
