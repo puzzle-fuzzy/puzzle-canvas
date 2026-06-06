@@ -57,7 +57,11 @@ export function useCanvasActions() {
   // ========== 视口变化时保存到 localStorage ==========
   const handleMoveEnd = useCallback(() => {
     const { x, y, zoom } = getViewport()
-    localStorage.setItem('viewport', JSON.stringify({ x, y, zoom }))
+    try {
+      localStorage.setItem('viewport', JSON.stringify({ x, y, zoom }))
+    } catch {
+      // localStorage 可能不可用（隐私模式、配额满）
+    }
   }, [getViewport])
 
   // ========== 拖拽结束持久化 ==========

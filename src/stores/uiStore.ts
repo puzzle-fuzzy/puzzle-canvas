@@ -2,7 +2,11 @@ import { create } from 'zustand'
 
 function syncDarkModeToDOM(dark: boolean) {
   document.documentElement.classList.toggle('dark', dark)
-  localStorage.setItem('theme', dark ? 'dark' : 'light')
+  try {
+    localStorage.setItem('theme', dark ? 'dark' : 'light')
+  } catch {
+    // localStorage 可能不可用（隐私模式、配额满）
+  }
 }
 
 interface UIStore {
