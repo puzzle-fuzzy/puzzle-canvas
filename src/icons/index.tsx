@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, type ComponentType } from 'react'
 import { fluentRegistry } from './fluent'
 import { lucideRegistry } from './lucide'
+import { antdRegistry } from './antd'
 
 export type IconName =
   | 'board'
@@ -22,12 +23,13 @@ export type IconName =
   | 'globe'
   | 'settings'
 
-export type IconSet = 'fluent' | 'lucide'
+export type IconSet = 'fluent' | 'lucide' | 'antd'
 export type IconRegistry = Record<IconName, ComponentType>
 
 const registries: Record<IconSet, IconRegistry> = {
   fluent: fluentRegistry,
   lucide: lucideRegistry,
+  antd: antdRegistry,
 }
 
 interface IconContextValue {

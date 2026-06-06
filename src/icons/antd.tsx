@@ -1,0 +1,46 @@
+import {
+  AppstoreOutlined,
+  DownloadOutlined,
+  DeleteOutlined,
+  DragOutlined,
+  AimOutlined,
+  StarOutlined,
+  CloseOutlined,
+  LoadingOutlined,
+  BulbOutlined,
+  BulbFilled,
+  DownOutlined,
+  FileTextOutlined,
+  FileMarkdownOutlined,
+  FileZipOutlined,
+  VideoCameraOutlined,
+  PictureOutlined,
+  GlobalOutlined,
+  SettingOutlined,
+} from '@ricons/antd'
+import type { IconRegistry } from './index'
+
+// @ricons/antd 图标是纯 SVG 组件，不接受 props
+// Icon 包装器通过父级 <span> fontSize 控制尺寸，这里直接透传即可
+const wrap = (Comp: React.ComponentType) => Comp
+
+export const antdRegistry: IconRegistry = {
+  board: wrap(AppstoreOutlined),
+  download: wrap(DownloadOutlined),
+  delete: wrap(DeleteOutlined),
+  hand: wrap(DragOutlined),
+  cursor: wrap(AimOutlined),
+  sparkle: wrap(StarOutlined),
+  dismiss: wrap(CloseOutlined),
+  spinner: wrap(LoadingOutlined),
+  sun: wrap(BulbOutlined),
+  moon: wrap(BulbFilled),
+  chevronDown: wrap(DownOutlined),
+  documentText: wrap(FileTextOutlined),
+  documentCode: wrap(FileMarkdownOutlined),
+  folderZip: wrap(FileZipOutlined),
+  video: wrap(VideoCameraOutlined),
+  image: wrap(PictureOutlined),
+  globe: wrap(GlobalOutlined),
+  settings: wrap(SettingOutlined),
+}

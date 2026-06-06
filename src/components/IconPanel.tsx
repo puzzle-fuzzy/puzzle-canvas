@@ -2,6 +2,7 @@ import { Icon } from '@ricons/utils'
 import { useIconSet, type IconSet, type IconName } from '../icons'
 import { fluentRegistry } from '../icons/fluent'
 import { lucideRegistry } from '../icons/lucide'
+import { antdRegistry } from '../icons/antd'
 
 interface IconPanelProps {
   darkMode: boolean
@@ -10,6 +11,7 @@ interface IconPanelProps {
 const iconSets: { id: IconSet; name: string; description: string }[] = [
   { id: 'fluent', name: 'Fluent', description: 'Microsoft Fluent UI 风格，圆润柔和' },
   { id: 'lucide', name: 'Lucide', description: '简洁线条风格，轻量现代' },
+  { id: 'antd', name: 'Ant Design', description: 'Ant Design 风格，方正专业' },
 ]
 
 const previewIcons: IconName[] = ['hand', 'sparkle', 'image', 'globe', 'sun']
@@ -17,6 +19,7 @@ const previewIcons: IconName[] = ['hand', 'sparkle', 'image', 'globe', 'sun']
 const registries: Record<IconSet, typeof fluentRegistry> = {
   fluent: fluentRegistry,
   lucide: lucideRegistry,
+  antd: antdRegistry,
 }
 
 function IconPanel({ darkMode }: IconPanelProps) {
