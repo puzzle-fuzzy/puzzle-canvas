@@ -132,11 +132,15 @@ function App() {
     [loading],
   )
 
-  // ========== 根据文件创建节点 ==========
-  const addNodeFromFile = useCallback(
-    async (file: File) => {
+  // ========== 根据文件创建节点（支持多文件）==========
+  const addNodeFromFiles = useCallback(
+    async (files: FileList | File[]) => {
       if (loading) return
-      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+
+      const validFiles = Array.from(files).filter(
+        (f) => f.type.startsWith('image/') || f.type.startsWith('video/'),
+      )
+      if (validFiles.length === 0) {
         setError('仅支持图片和视频文件')
         setTimeout(() => setError(null), 3000)
         return
@@ -145,27 +149,34 @@ function App() {
       setLoading(true)
       setError(null)
 
-      try {
-        const result = await uploadFile(file)
+      // 逐个上传，每上传完一个立即显示
+      for (const file of validFiles) {
+        try {
+          const result = await uploadFile(file)
 
-        const newNode: ImageNodeType | VideoNodeType = {
-          id: `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-          type: result.mediaType === 'video' ? 'videoNode' : 'imageNode',
-          position: getNextPosition(nodesRef.current),
-          data: {
-            src: result.src,
-            fileName: result.fileName,
-          },
+          const newNode: ImageNodeType | VideoNodeType = {
+            id: `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            type: result.mediaType === 'video' ? 'videoNode' : 'imageNode',
+            position: getNextPosition(nodesRef.current),
+            data: {
+              src: result.src,
+              fileName: result.fileName,
+            },
+          }
+
+          setNodes((prev) => {
+            const updated = [...prev, newNode]
+            nodesRef.current = updated
+            return updated
+          })
+          persistNode(newNode)
+        } catch (err) {
+          setError(err instanceof Error ? err.message : '上传失败')
+          setTimeout(() => setError(null), 3000)
         }
-
-        setNodes((prev) => [...prev, newNode])
-        persistNode(newNode)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : '上传失败')
-        setTimeout(() => setError(null), 3000)
-      } finally {
-        setLoading(false)
       }
+
+      setLoading(false)
     },
     [loading],
   )
@@ -185,7 +196,7 @@ function App() {
       const files = e.clipboardData?.files
       if (files && files.length > 0) {
         e.preventDefault()
-        addNodeFromFile(files[0])
+        addNodeFromFiles(files)
         return
       }
 
@@ -196,7 +207,7 @@ function App() {
         addNodeFromUrl(text)
       }
     },
-    [addNodeFromUrl, addNodeFromFile],
+    [addNodeFromUrl, addNodeFromFiles],
   )
 
   useEffect(() => {
@@ -215,10 +226,10 @@ function App() {
       e.preventDefault()
       const files = e.dataTransfer.files
       if (files.length > 0) {
-        addNodeFromFile(files[0])
+        addNodeFromFiles(files)
       }
     },
-    [addNodeFromFile],
+    [addNodeFromFiles],
   )
 
   // ========== 输入框回车提交 ==========

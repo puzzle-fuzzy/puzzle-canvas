@@ -19,7 +19,7 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 6px 8px 6px 16px;
   box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.06),
@@ -139,7 +139,7 @@
 .url-node {
   width: 280px;
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: 6px;
   overflow: hidden;
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.06),
@@ -274,7 +274,7 @@
 .media-node {
   width: 320px;
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: 6px;
   overflow: hidden;
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.06),
