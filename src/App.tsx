@@ -80,6 +80,14 @@ function Canvas() {
         if (change.type === 'remove') {
           persistNodeDelete(change.id)
         }
+        // 拖拽结束时持久化位置（dragging 从 true 变 false）
+        if (
+          change.type === 'position' &&
+          change.dragging === false &&
+          change.position
+        ) {
+          persistNodePosition(change.id, change.position.x, change.position.y)
+        }
       }
       setNodes((nds) => {
         const updated = applyNodeChanges(changes, nds)
@@ -93,10 +101,7 @@ function Canvas() {
   // ========== 拖拽结束持久化 ==========
   const handleNodeDragStop = useCallback(
     (_event: MouseEvent | TouchEvent, node: AppNode) => {
-      const latest = nodesRef.current.find((n) => n.id === node.id)
-      if (latest) {
-        persistNodePosition(latest.id, latest.position.x, latest.position.y)
-      }
+      persistNodePosition(node.id, node.position.x, node.position.y)
     },
     [],
   )
