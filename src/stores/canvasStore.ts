@@ -71,7 +71,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   handleOrganize: () => {
     const { nodes, selectedNodeIds } = get()
     const selected = nodes.filter((n) => selectedNodeIds.includes(n.id))
-    if (selected.length < 1) return
+    if (selected.length < 2) return
 
     const positions = selectionWaterfallLayout(selected)
 
