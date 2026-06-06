@@ -12,8 +12,7 @@ function ModeToolbar() {
   const toggleDarkMode = useUIStore((s) => s.toggleDarkMode)
   const setShowAIModal = useUIStore((s) => s.setShowAIModal)
   const setShowSettingsModal = useUIStore((s) => s.setShowSettingsModal)
-  const setShowLoginModal = useUIStore((s) => s.setShowLoginModal)
-  const setSettingsSection = useUIStore((s) => s.setSettingsSection)
+  const iconSize = useUIStore((s) => s.toolbarIconSize)
   const spaceHeld = useInputStore((s) => s.spaceHeld)
 
   const user = useAuthStore((s) => s.user)
@@ -25,43 +24,32 @@ function ModeToolbar() {
   const SunIcon = useAppIcon('sun')
   const MoonIcon = useAppIcon('moon')
   const SettingsIcon = useAppIcon('settings')
-  const UserIcon = useAppIcon('user')
-
-  const handleUserClick = () => {
-    if (isAuthenticated) {
-      setSettingsSection('account')
-      setShowSettingsModal(true)
-    } else {
-      setShowLoginModal(true)
-    }
-  }
 
   return (
     <div className={`mode-toolbar ${darkMode ? 'dark' : 'light'}`}>
-      <button
-        className={`mode-toolbar-btn ${!isAuthenticated ? 'active' : ''}`}
-        onClick={handleUserClick}
-        title={isAuthenticated ? `${user?.username} · 账户设置` : '登录 / 注册'}
+      <div
+        className={`mode-toolbar-avatar ${isAuthenticated ? '' : 'placeholder'}`}
+        title={isAuthenticated ? user?.username ?? '' : ''}
       >
         {isAuthenticated
           ? <span style={{ fontSize: '14px', fontWeight: 600 }}>{user?.username?.charAt(0).toUpperCase()}</span>
-          : <Icon size={20}><UserIcon /></Icon>
+          : <span style={{ fontSize: '11px', fontWeight: 500 }}>?</span>
         }
-      </button>
+      </div>
       <div className="mode-toolbar-divider" />
       <button
         className={`mode-toolbar-btn ${interactionMode === 'pan' && !spaceHeld ? 'active' : ''}`}
         onClick={() => setInteractionMode('pan')}
         title="拖拽模式（Space 切换）"
       >
-        <Icon size={20}><HandIcon /></Icon>
+        <Icon size={iconSize}><HandIcon /></Icon>
       </button>
       <button
         className={`mode-toolbar-btn ${interactionMode === 'select' || spaceHeld ? 'active' : ''}`}
         onClick={() => setInteractionMode('select')}
         title="选择模式（Space 切换）"
       >
-        <Icon size={20}><CursorIcon /></Icon>
+        <Icon size={iconSize}><CursorIcon /></Icon>
       </button>
       <div className="mode-toolbar-divider" />
       <button
@@ -69,7 +57,7 @@ function ModeToolbar() {
         onClick={() => setShowAIModal(true)}
         title="AI 生图"
       >
-        <Icon size={20}><SparkleIcon /></Icon>
+        <Icon size={iconSize}><SparkleIcon /></Icon>
       </button>
       <div className="mode-toolbar-divider" />
       <button
@@ -77,7 +65,7 @@ function ModeToolbar() {
         onClick={() => toggleDarkMode()}
         title={darkMode ? '切换到日间模式' : '切换到夜间模式'}
       >
-        {darkMode ? <Icon size={20}><SunIcon /></Icon> : <Icon size={20}><MoonIcon /></Icon>}
+        {darkMode ? <Icon size={iconSize}><SunIcon /></Icon> : <Icon size={iconSize}><MoonIcon /></Icon>}
       </button>
       <div className="mode-toolbar-divider" />
       <button
@@ -85,7 +73,7 @@ function ModeToolbar() {
         onClick={() => setShowSettingsModal(true)}
         title="设置"
       >
-        <Icon size={20}><SettingsIcon /></Icon>
+        <Icon size={iconSize}><SettingsIcon /></Icon>
       </button>
     </div>
   )

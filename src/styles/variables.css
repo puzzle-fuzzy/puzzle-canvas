@@ -1,5 +1,14 @@
 /* ========== 全局变量 ========== */
 :root {
+  /* 节点 */
   --node-width: 320px;
+
+  /* 工具栏 */
   --mode-toolbar-size: 55px;
+  --toolbar-icon-size: 20px;
+
+  /* 主色调 */
+  --color-primary: #6366f1;
+  --color-primary-hover: #818cf8;
+  --color-primary-rgb: 99, 102, 241;
 }

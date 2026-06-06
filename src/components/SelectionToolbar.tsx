@@ -11,6 +11,7 @@ interface SelectionToolbarProps {
 
 function SelectionToolbar({ position, selectedCount, onDownload }: SelectionToolbarProps) {
   const darkMode = useUIStore((s) => s.darkMode)
+  const iconSize = useUIStore((s) => s.toolbarIconSize)
   const setFullscreenPreview = useUIStore((s) => s.setFullscreenPreview)
   const handleOrganize = useCanvasStore((s) => s.handleOrganize)
   const handleDeleteSelected = useCanvasStore((s) => s.handleDeleteSelected)
@@ -49,29 +50,29 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
       style={{
         position: 'absolute',
         left: position.x,
-        top: position.y - 44,
+        top: `calc(${position.y}px - var(--mode-toolbar-size))`,
         transform: 'translateX(-100%)',
       }}
     >
       {selectedCount > 1 && (
         <button className="selection-toolbar-btn" onClick={handleOrganize} title="整理">
-          <Icon size={15}><BoardIcon /></Icon>
+          <Icon size={Math.round(iconSize * 0.75)}><BoardIcon /></Icon>
         </button>
       )}
       {hasMedia && (
         <button className="selection-toolbar-btn" onClick={handleFullscreen} title="全屏预览">
-          <Icon size={15}><FullscreenIcon /></Icon>
+          <Icon size={Math.round(iconSize * 0.75)}><FullscreenIcon /></Icon>
         </button>
       )}
       <button className="selection-toolbar-btn" onClick={onDownload} title="下载">
-        <Icon size={15}><DownloadIcon /></Icon>
+        <Icon size={Math.round(iconSize * 0.75)}><DownloadIcon /></Icon>
         </button>
       <button
         className="selection-toolbar-btn selection-toolbar-btn--danger"
         onClick={handleDeleteSelected}
         title="删除"
       >
-        <Icon size={15}><DeleteIcon /></Icon>
+        <Icon size={Math.round(iconSize * 0.75)}><DeleteIcon /></Icon>
       </button>
     </div>
   )

@@ -5,6 +5,7 @@ import { useUIStore } from '../stores/uiStore'
 import { useAuthStore } from '../stores/authStore'
 import { logout } from '../utils/auth'
 import IconPanel from './IconPanel'
+import AppearancePanel from './AppearancePanel'
 
 interface SettingsModalProps {
   onClose: () => void
@@ -12,6 +13,7 @@ interface SettingsModalProps {
 
 const sections = [
   { id: 'account', label: '账户' },
+  { id: 'appearance', label: '外观' },
   { id: 'icons', label: '图标' },
 ] as const
 
@@ -83,6 +85,9 @@ function SettingsModal({ onClose }: SettingsModalProps) {
                 isAuthenticated={isAuthenticated}
                 onLogout={handleLogout}
               />
+            )}
+            {activeSection === 'appearance' && (
+              <AppearancePanel darkMode={darkMode} />
             )}
             {activeSection === 'icons' && <IconPanel darkMode={darkMode} />}
           </div>

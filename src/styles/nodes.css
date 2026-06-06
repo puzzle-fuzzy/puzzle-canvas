@@ -174,7 +174,7 @@ html.dark {
 
 .doc-node-icon {
   flex-shrink: 0;
-  color: #6366f1;
+  color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -219,7 +219,7 @@ html.dark {
   }
 
   .doc-node-icon {
-    color: #818cf8;
+    color: var(--color-primary-hover);
   }
 
   .doc-node-filename {
@@ -357,7 +357,7 @@ html.dark {
 .upload-progress-icon {
   display: flex;
   align-items: center;
-  color: #6366f1;
+  color: var(--color-primary);
 }
 
 .upload-progress-filename {
@@ -379,7 +379,7 @@ html.dark {
 
 .upload-progress-bar-fill {
   height: 100%;
-  background: #6366f1;
+  background: var(--color-primary);
   border-radius: 3px;
   transition: width 0.2s ease;
 }
@@ -436,7 +436,7 @@ html.dark {
   }
 
   .upload-progress-bar-fill {
-    background: #818cf8;
+    background: var(--color-primary-hover);
   }
 
   .upload-progress-percent {
