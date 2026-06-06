@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useCanvasStore } from '../stores/canvasStore'
+import { useUIStore } from '../stores/uiStore'
 import { loadNodes } from '../utils'
 
 /**
@@ -16,6 +17,7 @@ export function useNodeLoader() {
       })
       .catch((err) => {
         console.error('Failed to load nodes:', err)
+        useUIStore.getState().showError('节点加载失败，请刷新页面重试')
         setInitialized(true)
       })
   }, [])
