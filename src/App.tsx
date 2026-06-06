@@ -283,12 +283,12 @@ function Canvas() {
         nodeTypes={nodeTypes}
         minZoom={0.01}
         maxZoom={4}
-        panOnDrag={spaceHeld}
-        selectionOnDrag={!spaceHeld}
+        panOnDrag={!spaceHeld}
+        selectionOnDrag={spaceHeld}
         zoomOnScroll
         zoomOnPinch
         zoomOnDoubleClick={false}
-        panOnScroll={spaceHeld}
+        panOnScroll={false}
         deleteKeyCode="Delete"
         selectionKeyCode={null}
         multiSelectionKeyCode="Shift"
