@@ -2,10 +2,11 @@ import type { AppNode } from '../types'
 
 /** 获取 API URL（开发环境直连后端） */
 export function getApiUrl(path: string): string {
+  const normalized = path.startsWith('/') ? path : `/${path}`
   if (import.meta.env.DEV) {
-    return `http://localhost:3001${path}`
+    return `http://localhost:3001${normalized}`
   }
-  return path
+  return normalized
 }
 
 /** 持久化：创建节点到后端（fire-and-forget） */
