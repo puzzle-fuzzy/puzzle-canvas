@@ -125,7 +125,7 @@ function Canvas() {
   const handleOrganize = useCallback(() => {
     const allNodes = nodesRef.current
     const selected = allNodes.filter((n) => selectedNodeIds.includes(n.id))
-    if (selected.length < 2) return
+    if (selected.length < 1) return
 
     const positions = selectionWaterfallLayout(selected)
 
@@ -347,7 +347,7 @@ function Canvas() {
 
   // 计算选区工具栏位置（包围盒右上角，屏幕坐标）
   const toolbarPos = (() => {
-    if (selectedNodeIds.length < 2) return null
+    if (selectedNodeIds.length < 1) return null
     const selected = nodesRef.current.filter((n) => selectedNodeIds.includes(n.id))
     if (selected.length === 0) return null
 
@@ -409,9 +409,11 @@ function Canvas() {
             transform: 'translateX(-100%)',
           }}
         >
-          <button className="selection-toolbar-btn" onClick={handleOrganize} title="整理">
-            <LayoutGrid size={15} />
-          </button>
+          {selectedNodeIds.length > 1 && (
+            <button className="selection-toolbar-btn" onClick={handleOrganize} title="整理">
+              <LayoutGrid size={15} />
+            </button>
+          )}
           <button className="selection-toolbar-btn" onClick={handleDownloadSelected} title="下载">
             <Download size={15} />
           </button>
