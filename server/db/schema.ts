@@ -2,7 +2,7 @@ import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core'
 
 export const nodes = sqliteTable('nodes', {
   id: text('id').primaryKey(),
-  type: text('type', { enum: ['urlNode', 'imageNode', 'videoNode'] }).notNull(),
+  type: text('type', { enum: ['urlNode', 'imageNode', 'videoNode', 'docNode'] }).notNull(),
   positionX: real('position_x').notNull(),
   positionY: real('position_y').notNull(),
 
@@ -13,9 +13,10 @@ export const nodes = sqliteTable('nodes', {
   image: text('image'),
   favicon: text('favicon'),
 
-  // imageNode / videoNode 字段
+  // imageNode / videoNode / docNode 字段
   src: text('src'),
   fileName: text('fileName'),
+  fileSize: integer('file_size'),
 
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()

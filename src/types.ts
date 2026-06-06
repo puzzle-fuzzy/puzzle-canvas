@@ -29,8 +29,18 @@ export type VideoNodeData = {
 
 export type VideoNodeType = Node<VideoNodeData, 'videoNode'>
 
+// ========== 文档节点 ==========
+export type DocNodeData = {
+  src: string
+  fileName: string
+  fileSize: number
+  uploading?: UploadState
+}
+
+export type DocNodeType = Node<DocNodeData, 'docNode'>
+
 // ========== 联合类型 ==========
-export type AppNode = UrlNodeType | ImageNodeType | VideoNodeType
+export type AppNode = UrlNodeType | ImageNodeType | VideoNodeType | DocNodeType
 
 // ========== 上传状态 ==========
 export type UploadState = {
@@ -50,7 +60,7 @@ export type MetadataResponse = {
 export type UploadResponse = {
   src: string
   fileName: string
-  mediaType: 'image' | 'video'
+  mediaType: 'image' | 'video' | 'document'
 }
 
 // ========== 分片上传 API ==========

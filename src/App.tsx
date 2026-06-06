@@ -15,15 +15,18 @@ import '@xyflow/react/dist/style.css'
 
 import UrlNode from './components/UrlNode'
 import MediaNode from './components/MediaNode'
+import DocNode from './components/DocNode'
 import type {
   AppNode,
   UrlNodeType,
   ImageNodeType,
   VideoNodeType,
+  DocNodeType,
   MetadataResponse,
 } from './types'
 import {
   isValidUrl,
+  isDangerousFile,
   persistNode,
   persistNodePosition,
   persistNodeDelete,
@@ -43,6 +46,7 @@ const nodeTypes = {
   urlNode: UrlNode,
   imageNode: MediaNode,
   videoNode: MediaNode,
+  docNode: DocNode,
 }
 
 function Canvas() {
@@ -164,13 +168,13 @@ function Canvas() {
   // ========== 选区下载（图片/视频）==========
   const handleDownloadSelected = useCallback(async () => {
     const selected = nodesRef.current.filter((n) => selectedNodeIds.includes(n.id))
-    const mediaNodes = selected.filter(
-      (n) => n.type === 'imageNode' || n.type === 'videoNode',
-    ) as (ImageNodeType | VideoNodeType)[]
+    const downloadable = selected.filter(
+      (n) => n.type === 'imageNode' || n.type === 'videoNode' || n.type === 'docNode',
+    ) as (ImageNodeType | VideoNodeType | DocNodeType)[]
 
-    if (mediaNodes.length === 0) return
+    if (downloadable.length === 0) return
 
-    for (const node of mediaNodes) {
+    for (const node of downloadable) {
       try {
         const url = getApiUrl(node.data.src)
         const res = await fetch(url)
@@ -247,11 +251,10 @@ function Canvas() {
   // ========== 文件节点（分片上传 + 进度节点）==========
   const addNodeFromFiles = useCallback(
     (files: FileList | File[], origin: { x: number; y: number }) => {
-      const validFiles = Array.from(files).filter(
-        (f) => f.type.startsWith('image/') || f.type.startsWith('video/'),
-      )
+      const allFiles = Array.from(files)
+      const validFiles = allFiles.filter((f) => !isDangerousFile(f.name))
       if (validFiles.length === 0) {
-        setError('仅支持图片和视频文件')
+        setError('不支持的文件类型')
         setTimeout(() => setError(null), 3000)
         return
       }
@@ -265,19 +268,43 @@ function Canvas() {
       for (const file of validFiles) {
         const pos = layout.next(NODE_WIDTH)
         const nodeId = `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-        const mediaType = file.type.startsWith('video/') ? 'video' : 'image'
+        const isVideo = file.type.startsWith('video/')
+        const isImage = file.type.startsWith('image/')
 
         // 立即创建带进度的节点
-        const newNode: ImageNodeType | VideoNodeType = {
-          id: nodeId,
-          type: mediaType === 'video' ? 'videoNode' : 'imageNode',
-          position: pos,
-          data: {
-            src: '',
-            fileName: file.name,
-            uploading: { progress: 0, fileName: file.name },
-          },
-        }
+        const newNode: AppNode = isVideo
+          ? {
+              id: nodeId,
+              type: 'videoNode',
+              position: pos,
+              data: {
+                src: '',
+                fileName: file.name,
+                uploading: { progress: 0, fileName: file.name },
+              },
+            }
+          : isImage
+            ? {
+                id: nodeId,
+                type: 'imageNode',
+                position: pos,
+                data: {
+                  src: '',
+                  fileName: file.name,
+                  uploading: { progress: 0, fileName: file.name },
+                },
+              }
+            : {
+                id: nodeId,
+                type: 'docNode',
+                position: pos,
+                data: {
+                  src: '',
+                  fileName: file.name,
+                  fileSize: file.size,
+                  uploading: { progress: 0, fileName: file.name },
+                },
+              }
 
         setNodes((prev) => {
           const updated = [...prev, newNode]
@@ -297,15 +324,17 @@ function Canvas() {
             onProgress: (progress) => {
               setNodes((prev) =>
                 prev.map((n) => {
-                  if (n.id !== currentNodeId) return n
-                  if (n.type === 'urlNode') return n
+                  if (n.id !== currentNodeId || n.type === 'urlNode') return n
+                  const nodeData = n.type === 'docNode'
+                    ? { src: n.data.src, fileName: n.data.fileName, fileSize: n.data.fileSize }
+                    : { src: n.data.src, fileName: n.data.fileName }
                   return {
                     ...n,
                     data: {
-                      ...n.data,
+                      ...nodeData,
                       uploading: { progress, fileName: currentFile.name },
                     },
-                  }
+                  } as AppNode
                 }),
               )
             },
@@ -313,26 +342,35 @@ function Canvas() {
           })
             .then((result) => {
               // 上传完成 → 转为正常节点
+              const nodeType = result.mediaType === 'video' ? 'videoNode' as const
+                : result.mediaType === 'image' ? 'imageNode' as const
+                : 'docNode' as const
+
               setNodes((prev) => {
-                const updated = prev.map((n) =>
-                  n.id === currentNodeId
-                    ? {
-                        ...n,
-                        type: result.mediaType === 'video' ? 'videoNode' as const : 'imageNode' as const,
-                        data: { src: result.src, fileName: result.fileName },
-                      }
-                    : n,
-                )
+                const updated = prev.map((n): AppNode => {
+                  if (n.id !== currentNodeId) return n
+                  if (nodeType === 'docNode') {
+                    return { ...n, type: 'docNode', data: { src: result.src, fileName: result.fileName, fileSize: currentFile.size } }
+                  }
+                  if (nodeType === 'videoNode') {
+                    return { ...n, type: 'videoNode', data: { src: result.src, fileName: result.fileName } }
+                  }
+                  return { ...n, type: 'imageNode', data: { src: result.src, fileName: result.fileName } }
+                })
                 nodesRef.current = updated
                 return updated
               })
 
+              const persistData = nodeType === 'docNode'
+                ? { src: result.src, fileName: result.fileName, fileSize: currentFile.size }
+                : { src: result.src, fileName: result.fileName }
+
               persistNode({
                 id: currentNodeId,
-                type: result.mediaType === 'video' ? 'videoNode' : 'imageNode',
+                type: nodeType,
                 position: pos,
-                data: { src: result.src, fileName: result.fileName },
-              } as ImageNodeType | VideoNodeType)
+                data: persistData,
+              } as AppNode)
             })
             .catch((err) => {
               if (err instanceof DOMException && err.name === 'AbortError') {

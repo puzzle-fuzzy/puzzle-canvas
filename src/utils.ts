@@ -100,6 +100,23 @@ function getImageRenderHeight(src: string): Promise<number> {
   })
 }
 
+/** 危险文件扩展名（与后端一致） */
+const DANGEROUS_EXTENSIONS = new Set([
+  'exe', 'bat', 'cmd', 'com', 'scr', 'msi', 'dll', 'sys', 'vxd',
+  'vbs', 'vbe', 'wsf', 'wsh', 'ps1', 'psm1',
+  'jar', 'class',
+  'inf', 'reg', 'lnk', 'desktop',
+  'app', 'dmg', 'pkg',
+  'iso', 'img',
+  'hta', 'cpl',
+])
+
+/** 判断文件是否为危险类型 */
+function isDangerousFile(fileName: string): boolean {
+  const ext = fileName.includes('.') ? fileName.split('.').pop()!.toLowerCase() : ''
+  return DANGEROUS_EXTENSIONS.has(ext)
+}
+
 /** 校验字符串是否为合法 HTTP/HTTPS URL */
 function isValidUrl(str: string): boolean {
   try {
@@ -321,7 +338,7 @@ async function loadNodes(): Promise<AppNode[]> {
 
   return rows.map((row: Record<string, unknown>) => ({
     id: row.id as string,
-    type: row.type as 'urlNode' | 'imageNode' | 'videoNode',
+    type: row.type as 'urlNode' | 'imageNode' | 'videoNode' | 'docNode',
     position: { x: row.positionX as number, y: row.positionY as number },
     data: row.type === 'urlNode'
       ? {
@@ -331,15 +348,22 @@ async function loadNodes(): Promise<AppNode[]> {
           image: (row.image as string) ?? null,
           favicon: (row.favicon as string) ?? null,
         }
-      : {
-          src: row.src as string,
-          fileName: row.fileName as string,
-        },
+      : row.type === 'docNode'
+        ? {
+            src: row.src as string,
+            fileName: row.fileName as string,
+            fileSize: (row.fileSize as number) ?? 0,
+          }
+        : {
+            src: row.src as string,
+            fileName: row.fileName as string,
+          },
   }))
 }
 
 export {
   isValidUrl,
+  isDangerousFile,
   getDomain,
   localWaterfallLayout,
   selectionWaterfallLayout,

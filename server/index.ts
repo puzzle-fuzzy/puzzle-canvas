@@ -30,7 +30,7 @@ app.onError((err, c) => {
 app.use('/uploads/*', serveStatic({ root: './' }))
 
 // ========== 节点 CRUD ==========
-const VALID_NODE_TYPES = ['urlNode', 'imageNode', 'videoNode']
+const VALID_NODE_TYPES = ['urlNode', 'imageNode', 'videoNode', 'docNode']
 
 // 获取所有节点
 app.get('/api/nodes', (c) => {
@@ -62,6 +62,7 @@ app.post('/api/nodes', async (c) => {
     favicon: body.favicon ?? null,
     src: body.src ?? null,
     fileName: body.fileName ?? null,
+    fileSize: body.fileSize ?? null,
   }).returning().get()
 
   return c.json(result, 201)
@@ -72,7 +73,7 @@ app.patch('/api/nodes/:id', async (c) => {
   const id = c.req.param('id')
   const body = await c.req.json()
 
-  const allowedFields = ['positionX', 'positionY', 'title', 'description', 'image', 'favicon', 'src', 'fileName']
+  const allowedFields = ['positionX', 'positionY', 'title', 'description', 'image', 'favicon', 'src', 'fileName', 'fileSize']
   const updates: Record<string, unknown> = {}
   for (const field of allowedFields) {
     if (field in body) {
@@ -103,7 +104,23 @@ app.delete('/api/nodes/:id', (c) => {
 })
 
 // ========== 文件上传 ==========
-const ALLOWED_MIME_PREFIXES = ['image/', 'video/']
+
+// 危险文件扩展名黑名单
+const DANGEROUS_EXTENSIONS = new Set([
+  'exe', 'bat', 'cmd', 'com', 'scr', 'msi', 'dll', 'sys', 'vxd',
+  'vbs', 'vbe', 'wsf', 'wsh', 'ps1', 'psm1',
+  'jar', 'class',
+  'inf', 'reg', 'lnk', 'desktop',
+  'app', 'dmg', 'pkg',
+  'iso', 'img',
+  'hta', 'cpl',
+])
+
+function isDangerousFile(fileName: string): boolean {
+  const ext = fileName.includes('.') ? fileName.split('.').pop()!.toLowerCase() : ''
+  return DANGEROUS_EXTENSIONS.has(ext)
+}
+
 const MAX_FILE_SIZE = 800 * 1024 * 1024 // 800 MB
 const CHUNK_DIR = './uploads/tmp'
 const TMP_MAX_AGE_MS = 24 * 60 * 60 * 1000 // 24 小时
@@ -139,6 +156,10 @@ app.post('/api/upload/init', async (c) => {
 
   if (!fileName || !fileSize || !totalChunks || !fingerprint) {
     return c.json({ error: '缺少必要字段' }, 400)
+  }
+
+  if (isDangerousFile(fileName)) {
+    return c.json({ error: '不支持的文件类型' }, 400)
   }
 
   if (fileSize > MAX_FILE_SIZE) {
@@ -231,7 +252,9 @@ app.post('/api/upload/complete', async (c) => {
 
   uploadSessions.delete(uploadId)
 
-  const mediaType = /\.(mp4|webm|mov|avi|mkv)$/i.test(fileName) ? 'video' : 'image'
+  const mediaType = /\.(mp4|webm|mov|avi|mkv)$/i.test(fileName) ? 'video'
+    : /\.(jpe?g|png|gif|webp|bmp|svg|ico|tiff?)$/i.test(fileName) ? 'image'
+    : 'document'
 
   return c.json({
     src: `/uploads/${uniqueName}`,
@@ -264,14 +287,14 @@ app.post('/api/upload', async (c) => {
     return c.json({ error: '未提供文件' }, 400)
   }
 
-  // 校验 MIME 类型
-  if (!ALLOWED_MIME_PREFIXES.some((prefix) => file.type.startsWith(prefix))) {
-    return c.json({ error: '仅支持图片和视频文件' }, 400)
+  // 校验危险文件
+  if (isDangerousFile(file.name)) {
+    return c.json({ error: '不支持的文件类型' }, 400)
   }
 
   // 校验文件大小
   if (file.size > MAX_FILE_SIZE) {
-    return c.json({ error: '文件过大（最大 50MB）' }, 413)
+    return c.json({ error: '文件过大（最大 800MB）' }, 413)
   }
 
   // 生成唯一文件名：时间戳 + 随机后缀 + 原始扩展名
@@ -281,7 +304,9 @@ app.post('/api/upload', async (c) => {
   // 写入磁盘
   await Bun.write(`./uploads/${uniqueName}`, file)
 
-  const mediaType = file.type.startsWith('image/') ? 'image' : 'video'
+  const mediaType = file.type.startsWith('image/') ? 'image'
+    : file.type.startsWith('video/') ? 'video'
+    : 'document'
 
   return c.json({
     src: `/uploads/${uniqueName}`,
