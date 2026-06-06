@@ -51,7 +51,7 @@ export function useCanvasActions() {
         const pos = screenToFlowPosition(mouse)
 
         const newNode: UrlNodeType = {
-          id: `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          id: crypto.randomUUID(),
           type: 'urlNode',
           position: pos,
           data: {
@@ -105,7 +105,7 @@ export function useCanvasActions() {
         }
 
         const pos = layout.next(nodeHeight)
-        const nodeId = `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+        const nodeId = crypto.randomUUID()
 
         // 立即创建带进度的节点
         const newNode: AppNode = isVideo
@@ -307,7 +307,7 @@ export function useCanvasActions() {
       x: window.innerWidth / 2,
       y: window.innerHeight / 2,
     })
-    const nodeId = `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const nodeId = crypto.randomUUID()
 
     const generatingNode: ImageNodeType = {
       id: nodeId,
