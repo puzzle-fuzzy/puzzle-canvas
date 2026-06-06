@@ -52,7 +52,9 @@ function selectionWaterfallLayout(
 
   // 获取节点默认尺寸（所有节点宽度统一 320px）
   const defaultSize = (n: AppNode) => {
-    if (n.measured?.width && n.measured?.height) return n.measured
+    if (n.measured?.width && n.measured?.height) {
+      return { width: n.measured.width, height: n.measured.height }
+    }
     return { width: NODE_WIDTH, height: 200 }
   }
 

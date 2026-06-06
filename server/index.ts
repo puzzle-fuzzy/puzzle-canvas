@@ -417,6 +417,19 @@ app.get('/api/metadata', async (c) => {
   })
 })
 
+// ========== 前端产物静态服务（生产模式）==========
+// 静态资源（JS/CSS/图片等）
+app.use('/*', serveStatic({ root: './dist' }))
+
+// SPA fallback：非 API/非静态资源请求返回 index.html
+app.get('*', async (c) => {
+  const file = Bun.file('./dist/index.html')
+  if (await file.exists()) {
+    return new Response(file)
+  }
+  return c.text('Frontend not built. Run `bun run build` first.', 404)
+})
+
 export default {
   port: 3001,
   fetch: app.fetch,
