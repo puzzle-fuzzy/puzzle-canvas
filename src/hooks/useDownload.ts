@@ -25,6 +25,9 @@ export function useDownload() {
       try {
         const url = getApiUrl(node.data.src)
         const res = await fetch(url)
+        if (!res.ok) {
+          throw new Error(`下载失败 (${res.status})`)
+        }
         const blob = await res.blob()
         const a = document.createElement('a')
         a.href = URL.createObjectURL(blob)
