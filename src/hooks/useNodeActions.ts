@@ -33,6 +33,11 @@ export function useNodeActions() {
       const { loading } = useCanvasStore.getState()
       if (loading) return
 
+      if (url.length > 2048) {
+        useUIStore.getState().showError('URL 过长，请缩短后重试')
+        return
+      }
+
       useCanvasStore.getState().setLoading(true)
       useUIStore.getState().setError(null)
 
