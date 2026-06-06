@@ -25,3 +25,9 @@ dist-ssr
 
 # Uploads
 uploads/
+
+# Database
+puzzle-canvas.db
+puzzle-canvas.db-wal
+puzzle-canvas.db-shm
+drizzle/

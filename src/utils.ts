@@ -52,12 +52,12 @@ function getNextPosition(nodes: AppNode[]): { x: number; y: number } {
   return { x: 50, y: 50 }
 }
 
-/** 获取上传 API 的基础 URL（开发环境直连后端，避免 Vite 代理大文件 EPIPE 问题） */
-function getApiBaseUrl(): string {
+/** 获取 API 基础 URL（开发环境直连后端，避免 Vite 代理问题） */
+function getApiUrl(path: string): string {
   if (import.meta.env.DEV) {
-    return 'http://localhost:3001'
+    return `http://localhost:3001${path}`
   }
-  return ''
+  return path
 }
 
 /** 上传文件到后端 */
@@ -69,8 +69,7 @@ async function uploadFile(file: File): Promise<{
   const formData = new FormData()
   formData.append('file', file)
 
-  const baseUrl = getApiBaseUrl()
-  const res = await fetch(`${baseUrl}/api/upload`, {
+  const res = await fetch(getApiUrl('/api/upload'), {
     method: 'POST',
     body: formData,
   })
@@ -83,4 +82,71 @@ async function uploadFile(file: File): Promise<{
   return await res.json()
 }
 
-export { isValidUrl, getDomain, getNextPosition, uploadFile }
+/** 持久化：创建节点到后端（fire-and-forget） */
+function persistNode(node: AppNode): void {
+  fetch(getApiUrl('/api/nodes'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id: node.id,
+      type: node.type,
+      positionX: node.position.x,
+      positionY: node.position.y,
+      ...node.data,
+    }),
+  }).catch((err) => console.error('Failed to persist node:', err))
+}
+
+/** 持久化：更新节点位置（fire-and-forget） */
+function persistNodePosition(id: string, x: number, y: number): void {
+  fetch(getApiUrl(`/api/nodes/${id}`), {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ positionX: x, positionY: y }),
+  }).catch((err) => console.error('Failed to persist position:', err))
+}
+
+/** 持久化：删除节点（fire-and-forget） */
+function persistNodeDelete(id: string): void {
+  fetch(getApiUrl(`/api/nodes/${id}`), {
+    method: 'DELETE',
+  }).catch((err) => console.error('Failed to persist delete:', err))
+}
+
+/** 从后端加载所有节点 */
+async function loadNodes(): Promise<AppNode[]> {
+  const res = await fetch(getApiUrl('/api/nodes'))
+  if (!res.ok) return []
+
+  const rows = await res.json()
+
+  return rows.map((row: Record<string, unknown>) => ({
+    id: row.id as string,
+    type: row.type as 'urlNode' | 'imageNode' | 'videoNode',
+    position: { x: row.positionX as number, y: row.positionY as number },
+    data: row.type === 'urlNode'
+      ? {
+          url: row.url as string,
+          title: row.title as string,
+          description: (row.description as string) ?? '',
+          image: (row.image as string) ?? null,
+          favicon: (row.favicon as string) ?? null,
+        }
+      : {
+          src: row.src as string,
+          fileName: row.fileName as string,
+        },
+  }))
+}
+
+export {
+  isValidUrl,
+  getDomain,
+  getNextPosition,
+  uploadFile,
+  getApiUrl,
+  persistNode,
+  persistNodePosition,
+  persistNodeDelete,
+  loadNodes,
+}

@@ -2,6 +2,9 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/bun'
 import { mkdirSync } from 'node:fs'
+import { db } from './db'
+import { nodes } from './db/schema'
+import { eq } from 'drizzle-orm'
 
 // 确保上传目录存在
 mkdirSync('./uploads', { recursive: true })
@@ -24,6 +27,79 @@ app.onError((err, c) => {
 
 // 静态文件服务：提供上传的文件
 app.use('/uploads/*', serveStatic({ root: './' }))
+
+// ========== 节点 CRUD ==========
+const VALID_NODE_TYPES = ['urlNode', 'imageNode', 'videoNode']
+
+// 获取所有节点
+app.get('/api/nodes', (c) => {
+  const allNodes = db.select().from(nodes).all()
+  return c.json(allNodes)
+})
+
+// 创建节点
+app.post('/api/nodes', async (c) => {
+  const body = await c.req.json()
+
+  if (!body.id || !body.type || body.positionX == null || body.positionY == null) {
+    return c.json({ error: '缺少必要字段 (id, type, positionX, positionY)' }, 400)
+  }
+
+  if (!VALID_NODE_TYPES.includes(body.type)) {
+    return c.json({ error: `无效的节点类型，允许: ${VALID_NODE_TYPES.join(', ')}` }, 400)
+  }
+
+  const result = db.insert(nodes).values({
+    id: body.id,
+    type: body.type,
+    positionX: body.positionX,
+    positionY: body.positionY,
+    url: body.url ?? null,
+    title: body.title ?? null,
+    description: body.description ?? null,
+    image: body.image ?? null,
+    favicon: body.favicon ?? null,
+    src: body.src ?? null,
+    fileName: body.fileName ?? null,
+  }).returning().get()
+
+  return c.json(result, 201)
+})
+
+// 更新节点
+app.patch('/api/nodes/:id', async (c) => {
+  const id = c.req.param('id')
+  const body = await c.req.json()
+
+  const allowedFields = ['positionX', 'positionY', 'title', 'description', 'image', 'favicon', 'src', 'fileName']
+  const updates: Record<string, unknown> = {}
+  for (const field of allowedFields) {
+    if (field in body) {
+      updates[field] = body[field]
+    }
+  }
+
+  if (Object.keys(updates).length === 0) {
+    return c.json({ error: '没有可更新的字段' }, 400)
+  }
+
+  const result = db.update(nodes).set(updates).where(eq(nodes.id, id)).returning().get()
+  if (!result) {
+    return c.json({ error: '节点不存在' }, 404)
+  }
+
+  return c.json(result)
+})
+
+// 删除节点
+app.delete('/api/nodes/:id', (c) => {
+  const id = c.req.param('id')
+  const result = db.delete(nodes).where(eq(nodes.id, id)).returning().get()
+  if (!result) {
+    return c.json({ error: '节点不存在' }, 404)
+  }
+  return c.body(null, 204)
+})
 
 // ========== 文件上传 ==========
 const ALLOWED_MIME_PREFIXES = ['image/', 'video/']

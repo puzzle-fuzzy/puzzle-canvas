@@ -7,12 +7,17 @@
     "dev": "vite",
     "dev:server": "bun run --hot server/index.ts",
     "dev:all": "bash scripts/start.sh",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@xyflow/react": "^12.11.0",
+    "drizzle-orm": "^0.45.2",
     "hono": "^4.12.23",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
@@ -28,6 +33,8 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "babel-plugin-react-compiler": "^1.0.0",
+    "better-sqlite3": "^12.10.0",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
