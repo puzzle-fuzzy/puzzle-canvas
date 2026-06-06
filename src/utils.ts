@@ -50,12 +50,10 @@ function selectionWaterfallLayout(
   const minX = Math.min(...nodes.map((n) => n.position.x))
   const minY = Math.min(...nodes.map((n) => n.position.y))
 
-  // 获取节点默认尺寸
+  // 获取节点默认尺寸（所有节点宽度统一 320px）
   const defaultSize = (n: AppNode) => {
     if (n.measured?.width && n.measured?.height) return n.measured
-    return n.type === 'urlNode'
-      ? { width: 280, height: 200 }
-      : { width: 320, height: 200 }
+    return { width: 320, height: 200 }
   }
 
   // 按高度降序排列，让大块先放，布局更紧凑

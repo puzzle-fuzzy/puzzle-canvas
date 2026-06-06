@@ -354,7 +354,7 @@ function Canvas() {
     let maxX = -Infinity
     let minY = Infinity
     for (const n of selected) {
-      const w = n.measured?.width ?? (n.type === 'urlNode' ? 280 : 320)
+      const w = n.measured?.width ?? 320
       maxX = Math.max(maxX, n.position.x + w)
       minY = Math.min(minY, n.position.y)
     }
