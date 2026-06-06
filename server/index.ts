@@ -8,7 +8,19 @@ mkdirSync('./uploads', { recursive: true })
 
 const app = new Hono()
 
-app.use('*', cors())
+app.use('*', cors({
+  origin: '*',
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type'],
+  exposeHeaders: ['Content-Length'],
+  maxAge: 86400,
+}))
+
+// 全局错误处理，确保错误响应也带 CORS 头
+app.onError((err, c) => {
+  console.error('Server error:', err)
+  return c.json({ error: err.message || '服务器内部错误' }, 500)
+})
 
 // 静态文件服务：提供上传的文件
 app.use('/uploads/*', serveStatic({ root: './' }))
