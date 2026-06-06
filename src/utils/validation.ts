@@ -23,7 +23,7 @@ export function isDangerousFile(fileName: string): boolean {
 export function isValidUrl(str: string): boolean {
   try {
     const url = new URL(str)
-    return ['http:', 'https:'].includes(url.protocol)
+    return ['http:', 'https:'].includes(url.protocol) && url.hostname.length > 0
   } catch {
     return false
   }
