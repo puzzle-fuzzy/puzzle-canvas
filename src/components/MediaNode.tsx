@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { Icon } from '@ricons/utils'
 import { useAppIcon } from '../icons'
@@ -13,6 +13,7 @@ function MediaNode({ data, type, id }: MediaNodeProps) {
   const DismissIcon = useAppIcon('dismiss')
   const VideoIcon = useAppIcon('video')
   const ImageIcon = useAppIcon('image')
+  const [imageError, setImageError] = useState(false)
 
   const handleMouseEnter = useCallback(() => {
     videoRef.current?.play().catch(() => {})
@@ -77,11 +78,21 @@ function MediaNode({ data, type, id }: MediaNodeProps) {
             muted
             loop
             playsInline
+            onError={() => setImageError(true)}
+          />
+        </div>
+      ) : !imageError ? (
+        <div className="media-image-wrapper">
+          <img
+            className="media-image"
+            src={data.src}
+            alt={data.fileName}
+            onError={() => setImageError(true)}
           />
         </div>
       ) : (
-        <div className="media-image-wrapper">
-          <img className="media-image" src={data.src} alt={data.fileName} />
+        <div className="media-image-wrapper media-image-fallback">
+          <Icon size={32}><ImageIcon /></Icon>
         </div>
       )}
       <span className="media-file-name">{data.fileName}</span>
