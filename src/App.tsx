@@ -62,8 +62,8 @@ function Canvas() {
   useEffect(() => {
     loadNodes()
       .then((loaded) => {
-        setNodes(loaded)
         setInitialized(true)
+          setNodes(loaded)
         // 恢复上次保存的视口，没有则 fitView 展示全部
         setTimeout(() => {
           const saved = localStorage.getItem('viewport')
