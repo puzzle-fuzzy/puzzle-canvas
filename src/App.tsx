@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { LayoutGrid, Download, Trash2, Hand, MousePointer2 } from 'lucide-react'
+import { LayoutGrid, Download, Trash2, Hand, MousePointer2, Sparkles, X, Loader2 } from 'lucide-react'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -58,6 +58,11 @@ function Canvas() {
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([])
   // 'pan' = 拖拽画布（默认）, 'select' = 框选节点
   const [interactionMode, setInteractionMode] = useState<'pan' | 'select'>('pan')
+  // AI 生图弹窗状态
+  const [showAIModal, setShowAIModal] = useState(false)
+  const [aiPrompt, setAiPrompt] = useState('')
+  const [aiModel, setAiModel] = useState('dall-e-3')
+  const [aiGenerating, setAiGenerating] = useState(false)
   const nodesRef = useRef<AppNode[]>(nodes)
   nodesRef.current = nodes
   const mouseRef = useRef({ x: 0, y: 0 })
@@ -484,6 +489,78 @@ function Canvas() {
     }
   })()
 
+  // ========== AI 生图 ==========
+  const handleAIGenerate = useCallback(async () => {
+    if (!aiPrompt.trim() || aiGenerating) return
+
+    // 在屏幕中间创建生成中的节点
+    const center = screenToFlowPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 })
+    const nodeId = `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+
+    const generatingNode: ImageNodeType = {
+      id: nodeId,
+      type: 'imageNode',
+      position: center,
+      data: {
+        src: '',
+        fileName: `AI: ${aiPrompt.trim().slice(0, 50)}`,
+        uploading: { progress: 0, fileName: `AI: ${aiPrompt.trim().slice(0, 50)}` },
+      },
+    }
+
+    setNodes((prev) => {
+      const updated = [...prev, generatingNode]
+      nodesRef.current = updated
+      return updated
+    })
+
+    setShowAIModal(false)
+    setAiGenerating(true)
+
+    try {
+      // TODO: 调用实际 AI 生图 API
+      // const res = await fetch(getApiUrl('/api/generate-image'), {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ prompt: aiPrompt, model: aiModel }),
+      // })
+      // const { src } = await res.json()
+
+      // 模拟生成过程（后端接入后移除）
+      await new Promise((r) => setTimeout(r, 3000))
+
+      // 生成完成 → 替换为占位图
+      const placeholderSrc = 'https://placehold.co/640x640/1a1a2e/818cf8?text=AI+Generated'
+
+      setNodes((prev) => {
+        const updated = prev.map((n) => {
+          if (n.id !== nodeId) return n
+          return { ...n, type: 'imageNode' as const, data: { src: placeholderSrc, fileName: `AI: ${aiPrompt.trim().slice(0, 50)}` } }
+        })
+        nodesRef.current = updated
+        return updated
+      })
+
+      persistNode({
+        id: nodeId,
+        type: 'imageNode',
+        position: center,
+        data: { src: placeholderSrc, fileName: `AI: ${aiPrompt.trim().slice(0, 50)}` },
+      } as ImageNodeType)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'AI 生图失败')
+      setTimeout(() => setError(null), 3000)
+      setNodes((prev) => {
+        const updated = prev.filter((n) => n.id !== nodeId)
+        nodesRef.current = updated
+        return updated
+      })
+    } finally {
+      setAiGenerating(false)
+      setAiPrompt('')
+    }
+  }, [aiPrompt, aiModel, aiGenerating, screenToFlowPosition])
+
   return (
     <div
       className="canvas-container"
@@ -555,6 +632,58 @@ function Canvas() {
         </div>
       )}
 
+      {/* AI 生图弹窗 */}
+      {showAIModal && (
+        <div className="ai-modal-overlay" onClick={() => !aiGenerating && setShowAIModal(false)}>
+          <div className="ai-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="ai-modal-header">
+              <span className="ai-modal-title">
+                <Sparkles size={16} />
+                AI 生图
+              </span>
+              <button
+                className="ai-modal-close"
+                onClick={() => !aiGenerating && setShowAIModal(false)}
+                disabled={aiGenerating}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <textarea
+              className="ai-modal-input"
+              placeholder="描述你想要的图片..."
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              rows={3}
+              disabled={aiGenerating}
+            />
+
+            <div className="ai-modal-row">
+              <select
+                className="ai-modal-select"
+                value={aiModel}
+                onChange={(e) => setAiModel(e.target.value)}
+                disabled={aiGenerating}
+              >
+                <option value="dall-e-3">DALL·E 3</option>
+                <option value="flux-1.1-pro">FLUX 1.1 Pro</option>
+                <option value="stable-diffusion-xl">Stable Diffusion XL</option>
+              </select>
+              <button
+                className="ai-modal-generate"
+                onClick={handleAIGenerate}
+                disabled={aiGenerating || !aiPrompt.trim()}
+              >
+                {aiGenerating ? (
+                  <><Loader2 size={14} className="spin" /> 生成中...</>
+                ) : '生成图片'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 右侧模式切换工具栏 */}
       <div className="mode-toolbar">
         <button
@@ -570,6 +699,14 @@ function Canvas() {
           title="选择模式（Space 切换）"
         >
           <MousePointer2 size={20} />
+        </button>
+        <div className="mode-toolbar-divider" />
+        <button
+          className="mode-toolbar-btn"
+          onClick={() => setShowAIModal(true)}
+          title="AI 生图"
+        >
+          <Sparkles size={20} />
         </button>
       </div>
     </div>

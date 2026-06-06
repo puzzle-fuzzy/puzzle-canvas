@@ -29,7 +29,7 @@
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 12px;
+  border-radius: 30px;
   background: transparent;
   color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
@@ -44,6 +44,149 @@
 .mode-toolbar-btn.active {
   color: #fff;
   background: rgba(255, 255, 255, 0.15);
+}
+
+.mode-toolbar-divider {
+  width: 32px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 2px 0;
+}
+
+/* ========== AI 生图弹窗 ========== */
+.ai-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+
+.ai-modal {
+  width: 420px;
+  background: #18181b;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ai-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ai-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.ai-modal-close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ai-modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.ai-modal-input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #f3f4f6;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+
+.ai-modal-input:focus {
+  border-color: rgba(129, 140, 248, 0.5);
+}
+
+.ai-modal-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.ai-modal-row {
+  display: flex;
+  gap: 10px;
+}
+
+.ai-modal-select {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #e5e7eb;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  outline: none;
+  cursor: pointer;
+}
+
+.ai-modal-select option {
+  background: #18181b;
+  color: #e5e7eb;
+}
+
+.ai-modal-generate {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  background: #6366f1;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.ai-modal-generate:hover:not(:disabled) {
+  background: #818cf8;
+}
+
+.ai-modal-generate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* ========== 画布容器 ========== */
