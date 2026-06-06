@@ -13,7 +13,7 @@ const app = new Hono()
 
 app.use('*', cors({
   origin: '*',
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type'],
   exposeHeaders: ['Content-Length'],
   maxAge: 86400,
