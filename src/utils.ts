@@ -52,6 +52,14 @@ function getNextPosition(nodes: AppNode[]): { x: number; y: number } {
   return { x: 50, y: 50 }
 }
 
+/** 获取上传 API 的基础 URL（开发环境直连后端，避免 Vite 代理大文件 EPIPE 问题） */
+function getApiBaseUrl(): string {
+  if (import.meta.env.DEV) {
+    return 'http://localhost:3001'
+  }
+  return ''
+}
+
 /** 上传文件到后端 */
 async function uploadFile(file: File): Promise<{
   src: string
@@ -61,7 +69,8 @@ async function uploadFile(file: File): Promise<{
   const formData = new FormData()
   formData.append('file', file)
 
-  const res = await fetch('/api/upload', {
+  const baseUrl = getApiBaseUrl()
+  const res = await fetch(`${baseUrl}/api/upload`, {
     method: 'POST',
     body: formData,
   })
