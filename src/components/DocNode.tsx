@@ -28,7 +28,8 @@ function getFileIcon(
 }
 
 /** 格式化文件大小 */
-function formatFileSize(bytes: number): string {
+export function formatFileSize(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes < 0) bytes = 0
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`
