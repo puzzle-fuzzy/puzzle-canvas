@@ -1,12 +1,13 @@
 import type { NodeProps } from '@xyflow/react'
 import { Icon } from '@ricons/utils'
-import { Globe16Regular } from '@ricons/fluent'
+import { useAppIcon } from '../icons'
 import type { UrlNodeType } from '../types'
 import { getDomain } from '../utils'
 
 function UrlNode({ data }: NodeProps<UrlNodeType>) {
   const { url, title, description, image, favicon } = data
   const domain = getDomain(url)
+  const GlobeIcon = useAppIcon('globe')
 
   return (
     <div className="url-node">
@@ -16,7 +17,7 @@ function UrlNode({ data }: NodeProps<UrlNodeType>) {
           <img className="node-favicon" src={favicon} alt="" />
         ) : (
           <span className="node-favicon-fallback">
-            <Icon size={16}><Globe16Regular /></Icon>
+            <Icon size={16}><GlobeIcon /></Icon>
           </span>
         )}
         <span className="node-domain">{domain}</span>

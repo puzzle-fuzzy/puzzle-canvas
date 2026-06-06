@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Icon } from '@ricons/utils'
-import { ChevronDown16Regular } from '@ricons/fluent'
+import { useAppIcon } from '../icons'
 
 interface ModelOption {
   value: string
@@ -18,6 +18,7 @@ interface ModelSelectProps {
 function ModelSelect({ options, value, onChange, disabled, darkMode }: ModelSelectProps) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const ChevronDownIcon = useAppIcon('chevronDown')
 
   const selected = options.find((o) => o.value === value)
 
@@ -47,7 +48,7 @@ function ModelSelect({ options, value, onChange, disabled, darkMode }: ModelSele
         <span className="model-select-value">{selected?.label}</span>
         <span className={`model-select-chevron ${open ? 'rotated' : ''}`}>
           <Icon size={14}>
-            <ChevronDown16Regular />
+            <ChevronDownIcon />
           </Icon>
         </span>
       </button>

@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { Icon } from '@ricons/utils'
-import { Board20Regular, ArrowDownload20Regular, Delete20Regular, HandRight20Regular, Cursor20Regular, Sparkle20Regular, Dismiss20Regular, SpinnerIos20Regular, WeatherSunny20Regular, WeatherMoon20Regular } from '@ricons/fluent'
+import { useAppIcon } from './icons'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -18,6 +18,8 @@ import UrlNode from './components/UrlNode'
 import MediaNode from './components/MediaNode'
 import DocNode from './components/DocNode'
 import ModelSelect from './components/ModelSelect'
+import SettingsModal from './components/SettingsModal'
+import { IconProvider } from './icons'
 import type {
   AppNode,
   UrlNodeType,
@@ -65,6 +67,8 @@ function Canvas() {
   const [aiPrompt, setAiPrompt] = useState('')
   const [aiModel, setAiModel] = useState('dall-e-3')
   const [aiGenerating, setAiGenerating] = useState(false)
+  // 设置弹窗状态
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
   // 日夜模式（优先读取用户偏好，其次跟随系统）
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('theme')
@@ -89,6 +93,20 @@ function Canvas() {
     mql.addEventListener('change', handler)
     return () => mql.removeEventListener('change', handler)
   }, [])
+
+  // 图标
+  const BoardIcon = useAppIcon('board')
+  const DownloadIcon = useAppIcon('download')
+  const DeleteIcon = useAppIcon('delete')
+  const HandIcon = useAppIcon('hand')
+  const CursorIcon = useAppIcon('cursor')
+  const SparkleIcon = useAppIcon('sparkle')
+  const DismissIcon = useAppIcon('dismiss')
+  const SpinnerIcon = useAppIcon('spinner')
+  const SunIcon = useAppIcon('sun')
+  const MoonIcon = useAppIcon('moon')
+  const SettingsIcon = useAppIcon('settings')
+
   const nodesRef = useRef<AppNode[]>(nodes)
   nodesRef.current = nodes
   const mouseRef = useRef({ x: 0, y: 0 })
@@ -648,14 +666,14 @@ function Canvas() {
         >
           {selectedNodeIds.length > 1 && (
             <button className="selection-toolbar-btn" onClick={handleOrganize} title="整理">
-              <Icon size={15}><Board20Regular /></Icon>
+              <Icon size={15}><BoardIcon /></Icon>
             </button>
           )}
           <button className="selection-toolbar-btn" onClick={handleDownloadSelected} title="下载">
-            <Icon size={15}><ArrowDownload20Regular /></Icon>
+            <Icon size={15}><DownloadIcon /></Icon>
           </button>
           <button className="selection-toolbar-btn selection-toolbar-btn--danger" onClick={handleDeleteSelected} title="删除">
-            <Icon size={15}><Delete20Regular /></Icon>
+            <Icon size={15}><DeleteIcon /></Icon>
           </button>
         </div>
       )}
@@ -679,7 +697,7 @@ function Canvas() {
           <div className={`ai-modal ${darkMode ? 'dark' : 'light'}`} onClick={(e) => e.stopPropagation()}>
             <div className="ai-modal-header">
               <span className="ai-modal-title">
-                <Icon size={16}><Sparkle20Regular /></Icon>
+                <Icon size={16}><SparkleIcon /></Icon>
                 AI 生图
               </span>
               <button
@@ -687,7 +705,7 @@ function Canvas() {
                 onClick={() => !aiGenerating && setShowAIModal(false)}
                 disabled={aiGenerating}
               >
-                <Icon size={16}><Dismiss20Regular /></Icon>
+                <Icon size={16}><DismissIcon /></Icon>
               </button>
             </div>
 
@@ -718,7 +736,7 @@ function Canvas() {
                 disabled={aiGenerating || !aiPrompt.trim()}
               >
                 {aiGenerating ? (
-                  <><span className="spin"><Icon size={14}><SpinnerIos20Regular /></Icon></span> 生成中...</>
+                  <><span className="spin"><Icon size={14}><SpinnerIcon /></Icon></span> 生成中...</>
                 ) : '生成图片'}
               </button>
             </div>
@@ -733,14 +751,14 @@ function Canvas() {
           onClick={() => setInteractionMode('pan')}
           title="拖拽模式（Space 切换）"
         >
-          <Icon size={20}><HandRight20Regular /></Icon>
+          <Icon size={20}><HandIcon /></Icon>
         </button>
         <button
           className={`mode-toolbar-btn ${interactionMode === 'select' || spaceHeld ? 'active' : ''}`}
           onClick={() => setInteractionMode('select')}
           title="选择模式（Space 切换）"
         >
-          <Icon size={20}><Cursor20Regular /></Icon>
+          <Icon size={20}><CursorIcon /></Icon>
         </button>
         <div className="mode-toolbar-divider" />
         <button
@@ -748,7 +766,7 @@ function Canvas() {
           onClick={() => setShowAIModal(true)}
           title="AI 生图"
         >
-          <Icon size={20}><Sparkle20Regular /></Icon>
+          <Icon size={20}><SparkleIcon /></Icon>
         </button>
         <div className="mode-toolbar-divider" />
         <button
@@ -756,9 +774,25 @@ function Canvas() {
           onClick={() => setDarkMode((d) => !d)}
           title={darkMode ? '切换到日间模式' : '切换到夜间模式'}
         >
-          {darkMode ? <Icon size={20}><WeatherSunny20Regular /></Icon> : <Icon size={20} color="currentColor"><WeatherMoon20Regular /></Icon>}
+          {darkMode ? <Icon size={20}><SunIcon /></Icon> : <Icon size={20}><MoonIcon /></Icon>}
+        </button>
+        <div className="mode-toolbar-divider" />
+        <button
+          className="mode-toolbar-btn"
+          onClick={() => setShowSettingsModal(true)}
+          title="设置"
+        >
+          <Icon size={20}><SettingsIcon /></Icon>
         </button>
       </div>
+
+      {/* 设置弹窗 */}
+      {showSettingsModal && (
+        <SettingsModal
+          darkMode={darkMode}
+          onClose={() => setShowSettingsModal(false)}
+        />
+      )}
     </div>
   )
 }
@@ -766,7 +800,9 @@ function Canvas() {
 function App() {
   return (
     <ReactFlowProvider>
-      <Canvas />
+      <IconProvider>
+        <Canvas />
+      </IconProvider>
     </ReactFlowProvider>
   )
 }
