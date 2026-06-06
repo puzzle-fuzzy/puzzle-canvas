@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { LayoutGrid, Download, Trash2 } from 'lucide-react'
+import { LayoutGrid, Download, Trash2, Hand, MousePointer2 } from 'lucide-react'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -56,6 +56,8 @@ function Canvas() {
   const [initialized, setInitialized] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([])
+  // 'pan' = 拖拽画布（默认）, 'select' = 框选节点
+  const [interactionMode, setInteractionMode] = useState<'pan' | 'select'>('pan')
   const nodesRef = useRef<AppNode[]>(nodes)
   nodesRef.current = nodes
   const mouseRef = useRef({ x: 0, y: 0 })
@@ -498,8 +500,9 @@ function Canvas() {
         defaultViewport={savedViewport}
         minZoom={0.01}
         maxZoom={4}
-        panOnDrag
-        selectionKeyCode="Space"
+        panOnDrag={interactionMode === 'pan'}
+        selectionKeyCode={interactionMode === 'select' ? null : 'Space'}
+        selectionOnDrag={interactionMode === 'select'}
         deleteKeyCode="Delete"
         multiSelectionKeyCode="Shift"
         zoomOnScroll
@@ -551,6 +554,24 @@ function Canvas() {
           <p className="empty-hint-sub">支持 Ctrl+V / ⌘+V 粘贴，或拖拽文件</p>
         </div>
       )}
+
+      {/* 右侧模式切换工具栏 */}
+      <div className="mode-toolbar">
+        <button
+          className={`mode-toolbar-btn ${interactionMode === 'pan' ? 'active' : ''}`}
+          onClick={() => setInteractionMode('pan')}
+          title="拖拽模式（Space 切换）"
+        >
+          <Hand size={20} />
+        </button>
+        <button
+          className={`mode-toolbar-btn ${interactionMode === 'select' ? 'active' : ''}`}
+          onClick={() => setInteractionMode('select')}
+          title="选择模式（Space 切换）"
+        >
+          <MousePointer2 size={20} />
+        </button>
+      </div>
     </div>
   )
 }

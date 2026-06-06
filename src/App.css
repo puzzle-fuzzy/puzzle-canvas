@@ -1,6 +1,49 @@
 /* ========== 全局变量 ========== */
 :root {
   --node-width: 320px;
+  --mode-toolbar-size: 60px;
+}
+
+/* ========== 右侧模式工具栏 ========== */
+.mode-toolbar {
+  position: fixed;
+  top: 45px;
+  right: 10px;
+  width: var(--mode-toolbar-size);
+  background: #000;
+  border-radius: var(--mode-toolbar-size);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 0;
+  z-index: 10;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.mode-toolbar-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mode-toolbar-btn:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mode-toolbar-btn.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* ========== 画布容器 ========== */
