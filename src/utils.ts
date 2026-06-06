@@ -1,6 +1,7 @@
 import type { AppNode } from './types'
 
-const GAP = 36
+const GAP_X = 16
+const GAP_Y = 36
 const COL_COUNT = 3
 const MEDIA_NODE_WIDTH = 320
 
@@ -10,7 +11,7 @@ const MEDIA_NODE_WIDTH = 320
  * 在起始点附近按 3 列瀑布流排列，互不重叠
  */
 function localWaterfallLayout(origin: { x: number; y: number }) {
-  const stepX = MEDIA_NODE_WIDTH + GAP
+  const stepX = MEDIA_NODE_WIDTH + GAP_X
   const colTops: number[] = new Array(COL_COUNT).fill(origin.y)
 
   return {
@@ -24,7 +25,7 @@ function localWaterfallLayout(origin: { x: number; y: number }) {
         x: origin.x + minCol * stepX,
         y: colTops[minCol],
       }
-      colTops[minCol] += height + GAP
+      colTops[minCol] += height + GAP_Y
       return pos
     },
   }
