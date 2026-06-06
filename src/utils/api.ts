@@ -41,32 +41,36 @@ export function persistNodeDelete(id: string): void {
 
 /** 从后端加载所有节点 */
 export async function loadNodes(): Promise<AppNode[]> {
-  const res = await fetch(getApiUrl('/api/nodes'))
-  if (!res.ok) return []
+  try {
+    const res = await fetch(getApiUrl('/api/nodes'))
+    if (!res.ok) return []
 
-  const rows = await res.json()
+    const rows = await res.json()
 
-  return rows.map((row: Record<string, unknown>) => ({
-    id: row.id as string,
-    type: row.type as 'urlNode' | 'imageNode' | 'videoNode' | 'docNode',
-    position: { x: row.positionX as number, y: row.positionY as number },
-    data: row.type === 'urlNode'
-      ? {
-          url: row.url as string,
-          title: row.title as string,
-          description: (row.description as string) ?? '',
-          image: (row.image as string) ?? null,
-          favicon: (row.favicon as string) ?? null,
-        }
-      : row.type === 'docNode'
+    return rows.map((row: Record<string, unknown>) => ({
+      id: row.id as string,
+      type: row.type as 'urlNode' | 'imageNode' | 'videoNode' | 'docNode',
+      position: { x: row.positionX as number, y: row.positionY as number },
+      data: row.type === 'urlNode'
         ? {
-            src: row.src as string,
-            fileName: row.fileName as string,
-            fileSize: (row.fileSize as number) ?? 0,
+            url: row.url as string,
+            title: row.title as string,
+            description: (row.description as string) ?? '',
+            image: (row.image as string) ?? null,
+            favicon: (row.favicon as string) ?? null,
           }
-        : {
-            src: row.src as string,
-            fileName: row.fileName as string,
-          },
-  }))
+        : row.type === 'docNode'
+          ? {
+              src: row.src as string,
+              fileName: row.fileName as string,
+              fileSize: (row.fileSize as number) ?? 0,
+            }
+          : {
+              src: row.src as string,
+              fileName: row.fileName as string,
+            },
+    }))
+  } catch {
+    return []
+  }
 }
