@@ -420,7 +420,7 @@ app.get('/api/metadata', async (c) => {
 // ========== AI 生图（预留）==========
 app.post('/api/generate-image', async (c) => {
   const body = await c.req.json()
-  const { prompt, model } = body
+  const { prompt } = body
 
   if (!prompt) {
     return c.json({ error: '缺少 prompt 参数' }, 400)
