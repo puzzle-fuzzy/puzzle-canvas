@@ -17,6 +17,8 @@ async function computeFileFingerprint(file: File): Promise<string> {
 const uploadControllers = new Map<string, AbortController>()
 
 export function registerUploadController(nodeId: string, controller: AbortController) {
+  // 先中止已有控制器，防止泄漏
+  uploadControllers.get(nodeId)?.abort()
   uploadControllers.set(nodeId, controller)
 }
 
