@@ -1,7 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/bun'
-import { bodyLimit } from 'hono/body-limit'
 import { mkdirSync } from 'node:fs'
 
 // 确保上传目录存在
@@ -18,41 +17,39 @@ app.use('/uploads/*', serveStatic({ root: './' }))
 const ALLOWED_MIME_PREFIXES = ['image/', 'video/']
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50 MB
 
-app.post(
-  '/api/upload',
-  bodyLimit({
-    maxSize: MAX_FILE_SIZE,
-    onError: (c) => c.json({ error: '文件过大（最大 50MB）' }, 413),
-  }),
-  async (c) => {
-    const body = await c.req.parseBody()
-    const file = body['file']
+app.post('/api/upload', async (c) => {
+  const body = await c.req.parseBody()
+  const file = body['file']
 
-    if (!(file instanceof File)) {
-      return c.json({ error: '未提供文件' }, 400)
-    }
+  if (!(file instanceof File)) {
+    return c.json({ error: '未提供文件' }, 400)
+  }
 
-    // 校验 MIME 类型
-    if (!ALLOWED_MIME_PREFIXES.some((prefix) => file.type.startsWith(prefix))) {
-      return c.json({ error: '仅支持图片和视频文件' }, 400)
-    }
+  // 校验 MIME 类型
+  if (!ALLOWED_MIME_PREFIXES.some((prefix) => file.type.startsWith(prefix))) {
+    return c.json({ error: '仅支持图片和视频文件' }, 400)
+  }
 
-    // 生成唯一文件名：时间戳 + 随机后缀 + 原始扩展名
-    const ext = file.name.includes('.') ? '.' + file.name.split('.').pop() : ''
-    const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`
+  // 校验文件大小
+  if (file.size > MAX_FILE_SIZE) {
+    return c.json({ error: '文件过大（最大 50MB）' }, 413)
+  }
 
-    // 写入磁盘
-    await Bun.write(`./uploads/${uniqueName}`, file)
+  // 生成唯一文件名：时间戳 + 随机后缀 + 原始扩展名
+  const ext = file.name.includes('.') ? '.' + file.name.split('.').pop() : ''
+  const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`
 
-    const mediaType = file.type.startsWith('image/') ? 'image' : 'video'
+  // 写入磁盘
+  await Bun.write(`./uploads/${uniqueName}`, file)
 
-    return c.json({
-      src: `/uploads/${uniqueName}`,
-      fileName: file.name,
-      mediaType,
-    })
-  },
-)
+  const mediaType = file.type.startsWith('image/') ? 'image' : 'video'
+
+  return c.json({
+    src: `/uploads/${uniqueName}`,
+    fileName: file.name,
+    mediaType,
+  })
+})
 
 // ========== URL 元数据提取 ==========
 function extractMeta(html: string, property: string): string | null {
