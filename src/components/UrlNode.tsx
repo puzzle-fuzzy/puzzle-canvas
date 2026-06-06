@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { Icon } from '@ricons/utils'
 import { useAppIcon } from '../icons'
@@ -9,32 +9,12 @@ function UrlNode({ data }: NodeProps<UrlNodeType>) {
   const { url, title, description, image, favicon } = data
   const domain = getDomain(url)
   const GlobeIcon = useAppIcon('globe')
-  const CopyIcon = useAppIcon('copy')
 
   const [faviconError, setFaviconError] = useState(false)
   const [imageError, setImageError] = useState(false)
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    })
-  }, [url])
 
   return (
     <div className="url-node">
-      {/* 复制链接按钮 */}
-      <button
-        className="url-copy-btn"
-        onClick={handleCopy}
-        title={copied ? '已复制' : '复制链接'}
-        type="button"
-      >
-        {copied ? '✓' : <Icon size={14}><CopyIcon /></Icon>}
-      </button>
-
       {/* 头部：favicon + 域名 */}
       <div className="node-header">
         {favicon && !faviconError ? (

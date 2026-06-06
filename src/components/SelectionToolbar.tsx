@@ -23,11 +23,27 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
   const DownloadIcon = useAppIcon('download')
   const DeleteIcon = useAppIcon('delete')
   const FullscreenIcon = useAppIcon('fullscreen')
+  const CopyIcon = useAppIcon('copy')
 
   // 判断选中节点中是否包含图片或视频
   const hasMedia = nodes.some(
     (n) => selectedNodeIds.includes(n.id) && (n.type === 'imageNode' || n.type === 'videoNode'),
   )
+
+  // 判断选中节点中是否包含 URL 节点
+  const hasUrl = nodes.some(
+    (n) => selectedNodeIds.includes(n.id) && n.type === 'urlNode',
+  )
+
+  const handleCopyUrl = () => {
+    const { nodes: allNodes, selectedNodeIds: ids } = useCanvasStore.getState()
+    const urlNode = allNodes.find(
+      (n) => ids.includes(n.id) && n.type === 'urlNode',
+    ) as (typeof allNodes)[number] & { type: 'urlNode' } | undefined
+    if (urlNode && 'url' in urlNode.data && urlNode.data.url) {
+      navigator.clipboard.writeText(urlNode.data.url)
+    }
+  }
 
   const handleFullscreen = () => {
     const { nodes: allNodes, selectedNodeIds: ids } = useCanvasStore.getState()
@@ -62,6 +78,11 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
       {hasMedia && (
         <button className="selection-toolbar-btn" onClick={handleFullscreen} title="全屏预览">
           <Icon size={iconSize}><FullscreenIcon /></Icon>
+        </button>
+      )}
+      {hasUrl && (
+        <button className="selection-toolbar-btn" onClick={handleCopyUrl} title="复制链接">
+          <Icon size={iconSize}><CopyIcon /></Icon>
         </button>
       )}
       <button className="selection-toolbar-btn" onClick={onDownload} title="下载">
