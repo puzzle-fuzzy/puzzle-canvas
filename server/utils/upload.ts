@@ -43,6 +43,12 @@ export const CHUNK_DIR = './uploads/tmp'
 /** 临时分片最大保留时间：24 小时 */
 export const TMP_MAX_AGE_MS = 24 * 60 * 60 * 1000
 
+/** 上传会话最大保留时间：1 小时（防止内存泄漏） */
+export const SESSION_MAX_AGE_MS = 60 * 60 * 1000
+
+/** 单个分片大小上限：100 MB */
+export const MAX_CHUNK_SIZE = 100 * 1024 * 1024
+
 /**
  * 判断文件名是否属于危险类型
  *
@@ -58,6 +64,27 @@ export function isDangerousFile(fileName: string): boolean {
 }
 
 /**
+ * 校验 fingerprint 是否合法（仅允许 SHA-256 hex 字符）
+ *
+ * 防止路径遍历攻击：fingerprint 被用于拼接到文件路径中，
+ * 必须确保不含 / \ . \x00 等危险字符。
+ */
+export function isValidFingerprint(fingerprint: string): boolean {
+  return /^[0-9a-f]{1,128}$/.test(fingerprint)
+}
+
+/**
+ * 校验文件名是否安全（不含路径分隔符或空字节）
+ */
+export function isSafeFileName(fileName: string): boolean {
+  return typeof fileName === 'string'
+    && fileName.length > 0
+    && !fileName.includes('/')
+    && !fileName.includes('\\')
+    && !fileName.includes('\x00')
+}
+
+/**
  * 分片上传会话（内存存储）
  *
  * Key: uploadId（由 /api/upload/init 生成的 UUID）
@@ -70,10 +97,10 @@ export const uploadSessions = new Map<string, {
 }>()
 
 /**
- * 定时清理过期临时分片
+ * 定时清理过期临时分片和上传会话
  *
  * 每小时扫描一次 CHUNK_DIR，删除超过 TMP_MAX_AGE_MS 的分片目录，
- * 防止中断的上传会话残留文件占用磁盘。
+ * 同时清理超过 SESSION_MAX_AGE_MS 的内存会话，防止内存泄漏。
  */
 setInterval(() => {
   try {
@@ -89,4 +116,12 @@ setInterval(() => {
       }
     }
   } catch { /* 目录可能已被删除 */ }
+
+  // 清理过期的上传会话（防止内存泄漏）
+  const sessionNow = Date.now()
+  for (const [id, session] of uploadSessions.entries()) {
+    if (sessionNow - session.createdAt > SESSION_MAX_AGE_MS) {
+      uploadSessions.delete(id)
+    }
+  }
 }, 60 * 60 * 1000)
