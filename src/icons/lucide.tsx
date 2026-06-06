@@ -20,6 +20,7 @@ import {
   User,
   LogOut,
   Maximize2,
+  Copy,
 } from 'lucide-react'
 import type { IconRegistry } from './index'
 
@@ -52,4 +53,5 @@ export const lucideRegistry: IconRegistry = {
   user: wrap(User),
   signOut: wrap(LogOut),
   fullscreen: wrap(Maximize2),
+  copy: wrap(Copy),
 }

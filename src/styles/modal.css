@@ -316,7 +316,7 @@
 }
 
 .settings-modal {
-  width: 768px;
+  width: 932px;
   height: 576px;
   border-radius: 16px;
   display: flex;
@@ -435,7 +435,7 @@
 
 /* 左侧菜单 */
 .settings-sidebar {
-  width: 160px;
+  width: 240px;
   flex-shrink: 0;
   padding: 20px 12px;
   display: flex;

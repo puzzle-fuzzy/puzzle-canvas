@@ -20,6 +20,7 @@ import {
   Person20Regular,
   SignOut20Regular,
   FullScreenMaximize20Regular,
+  Copy20Regular,
 } from '@ricons/fluent'
 import type { IconRegistry } from './index'
 
@@ -45,4 +46,5 @@ export const fluentRegistry: IconRegistry = {
   user: Person20Regular,
   signOut: SignOut20Regular,
   fullscreen: FullScreenMaximize20Regular,
+  copy: Copy20Regular,
 }

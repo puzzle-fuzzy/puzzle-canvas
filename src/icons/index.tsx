@@ -25,6 +25,7 @@ export type IconName =
   | 'user'
   | 'signOut'
   | 'fullscreen'
+  | 'copy'
 
 export type IconSet = 'fluent' | 'lucide' | 'antd'
 export type IconRegistry = Record<IconName, ComponentType>

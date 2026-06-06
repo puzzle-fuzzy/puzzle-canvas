@@ -50,7 +50,7 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
       style={{
         position: 'absolute',
         left: position.x,
-        top: `calc(${position.y}px - var(--mode-toolbar-size))`,
+        top: `calc(${position.y}px - var(--mode-toolbar-size) - 10px)`,
         transform: 'translateX(-100%)',
       }}
     >
