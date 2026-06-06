@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Icon } from '@ricons/utils'
 import { useAppIcon } from '../icons'
+import { useUIStore } from '../stores/uiStore'
 import IconPanel from './IconPanel'
 
 interface SettingsModalProps {
-  darkMode: boolean
   onClose: () => void
 }
 
@@ -14,8 +14,9 @@ const sections = [
 
 type SectionId = (typeof sections)[number]['id']
 
-function SettingsModal({ darkMode, onClose }: SettingsModalProps) {
+function SettingsModal({ onClose }: SettingsModalProps) {
   const [activeSection, setActiveSection] = useState<SectionId>('icons')
+  const darkMode = useUIStore((s) => s.darkMode)
   const DismissIcon = useAppIcon('dismiss')
 
   // Escape 关闭

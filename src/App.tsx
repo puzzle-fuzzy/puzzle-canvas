@@ -51,7 +51,6 @@ function Canvas() {
 
   const showSettingsModal = useUIStore((s) => s.showSettingsModal)
   const setShowSettingsModal = useUIStore((s) => s.setShowSettingsModal)
-  const darkMode = useUIStore((s) => s.darkMode)
 
   const actions = useCanvasActions()
   const toolbarPos = useSelectionToolbar()
@@ -140,7 +139,6 @@ function Canvas() {
 
       {showSettingsModal && (
         <SettingsModal
-          darkMode={darkMode}
           onClose={() => setShowSettingsModal(false)}
         />
       )}
