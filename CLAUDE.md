@@ -37,9 +37,10 @@ Production mode: the Hono server at `server/index.ts` serves both the API and th
   - `inputStore` — keyboard (spaceHeld) and mouse position tracking
   - `authStore` — placeholder for future auth/account features
 - **Custom hooks** in `src/hooks/` bridge ReactFlow hooks with zustand stores:
-  - `useCanvasActions` — all async flows (paste, upload, AI generate) that need `screenToFlowPosition`/`getViewport`
-  - `useInputListeners` — window event listeners for mouse/keyboard
-  - `useDarkModeSync` — syncs darkMode to DOM and localStorage
+  - `useCanvasActions` — event bridge (paste, drop, viewport) composing useNodeActions + useDownload
+  - `useNodeActions` — URL creation, file upload orchestration, AI generation (needs `screenToFlowPosition`)
+  - `useDownload` — selected node download (pure fetch, no ReactFlow dependency)
+  - `useInputListeners` — window event listeners for mouse/keyboard + system theme changes
   - `useNodeLoader` — initial node loading from backend
   - `useSelectionToolbar` — computes floating toolbar position
 - **Icon system** — React Context in `src/icons/` with pluggable registries (fluent, lucide, antd). `useAppIcon(name)` returns the current icon set's component.
@@ -51,7 +52,14 @@ Production mode: the Hono server at `server/index.ts` serves both the API and th
   - `SelectionToolbar` — floating toolbar for batch organize/download/delete
   - `AIModal` — AI image generation modal
   - `SettingsModal` — settings modal with icon panel
-- **Styling**: plain CSS in `App.css` + `index.css`. Dark mode uses `html.dark` class toggled on `<html>`, with `html.dark` descendant selectors throughout `App.css`. CSS custom property `--node-width: 320px` controls node sizing.
+- **Styling**: CSS split into `src/styles/` (variables, toolbar, modal, nodes, canvas). Dark mode uses `html.dark` class toggled on `<html>`. CSS custom property `--node-width: 320px` controls node sizing.
+- **Utility modules** in `src/utils/`:
+  - `constants.ts` — shared constants (NODE_WIDTH, layout gaps)
+  - `layout.ts` — waterfall/masonry layout algorithms
+  - `media.ts` — image/video height pre-computation
+  - `upload.ts` — chunked upload with SHA-256 fingerprinting, retry, and cancellation
+  - `api.ts` — backend persistence (persistNode, loadNodes, etc.)
+  - `validation.ts` — file/URL validation utilities
 - **React Compiler** is enabled via `@rolldown/plugin-babel` with `reactCompilerPreset()` in `vite.config.ts`.
 
 ### Backend (server/)
@@ -68,5 +76,6 @@ Production mode: the Hono server at `server/index.ts` serves both the API and th
 - **Chunked upload**: 5MB chunks, SHA-256 fingerprinting for deduplication, exponential backoff retry (3 attempts), `AbortController`-based cancellation, 800MB max file size.
 - **Node positioning**: new nodes are placed using viewport-aware calculations (accounting for current zoom and pan offset). Drag-and-drop nodes auto-arrange in a waterfall layout.
 - **Stale closure solution**: zustand's `getState()` replaces the old `nodesRef` mirror pattern — async callbacks always read the latest state without refs.
+- **Node IDs**: use `crypto.randomUUID()` for collision-free unique identifiers.
 - **Selection**: Space+drag for box selection, Shift+click for toggle selection. A floating toolbar appears on selection for batch organize/download/delete operations.
 - **Vite proxy**: in dev, `/api` and `/uploads` are proxied to the Hono backend at `localhost:3001` with a 60s timeout on `/api`.
