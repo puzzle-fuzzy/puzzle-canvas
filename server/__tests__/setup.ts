@@ -93,6 +93,12 @@ export function createTestDb() {
     TEST_USER.email,
     TEST_USER.username,
   ])
+  // 插入默认临时用户（与 routes/nodes.ts 中 userId 默认值 'temp' 对应）
+  sqlite.run('INSERT INTO users (id, email, username) VALUES (?, ?, ?)', [
+    'temp',
+    'temp@puzzle.local',
+    '临时用户',
+  ])
 
   const db = drizzle(sqlite, { schema })
   return { db, sqlite }

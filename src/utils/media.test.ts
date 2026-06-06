@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { NODE_WIDTH } from './constants'
 import { getImageFileHeight } from './media'
 
@@ -23,8 +23,6 @@ function createMockImage(naturalWidth: number, naturalHeight: number) {
 }
 
 describe('getImageFileHeight', () => {
-  let mockRef: ReturnType<typeof createMockImage>
-
   beforeEach(() => {
     // jsdom 提供 Image 构造函数，我们用 spyOn 替代它
   })

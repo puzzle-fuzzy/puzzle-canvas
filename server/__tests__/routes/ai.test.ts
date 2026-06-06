@@ -1,7 +1,7 @@
 /**
  * AI 生图路由测试（桩）
  */
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'bun:test'
 import { createTestApp } from '../setup'
 import type { Hono } from 'hono'
 

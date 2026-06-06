@@ -18,7 +18,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:server": "vitest run --project server"
+    "test:server": "bun test server/"
   },
   "dependencies": {
     "@ricons/antd": "^0.13.0",

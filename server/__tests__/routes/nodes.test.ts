@@ -1,8 +1,8 @@
 /**
  * 节点 CRUD 路由集成测试
  */
-import { describe, it, expect, beforeEach } from 'vitest'
-import { createTestApp, TEST_USER } from '../setup'
+import { describe, it, expect, beforeEach } from 'bun:test'
+import { createTestApp } from '../setup'
 import type { Hono } from 'hono'
 
 describe('节点路由', () => {
@@ -23,7 +23,6 @@ describe('节点路由', () => {
     })
 
     it('返回已创建的节点', async () => {
-      // 先创建一个节点
       await app.request('/api/nodes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -191,7 +190,6 @@ describe('节点路由', () => {
 
   describe('PATCH /api/nodes/:id', () => {
     it('正常更新节点位置', async () => {
-      // 先创建
       await app.request('/api/nodes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -271,7 +269,6 @@ describe('节点路由', () => {
         body: JSON.stringify({ positionX: 50, role: 'admin' }),
       })
       expect(res.status).toBe(200)
-      // role 不在白名单中，只有 positionX 被更新
       expect((await res.json()).positionX).toBe(50)
     })
 
@@ -334,7 +331,6 @@ describe('节点路由', () => {
       const res = await app.request('/api/nodes/node-1', { method: 'DELETE' })
       expect(res.status).toBe(204)
 
-      // 确认已删除
       const list = await app.request('/api/nodes')
       expect(await list.json()).toEqual([])
     })

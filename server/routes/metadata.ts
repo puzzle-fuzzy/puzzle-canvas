@@ -42,7 +42,9 @@ export function isPrivateUrl(url: URL): boolean {
   }
 
   // IPv6 私有地址（简化检查：唯一本地地址 fc00::/7）
-  if (hostname.startsWith('fc') || hostname.startsWith('fd')) {
+  // 注意：URL.hostname 对 IPv6 会带方括号，如 [fc00::1]
+  const bareHost = hostname.startsWith('[') ? hostname.slice(1, -1) : hostname
+  if (bareHost.startsWith('fc') || bareHost.startsWith('fd') || bareHost === '::1') {
     return true
   }
 
@@ -68,11 +70,18 @@ export function extractMeta(html: string, property: string): string | null {
   return null
 }
 
-/** 从 HTML 中提取 <title> 标签文本 */
+/**
+ * 从 HTML 中提取 <title> 标签文本
+ *
+ * 使用非贪婪匹配 .*? 以兼容 title 含子标签的情况：
+ *   <title>My <b>Page</b></title> → "My <b>Page</b>"
+ * 最终会去除 HTML 标签只保留文本。
+ */
 export function extractTitle(html: string): string | null {
-  const match = html.match(/<title[^>]*>([^<]*)<\/title>/i)
+  const match = html.match(/<title[^>]*>(.*?)<\/title>/i)
   if (!match) return null
-  const text = match[1].trim()
+  // 去除可能的子标签，只保留纯文本
+  const text = match[1].replace(/<[^>]+>/g, '').trim()
   return text.length > 0 ? text : null
 }
 

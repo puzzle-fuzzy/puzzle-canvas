@@ -1,7 +1,7 @@
 /**
  * 元数据辅助函数 + 路由集成测试
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'bun:test'
 import { createTestApp } from '../setup'
 import {
   extractMeta,
@@ -70,10 +70,9 @@ describe('extractTitle', () => {
     expect(extractTitle(html)).toBeNull()
   })
 
-  it('title 含子标签被截断（正则限制）', () => {
+  it('title 含子标签时去除标签保留纯文本', () => {
     const html = '<title>My <b>Page</b></title>'
-    // [^<]* 不匹配 <，所以只取到 < 之前的部分
-    expect(extractTitle(html)).toBe('My ')
+    expect(extractTitle(html)).toBe('My Page')
   })
 })
 
@@ -103,7 +102,6 @@ describe('extractFavicon', () => {
   })
 
   it('无效 pageUrl 返回 null', () => {
-    // pageUrl 无法被 new URL() 解析时会走到 catch 返回 null
     expect(extractFavicon('<html></html>', 'not-a-url')).toBeNull()
   })
 })

@@ -9,7 +9,6 @@ function UrlNode({ data }: NodeProps<UrlNodeType>) {
   const { url, title, description, image, favicon } = data
   const domain = getDomain(url)
   const GlobeIcon = useAppIcon('globe')
-  const ImageIcon = useAppIcon('image')
 
   const [faviconError, setFaviconError] = useState(false)
   const [imageError, setImageError] = useState(false)

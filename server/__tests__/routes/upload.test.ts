@@ -1,7 +1,7 @@
 /**
  * 上传路由集成测试
  */
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'bun:test'
 import { createTestApp } from '../setup'
 import { uploadSessions } from '../../utils/upload'
 import type { Hono } from 'hono'
@@ -160,7 +160,6 @@ describe('上传路由', () => {
     })
 
     it('缺少 fileName 返回 400', async () => {
-      // 手动创建一个会话
       const sessionId = 'test-session-id'
       uploadSessions.set(sessionId, {
         fingerprint: 'a1b2c3d4',
