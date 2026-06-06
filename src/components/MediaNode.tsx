@@ -32,7 +32,7 @@ function MediaNode({ data, type, id }: MediaNodeProps) {
 
   // 上传中 → 显示进度
   if (data.uploading) {
-    const percent = Math.round(data.uploading.progress * 100)
+    const percent = Math.round(Math.max(0, Math.min(1, data.uploading.progress)) * 100)
 
     return (
       <div className="media-node media-node--uploading">

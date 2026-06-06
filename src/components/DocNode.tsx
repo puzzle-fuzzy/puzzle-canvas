@@ -47,7 +47,7 @@ function DocNode({ data, id }: DocNodeProps) {
 
   // 上传中 → 显示进度
   if (data.uploading) {
-    const percent = Math.round(data.uploading.progress * 100)
+    const percent = Math.round(Math.max(0, Math.min(1, data.uploading.progress)) * 100)
 
     return (
       <div className="doc-node doc-node--uploading">
