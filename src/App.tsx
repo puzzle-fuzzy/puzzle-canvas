@@ -17,6 +17,7 @@ import SelectionToolbar from './components/SelectionToolbar'
 import ModeToolbar from './components/ModeToolbar'
 import AIModal from './components/AIModal'
 import LoginModal from './components/LoginModal'
+import FullscreenPreview from './components/FullscreenPreview'
 import ErrorToast from './components/ErrorToast'
 import LoadingIndicator from './components/LoadingIndicator'
 import EmptyHint from './components/EmptyHint'
@@ -50,6 +51,8 @@ function Canvas() {
 
   const showSettingsModal = useUIStore((s) => s.showSettingsModal)
   const setShowSettingsModal = useUIStore((s) => s.setShowSettingsModal)
+  const fullscreenPreview = useUIStore((s) => s.fullscreenPreview)
+  const setFullscreenPreview = useUIStore((s) => s.setFullscreenPreview)
 
   const actions = useCanvasActions()
   const toolbarPos = useSelectionToolbar()
@@ -140,6 +143,15 @@ function Canvas() {
       {showSettingsModal && (
         <SettingsModal
           onClose={() => setShowSettingsModal(false)}
+        />
+      )}
+
+      {fullscreenPreview && (
+        <FullscreenPreview
+          src={fullscreenPreview.src}
+          fileName={fullscreenPreview.fileName}
+          mediaType={fullscreenPreview.mediaType}
+          onClose={() => setFullscreenPreview(null)}
         />
       )}
     </div>

@@ -11,12 +11,37 @@ interface SelectionToolbarProps {
 
 function SelectionToolbar({ position, selectedCount, onDownload }: SelectionToolbarProps) {
   const darkMode = useUIStore((s) => s.darkMode)
+  const setFullscreenPreview = useUIStore((s) => s.setFullscreenPreview)
   const handleOrganize = useCanvasStore((s) => s.handleOrganize)
   const handleDeleteSelected = useCanvasStore((s) => s.handleDeleteSelected)
+
+  const nodes = useCanvasStore((s) => s.nodes)
+  const selectedNodeIds = useCanvasStore((s) => s.selectedNodeIds)
 
   const BoardIcon = useAppIcon('board')
   const DownloadIcon = useAppIcon('download')
   const DeleteIcon = useAppIcon('delete')
+  const FullscreenIcon = useAppIcon('fullscreen')
+
+  // 判断选中节点中是否包含图片或视频
+  const hasMedia = nodes.some(
+    (n) => selectedNodeIds.includes(n.id) && (n.type === 'imageNode' || n.type === 'videoNode'),
+  )
+
+  const handleFullscreen = () => {
+    const { nodes: allNodes, selectedNodeIds: ids } = useCanvasStore.getState()
+    // 找到第一个选中的图片或视频节点
+    const mediaNode = allNodes.find(
+      (n) => ids.includes(n.id) && (n.type === 'imageNode' || n.type === 'videoNode'),
+    )
+    if (mediaNode && mediaNode.data.src) {
+      setFullscreenPreview({
+        src: mediaNode.data.src,
+        fileName: mediaNode.data.fileName,
+        mediaType: mediaNode.type === 'videoNode' ? 'video' : 'image',
+      })
+    }
+  }
 
   return (
     <div
@@ -33,9 +58,14 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
           <Icon size={15}><BoardIcon /></Icon>
         </button>
       )}
+      {hasMedia && (
+        <button className="selection-toolbar-btn" onClick={handleFullscreen} title="全屏预览">
+          <Icon size={15}><FullscreenIcon /></Icon>
+        </button>
+      )}
       <button className="selection-toolbar-btn" onClick={onDownload} title="下载">
         <Icon size={15}><DownloadIcon /></Icon>
-      </button>
+        </button>
       <button
         className="selection-toolbar-btn selection-toolbar-btn--danger"
         onClick={handleDeleteSelected}

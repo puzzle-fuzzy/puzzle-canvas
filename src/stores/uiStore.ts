@@ -17,6 +17,7 @@ interface UIStore {
   showSettingsModal: boolean
   showLoginModal: boolean
   settingsSection: string
+  fullscreenPreview: { src: string; fileName: string; mediaType: 'image' | 'video' } | null
   aiPrompt: string
   aiModel: string
   aiGenerating: boolean
@@ -30,6 +31,7 @@ interface UIStore {
   setShowSettingsModal: (v: boolean) => void
   setShowLoginModal: (v: boolean) => void
   setSettingsSection: (v: string) => void
+  setFullscreenPreview: (v: { src: string; fileName: string; mediaType: 'image' | 'video' } | null) => void
   setAiPrompt: (v: string) => void
   setAiModel: (v: string) => void
   setAiGenerating: (v: boolean) => void
@@ -49,6 +51,7 @@ export const useUIStore = create<UIStore>((set) => ({
   showSettingsModal: false,
   showLoginModal: false,
   settingsSection: 'icons',
+  fullscreenPreview: null,
   aiPrompt: '',
   aiModel: 'dall-e-3',
   aiGenerating: false,
@@ -81,6 +84,7 @@ export const useUIStore = create<UIStore>((set) => ({
   setShowSettingsModal: (v) => set({ showSettingsModal: v }),
   setShowLoginModal: (v) => set({ showLoginModal: v }),
   setSettingsSection: (v) => set({ settingsSection: v }),
+  setFullscreenPreview: (v) => set({ fullscreenPreview: v }),
   setAiPrompt: (v) => set({ aiPrompt: v }),
   setAiModel: (v) => set({ aiModel: v }),
   setAiGenerating: (v) => set({ aiGenerating: v }),

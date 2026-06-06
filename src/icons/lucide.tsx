@@ -19,6 +19,7 @@ import {
   Settings,
   User,
   LogOut,
+  Maximize2,
 } from 'lucide-react'
 import type { IconRegistry } from './index'
 
@@ -50,4 +51,5 @@ export const lucideRegistry: IconRegistry = {
   settings: wrap(Settings),
   user: wrap(User),
   signOut: wrap(LogOut),
+  fullscreen: wrap(Maximize2),
 }
