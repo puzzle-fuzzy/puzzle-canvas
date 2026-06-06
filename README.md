@@ -1,75 +1,50 @@
-# React + TypeScript + Vite
+# Puzzle Canvas
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+无限画布，粘贴网址、图片、视频即可收藏。
 
-Currently, two official plugins are available:
+## 功能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **粘贴收藏** — 粘贴 URL 自动抓取标题、描述、封面图；粘贴图片/视频直接上传
+- **拖拽上传** — 拖拽图片或视频文件到画布，自动以瀑布流排列
+- **无限画布** — 自由缩放、平移，视口状态自动保存
+- **多选操作** — 按住 Space + 拖拽框选节点，支持批量整理、下载、删除
+- **持久化** — 所有节点和位置自动保存到 SQLite 数据库
 
-## React Compiler
+## 技术栈
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+| 层 | 技术 |
+|---|---|
+| 前端 | React 19 · @xyflow/react · Lucide Icons · Vite |
+| 后端 | Hono · Bun |
+| 数据库 | SQLite · Drizzle ORM |
 
-Note: This will impact Vite dev & build performances.
+## 快速开始
 
-## Expanding the ESLint configuration
+```bash
+# 安装依赖
+bun install
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# 初始化数据库
+bun run db:push
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 启动开发（前端 + 后端）
+bun run dev:all
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- 前端：http://localhost:5173
+- 后端：http://localhost:3001
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 操作说明
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+| 操作 | 说明 |
+|---|---|
+| `Ctrl/⌘ + V` | 粘贴 URL、图片或视频 |
+| 拖拽文件到画布 | 上传图片/视频 |
+| `Space + 拖拽` | 框选多个节点 |
+| `Shift + 点击` | 切换单个节点的选中状态 |
+| `Delete` | 删除选中的节点 |
+| 滚轮 | 缩放画布 |
+
+## License
+
+[MIT](LICENSE)

@@ -1,7 +1,9 @@
 {
   "name": "puzzle-canvas",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
+  "description": "无限画布，粘贴网址、图片、视频即可收藏",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
