@@ -89,15 +89,20 @@ export function useCanvasActions() {
       useUIStore.getState().setError(null)
       const layout = localWaterfallLayout(origin)
 
-      // 为每个文件预计算高度并立即创建进度节点，然后串行上传
-      let uploadChain: Promise<void> = Promise.resolve()
+      // 阶段 1：预计算高度，立即创建所有进度节点
+      const uploadItems: {
+        file: File
+        nodeId: string
+        pos: { x: number; y: number }
+        isVideo: boolean
+        isImage: boolean
+      }[] = []
 
       for (const file of validFiles) {
         const isVideo = file.type.startsWith('video/')
         const isImage = file.type.startsWith('image/')
 
-        // 从本地文件预计算渲染高度，用于瀑布流定位
-        let nodeHeight = 80 // 文档节点默认高度
+        let nodeHeight = 80
         if (isImage) {
           nodeHeight = await getImageFileHeight(file)
         } else if (isVideo) {
@@ -107,7 +112,6 @@ export function useCanvasActions() {
         const pos = layout.next(nodeHeight)
         const nodeId = crypto.randomUUID()
 
-        // 立即创建带进度的节点
         const newNode: AppNode = isVideo
           ? {
               id: nodeId,
@@ -143,20 +147,20 @@ export function useCanvasActions() {
               }
 
         useCanvasStore.getState().setNodes((prev) => [...prev, newNode])
+        uploadItems.push({ file, nodeId, pos, isVideo, isImage })
+      }
 
-        // 串行链式上传
-        const currentFile = file
-        const currentNodeId = nodeId
+      // 阶段 2：串行上传每个文件
+      for (const item of uploadItems) {
+        const controller = new AbortController()
+        registerUploadController(item.nodeId, controller)
 
-        uploadChain = uploadChain.then(() => {
-          const controller = new AbortController()
-          registerUploadController(currentNodeId, controller)
-
-          return uploadFileChunked(currentFile, {
+        try {
+          const result = await uploadFileChunked(item.file, {
             onProgress: (progress) => {
               useCanvasStore.getState().setNodes((prev) =>
                 prev.map((n) => {
-                  if (n.id !== currentNodeId || n.type === 'urlNode') return n
+                  if (n.id !== item.nodeId || n.type === 'urlNode') return n
                   const nodeData =
                     n.type === 'docNode'
                       ? {
@@ -169,7 +173,7 @@ export function useCanvasActions() {
                     ...n,
                     data: {
                       ...nodeData,
-                      uploading: { progress, fileName: currentFile.name },
+                      uploading: { progress, fileName: item.file.name },
                     },
                   } as AppNode
                 }),
@@ -177,83 +181,77 @@ export function useCanvasActions() {
             },
             signal: controller.signal,
           })
-            .then((result) => {
-              // 上传完成 → 转为正常节点
-              const nodeType =
-                result.mediaType === 'video'
-                  ? ('videoNode' as const)
-                  : result.mediaType === 'image'
-                    ? ('imageNode' as const)
-                    : ('docNode' as const)
 
-              useCanvasStore.getState().setNodes((prev) => {
-                const updated = prev.map((n): AppNode => {
-                  if (n.id !== currentNodeId) return n
-                  if (nodeType === 'docNode') {
-                    return {
-                      ...n,
-                      type: 'docNode',
-                      data: {
-                        src: result.src,
-                        fileName: result.fileName,
-                        fileSize: currentFile.size,
-                      },
-                    }
-                  }
-                  if (nodeType === 'videoNode') {
-                    return {
-                      ...n,
-                      type: 'videoNode',
-                      data: { src: result.src, fileName: result.fileName },
-                    }
-                  }
-                  return {
-                    ...n,
-                    type: 'imageNode',
-                    data: { src: result.src, fileName: result.fileName },
-                  }
-                })
-                return updated
-              })
+          // 上传完成 → 转为正常节点
+          const nodeType =
+            result.mediaType === 'video'
+              ? ('videoNode' as const)
+              : result.mediaType === 'image'
+                ? ('imageNode' as const)
+                : ('docNode' as const)
 
-              const persistData =
-                nodeType === 'docNode'
-                  ? {
-                      src: result.src,
-                      fileName: result.fileName,
-                      fileSize: currentFile.size,
-                    }
-                  : { src: result.src, fileName: result.fileName }
-
-              persistNode({
-                id: currentNodeId,
-                type: nodeType,
-                position: pos,
-                data: persistData,
-              } as AppNode)
-            })
-            .catch((err) => {
-              if (err instanceof DOMException && err.name === 'AbortError') {
-                // 取消 → 移除节点
-                useCanvasStore.getState().setNodes((prev) =>
-                  prev.filter((n) => n.id !== currentNodeId),
-                )
-              } else {
-                // 失败 → 移除节点 + 错误提示
-                useUIStore
-                  .getState()
-                  .showError(
-                    err instanceof Error ? err.message : '上传失败',
-                  )
-                useCanvasStore.getState().setNodes((prev) =>
-                  prev.filter((n) => n.id !== currentNodeId),
-                )
+          useCanvasStore.getState().setNodes((prev) =>
+            prev.map((n): AppNode => {
+              if (n.id !== item.nodeId) return n
+              if (nodeType === 'docNode') {
+                return {
+                  ...n,
+                  type: 'docNode',
+                  data: {
+                    src: result.src,
+                    fileName: result.fileName,
+                    fileSize: item.file.size,
+                  },
+                }
               }
-            })
-            .finally(() => {
-              cancelUpload(currentNodeId)
-            })
-        })
+              if (nodeType === 'videoNode') {
+                return {
+                  ...n,
+                  type: 'videoNode',
+                  data: { src: result.src, fileName: result.fileName },
+                }
+              }
+              return {
+                ...n,
+                type: 'imageNode',
+                data: { src: result.src, fileName: result.fileName },
+              }
+            }),
+          )
+
+          const persistData =
+            nodeType === 'docNode'
+              ? {
+                  src: result.src,
+                  fileName: result.fileName,
+                  fileSize: item.file.size,
+                }
+              : { src: result.src, fileName: result.fileName }
+
+          persistNode({
+            id: item.nodeId,
+            type: nodeType,
+            position: item.pos,
+            data: persistData,
+          } as AppNode)
+        } catch (err) {
+          if (err instanceof DOMException && err.name === 'AbortError') {
+            // 取消 → 移除节点
+            useCanvasStore.getState().setNodes((prev) =>
+              prev.filter((n) => n.id !== item.nodeId),
+            )
+          } else {
+            // 失败 → 移除节点 + 错误提示
+            useUIStore
+              .getState()
+              .showError(err instanceof Error ? err.message : '上传失败')
+            useCanvasStore.getState().setNodes((prev) =>
+              prev.filter((n) => n.id !== item.nodeId),
+            )
+          }
+        } finally {
+          cancelUpload(item.nodeId)
+        }
       }
     },
     [],
