@@ -35,6 +35,10 @@ app.use('*', cors({
 // 全局错误处理：捕获未处理的异常，返回 JSON 错误响应
 app.onError((err, c) => {
   console.error('Server error:', err)
+  // JSON 解析错误返回 400，而非默认的 500
+  if (err instanceof SyntaxError) {
+    return c.json({ error: '请求体 JSON 格式错误' }, 400)
+  }
   return c.json({ error: err.message || '服务器内部错误' }, 500)
 })
 

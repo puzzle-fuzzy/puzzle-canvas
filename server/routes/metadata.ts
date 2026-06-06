@@ -5,8 +5,49 @@
  *   GET /api/metadata?url=xxx
  *
  * 返回字段：url, title, description, image, favicon
+ *
+ * 安全措施：
+ *   - SSRF 防护：拦截私有网络地址（localhost / 内网 IP）
+ *   - 响应体大小限制：最大 1MB，防止大文件耗尽内存
+ *   - 请求超时：10 秒
  */
 import type { Hono } from 'hono'
+
+/** 响应体大小上限：1 MB */
+const MAX_HTML_SIZE = 1024 * 1024
+
+/**
+ * 检查 URL 是否指向私有网络地址
+ *
+ * 拦截 SSRF 攻击：禁止访问内网 IP、回环地址、链路本地地址等。
+ */
+export function isPrivateUrl(url: URL): boolean {
+  const hostname = url.hostname
+
+  // 回环地址
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
+    return true
+  }
+
+  // 解析 IPv4 地址
+  const ipMatch = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/)
+  if (ipMatch) {
+    const [, a, b] = ipMatch.map(Number)
+    if (a === 10) return true                    // 10.0.0.0/8
+    if (a === 172 && b >= 16 && b <= 31) return true  // 172.16.0.0/12
+    if (a === 192 && b === 168) return true       // 192.168.0.0/16
+    if (a === 0) return true                      // 0.0.0.0/8
+    if (a === 127) return true                    // 127.0.0.0/8
+    if (a === 169 && b === 254) return true       // 169.254.0.0/16（链路本地）
+  }
+
+  // IPv6 私有地址（简化检查：唯一本地地址 fc00::/7）
+  if (hostname.startsWith('fc') || hostname.startsWith('fd')) {
+    return true
+  }
+
+  return false
+}
 
 /**
  * 从 HTML 中提取 <meta> 标签内容
@@ -15,7 +56,7 @@ import type { Hono } from 'hono'
  *   <meta property="og:title" content="xxx">
  *   <meta content="xxx" property="og:title">
  */
-function extractMeta(html: string, property: string): string | null {
+export function extractMeta(html: string, property: string): string | null {
   const patterns = [
     new RegExp(`<meta\\s+[^>]*(?:property|name)\\s*=\\s*["']${property}["'][^>]*content\\s*=\\s*["']([^"']*)["']`, 'i'),
     new RegExp(`<meta\\s+[^>]*content\\s*=\\s*["']([^"']*)["'][^>]*(?:property|name)\\s*=\\s*["']${property}["']`, 'i'),
@@ -28,9 +69,11 @@ function extractMeta(html: string, property: string): string | null {
 }
 
 /** 从 HTML 中提取 <title> 标签文本 */
-function extractTitle(html: string): string | null {
+export function extractTitle(html: string): string | null {
   const match = html.match(/<title[^>]*>([^<]*)<\/title>/i)
-  return match ? match[1].trim() : null
+  if (!match) return null
+  const text = match[1].trim()
+  return text.length > 0 ? text : null
 }
 
 /**
@@ -39,7 +82,7 @@ function extractTitle(html: string): string | null {
  * 查找 <link rel="icon"> 标签，未找到则回退到 /favicon.ico。
  * 相对路径会基于 pageUrl 解析为绝对路径。
  */
-function extractFavicon(html: string, pageUrl: string): string | null {
+export function extractFavicon(html: string, pageUrl: string): string | null {
   const patterns = [
     /<link\s+[^>]*rel\s*=\s*["'](?:shortcut\s+)?icon["'][^>]*href\s*=\s*["']([^"']+)["']/i,
     /<link\s+[^>]*href\s*=\s*["']([^"']+)["'][^>]*rel\s*=\s*["'](?:shortcut\s+)?icon["']/i,
@@ -72,13 +115,19 @@ export function registerMetadataRoutes(app: Hono) {
     }
 
     // 仅允许 HTTP/HTTPS 协议
+    let parsed: URL
     try {
-      const parsed = new URL(url)
+      parsed = new URL(url)
       if (!['http:', 'https:'].includes(parsed.protocol)) {
         return c.json({ error: '仅支持 HTTP/HTTPS 协议' }, 400)
       }
     } catch {
       return c.json({ error: '无效的 URL' }, 400)
+    }
+
+    // SSRF 防护：禁止访问私有网络地址
+    if (isPrivateUrl(parsed)) {
+      return c.json({ error: '不允许访问私有网络地址' }, 400)
     }
 
     // 抓取目标网页，超时 10 秒
@@ -95,7 +144,19 @@ export function registerMetadataRoutes(app: Hono) {
       if (!response.ok) {
         return c.json({ error: `目标网站返回 ${response.status}` }, 502)
       }
+
+      // 检查 Content-Length 是否超过限制
+      const contentLength = response.headers.get('content-length')
+      if (contentLength && parseInt(contentLength, 10) > MAX_HTML_SIZE) {
+        return c.json({ error: '目标网页过大' }, 502)
+      }
+
       html = await response.text()
+
+      // 实际内容超过限制时截断
+      if (html.length > MAX_HTML_SIZE) {
+        html = html.slice(0, MAX_HTML_SIZE)
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : '请求失败'
       return c.json({ error: `无法获取网页: ${message}` }, 502)

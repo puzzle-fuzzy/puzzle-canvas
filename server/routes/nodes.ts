@@ -8,14 +8,21 @@
  *   DELETE /api/nodes/:id  — 删除节点
  */
 import type { Hono } from 'hono'
-import { db } from '../db'
+import { db as defaultDb } from '../db'
 import { nodes } from '../db/schema'
 import { eq } from 'drizzle-orm'
 
 /** 合法的节点类型，对应前端的 nodeTypes 注册表 */
 const VALID_NODE_TYPES = ['urlNode', 'imageNode', 'videoNode', 'docNode']
 
-export function registerNodeRoutes(app: Hono) {
+/** 路由依赖注入接口（方便测试时替换数据库实例） */
+interface NodeRouteDeps {
+  db?: typeof defaultDb
+}
+
+export function registerNodeRoutes(app: Hono, deps: NodeRouteDeps = {}) {
+  const db = deps.db ?? defaultDb
+
   // 获取所有节点
   app.get('/api/nodes', (c) => {
     const allNodes = db.select().from(nodes).all()
@@ -34,6 +41,12 @@ export function registerNodeRoutes(app: Hono) {
     // 校验节点类型
     if (!VALID_NODE_TYPES.includes(body.type)) {
       return c.json({ error: `无效的节点类型，允许: ${VALID_NODE_TYPES.join(', ')}` }, 400)
+    }
+
+    // 校验位置值为有效数字
+    if (typeof body.positionX !== 'number' || typeof body.positionY !== 'number'
+      || isNaN(body.positionX) || isNaN(body.positionY)) {
+      return c.json({ error: 'positionX 和 positionY 必须为有效数字' }, 400)
     }
 
     // 插入数据库，未提供的可选字段默认为 null
@@ -73,6 +86,25 @@ export function registerNodeRoutes(app: Hono) {
 
     if (Object.keys(updates).length === 0) {
       return c.json({ error: '没有可更新的字段' }, 400)
+    }
+
+    // 校验数字字段的类型
+    if ('positionX' in updates && (typeof updates.positionX !== 'number' || isNaN(updates.positionX as number))) {
+      return c.json({ error: 'positionX 必须为有效数字' }, 400)
+    }
+    if ('positionY' in updates && (typeof updates.positionY !== 'number' || isNaN(updates.positionY as number))) {
+      return c.json({ error: 'positionY 必须为有效数字' }, 400)
+    }
+    if ('fileSize' in updates && (typeof updates.fileSize !== 'number' || isNaN(updates.fileSize as number))) {
+      return c.json({ error: 'fileSize 必须为有效数字' }, 400)
+    }
+
+    // 校验字符串字段的类型
+    if ('title' in updates && typeof updates.title !== 'string') {
+      return c.json({ error: 'title 必须为字符串' }, 400)
+    }
+    if ('description' in updates && typeof updates.description !== 'string') {
+      return c.json({ error: 'description 必须为字符串' }, 400)
     }
 
     const result = db.update(nodes).set(updates).where(eq(nodes.id, id)).returning().get()

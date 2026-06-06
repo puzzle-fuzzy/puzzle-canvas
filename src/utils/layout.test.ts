@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { localWaterfallLayout, selectionWaterfallLayout } from './layout'
-import { NODE_WIDTH, GAP_X, GAP_Y, COL_COUNT } from './constants'
+import { NODE_WIDTH, GAP_X, GAP_Y } from './constants'
 import type { AppNode } from '../types'
 
 /** 创建模拟 AppNode */

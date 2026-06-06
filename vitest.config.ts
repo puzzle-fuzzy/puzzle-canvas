@@ -1,10 +1,13 @@
+/**
+ * Vitest 基础配置
+ *
+ * 前后端测试分离由 vitest.workspace.ts 管理，
+ * 此文件仅作为各 workspace project 的基础默认值。
+ */
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'jsdom',
-    include: ['src/**/*.test.{ts,tsx}'],
-    setupFiles: ['src/test-setup.ts'],
   },
 })

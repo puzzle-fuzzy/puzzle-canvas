@@ -7,7 +7,7 @@ export function getImageFileHeight(file: File): Promise<number> {
     const img = new Image()
     img.onload = () => {
       URL.revokeObjectURL(url)
-      const ratio = img.naturalHeight / img.naturalWidth
+      const ratio = img.naturalWidth ? img.naturalHeight / img.naturalWidth : 1
       resolve(Math.round(NODE_WIDTH * ratio))
     }
     img.onerror = () => {

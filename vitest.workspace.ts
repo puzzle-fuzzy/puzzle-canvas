@@ -5,6 +5,8 @@
  *   - 前端（src/）：jsdom 环境，React 组件测试
  *   - 后端（server/）：Node 环境，API 路由 + 工具函数测试
  */
+import { defineWorkspace } from 'vitest/config'
+
 export default defineWorkspace([
   {
     test: {
