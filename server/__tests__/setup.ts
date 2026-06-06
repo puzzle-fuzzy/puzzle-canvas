@@ -12,7 +12,6 @@ import { registerNodeRoutes } from '../routes/nodes'
 import { registerUploadRoutes } from '../routes/upload'
 import { registerMetadataRoutes } from '../routes/metadata'
 import { registerAIRoutes } from '../routes/ai'
-import type BetterSqlite3 from 'better-sqlite3'
 
 /** 测试用固定用户信息 */
 export const TEST_USER = {
@@ -28,12 +27,11 @@ export const TEST_USER = {
  * 并插入一条测试用户记录（nodes 外键依赖）。
  */
 export function createTestDb() {
-  const sqlite = new Database(':memory:') as BetterSqlite3.Database
-  sqlite.pragma('journal_mode = WAL')
-  sqlite.pragma('foreign_keys = ON')
+  const sqlite = new Database(':memory:')
+  sqlite.run('PRAGMA foreign_keys = ON')
 
   // 建表
-  sqlite.exec(`
+  sqlite.run(`
     CREATE TABLE users (
       id TEXT PRIMARY KEY,
       email TEXT NOT NULL UNIQUE,
@@ -47,7 +45,7 @@ export function createTestDb() {
       last_login_at INTEGER
     )
   `)
-  sqlite.exec(`
+  sqlite.run(`
     CREATE TABLE accounts (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -61,7 +59,7 @@ export function createTestDb() {
       UNIQUE(provider, provider_account_id)
     )
   `)
-  sqlite.exec(`
+  sqlite.run(`
     CREATE TABLE refresh_tokens (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -70,7 +68,7 @@ export function createTestDb() {
       created_at INTEGER NOT NULL DEFAULT (unixepoch())
     )
   `)
-  sqlite.exec(`
+  sqlite.run(`
     CREATE TABLE nodes (
       id TEXT PRIMARY KEY,
       type TEXT NOT NULL,
@@ -90,8 +88,11 @@ export function createTestDb() {
   `)
 
   // 插入测试用户（nodes 外键依赖）
-  const stmt = sqlite.prepare('INSERT INTO users (id, email, username) VALUES (?, ?, ?)')
-  stmt.run(TEST_USER.id, TEST_USER.email, TEST_USER.username)
+  sqlite.run('INSERT INTO users (id, email, username) VALUES (?, ?, ?)', [
+    TEST_USER.id,
+    TEST_USER.email,
+    TEST_USER.username,
+  ])
 
   const db = drizzle(sqlite, { schema })
   return { db, sqlite }

@@ -4,6 +4,7 @@ import { Icon } from '@ricons/utils'
 import { useAppIcon } from '../icons'
 import type { DocNodeType } from '../types'
 import { cancelUpload } from '../utils'
+import { formatFileSize } from '../utils/format'
 
 type DocNodeProps = NodeProps<DocNodeType>
 
@@ -25,15 +26,6 @@ function getFileIcon(
   if (archiveExts.includes(ext)) return <Icon size={28}><FolderZipIcon /></Icon>
   if (codeExts.includes(ext)) return <Icon size={28}><DocumentCodeIcon /></Icon>
   return <Icon size={28}><DocumentTextIcon /></Icon>
-}
-
-/** 格式化文件大小 */
-export function formatFileSize(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes < 0) bytes = 0
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`
-  return `${(bytes / 1024 / 1024 / 1024).toFixed(1)} GB`
 }
 
 function DocNode({ data, id }: DocNodeProps) {
