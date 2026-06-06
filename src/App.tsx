@@ -86,6 +86,28 @@ function Canvas() {
     return () => window.removeEventListener('mousemove', track)
   }, [])
 
+  // Space 键自动切换到选择模式，松开回到拖拽模式
+  useEffect(() => {
+    const prevModeRef = { current: interactionMode }
+    const down = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !e.repeat) {
+        prevModeRef.current = interactionMode
+        setInteractionMode('select')
+      }
+    }
+    const up = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        setInteractionMode(prevModeRef.current === 'pan' ? 'pan' : 'pan')
+      }
+    }
+    window.addEventListener('keydown', down)
+    window.addEventListener('keyup', up)
+    return () => {
+      window.removeEventListener('keydown', down)
+      window.removeEventListener('keyup', up)
+    }
+  }, [interactionMode])
+
   // ========== 初始视口（渲染前从 localStorage 读取，避免闪烁）==========
   const savedViewport = useRef(() => {
     try {
