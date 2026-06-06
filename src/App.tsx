@@ -47,7 +47,7 @@ function Canvas() {
   const nodesRef = useRef<AppNode[]>(nodes)
   nodesRef.current = nodes
   const mouseRef = useRef({ x: 0, y: 0 })
-  const { screenToFlowPosition, fitView } = useReactFlow()
+  const { screenToFlowPosition, fitView, setViewport, getViewport } = useReactFlow()
 
   // 追踪鼠标位置
   useEffect(() => {
@@ -64,8 +64,20 @@ function Canvas() {
       .then((loaded) => {
         setNodes(loaded)
         setInitialized(true)
-        // 节点加载完后 fitView 展示全部
-        setTimeout(() => fitView({ padding: 0.2 }), 200)
+        // 恢复上次保存的视口，没有则 fitView 展示全部
+        setTimeout(() => {
+          const saved = localStorage.getItem('viewport')
+          if (saved) {
+            try {
+              const { x, y, zoom } = JSON.parse(saved)
+              setViewport({ x, y, zoom })
+            } catch {
+              fitView({ padding: 0.2 })
+            }
+          } else {
+            fitView({ padding: 0.2 })
+          }
+        }, 200)
       })
       .catch((err) => {
         console.error('Failed to load nodes:', err)
@@ -97,6 +109,12 @@ function Canvas() {
     },
     [],
   )
+
+  // ========== 视口变化时保存到 localStorage ==========
+  const handleMoveEnd = useCallback(() => {
+    const { x, y, zoom } = getViewport()
+    localStorage.setItem('viewport', JSON.stringify({ x, y, zoom }))
+  }, [getViewport])
 
   // ========== 拖拽结束持久化 ==========
   const handleNodeDragStop = useCallback(
@@ -263,6 +281,7 @@ function Canvas() {
         nodes={nodes}
         onNodesChange={onNodesChange}
         onNodeDragStop={handleNodeDragStop}
+        onMoveEnd={handleMoveEnd}
         nodeTypes={nodeTypes}
         minZoom={0.01}
         maxZoom={4}
