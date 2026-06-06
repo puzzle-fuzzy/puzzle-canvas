@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:server": "bun run --hot server/index.ts",
-    "dev:all": "bun run dev & bun run dev:server",
+    "dev:all": "bash scripts/start.sh",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
