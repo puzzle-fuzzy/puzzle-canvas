@@ -15,6 +15,7 @@ export type UrlNodeType = Node<UrlNodeData, 'urlNode'>
 export type ImageNodeData = {
   src: string
   fileName: string
+  uploading?: UploadState
 }
 
 export type ImageNodeType = Node<ImageNodeData, 'imageNode'>
@@ -23,12 +24,19 @@ export type ImageNodeType = Node<ImageNodeData, 'imageNode'>
 export type VideoNodeData = {
   src: string
   fileName: string
+  uploading?: UploadState
 }
 
 export type VideoNodeType = Node<VideoNodeData, 'videoNode'>
 
 // ========== 联合类型 ==========
 export type AppNode = UrlNodeType | ImageNodeType | VideoNodeType
+
+// ========== 上传状态 ==========
+export type UploadState = {
+  progress: number // 0..1
+  fileName: string
+}
 
 // ========== API 响应 ==========
 export type MetadataResponse = {
@@ -43,4 +51,10 @@ export type UploadResponse = {
   src: string
   fileName: string
   mediaType: 'image' | 'video'
+}
+
+// ========== 分片上传 API ==========
+export type UploadInitResponse = {
+  uploadId: string
+  existingChunks: number[]
 }

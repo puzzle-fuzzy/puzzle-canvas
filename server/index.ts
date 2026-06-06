@@ -1,13 +1,14 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/bun'
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, readdirSync, rmSync, statSync } from 'node:fs'
 import { db } from './db'
 import { nodes } from './db/schema'
 import { eq } from 'drizzle-orm'
 
 // 确保上传目录存在
 mkdirSync('./uploads', { recursive: true })
+mkdirSync('./uploads/tmp', { recursive: true })
 
 const app = new Hono()
 
@@ -103,7 +104,157 @@ app.delete('/api/nodes/:id', (c) => {
 
 // ========== 文件上传 ==========
 const ALLOWED_MIME_PREFIXES = ['image/', 'video/']
-const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50 MB
+const MAX_FILE_SIZE = 800 * 1024 * 1024 // 800 MB
+const CHUNK_DIR = './uploads/tmp'
+const TMP_MAX_AGE_MS = 24 * 60 * 60 * 1000 // 24 小时
+
+// 分片上传会话（内存）
+const uploadSessions = new Map<string, {
+  fingerprint: string
+  totalChunks: number
+  createdAt: number
+}>()
+
+// 定时清理过期临时分片（每小时）
+setInterval(() => {
+  try {
+    const entries = readdirSync(CHUNK_DIR, { withFileTypes: true })
+    const now = Date.now()
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const dirPath = `${CHUNK_DIR}/${entry.name}`
+        const stat = statSync(dirPath)
+        if (now - stat.mtimeMs > TMP_MAX_AGE_MS) {
+          rmSync(dirPath, { recursive: true })
+        }
+      }
+    }
+  } catch { /* ignore */ }
+}, 60 * 60 * 1000)
+
+// 分片上传：初始化
+app.post('/api/upload/init', async (c) => {
+  const body = await c.req.json()
+  const { fileName, fileSize, totalChunks, fingerprint } = body
+
+  if (!fileName || !fileSize || !totalChunks || !fingerprint) {
+    return c.json({ error: '缺少必要字段' }, 400)
+  }
+
+  if (fileSize > MAX_FILE_SIZE) {
+    return c.json({ error: '文件过大（最大 800MB）' }, 413)
+  }
+
+  const uploadId = crypto.randomUUID()
+
+  // 扫描已有分片（用于断点续传）
+  const chunkDir = `${CHUNK_DIR}/${fingerprint}`
+  let existingChunks: number[] = []
+  try {
+    const entries = readdirSync(chunkDir)
+    existingChunks = entries
+      .filter((e) => e.startsWith('chunk-'))
+      .map((e) => parseInt(e.slice(6), 10))
+      .filter((n) => !isNaN(n))
+  } catch { /* 目录不存在 */ }
+
+  mkdirSync(chunkDir, { recursive: true })
+
+  uploadSessions.set(uploadId, {
+    fingerprint,
+    totalChunks,
+    createdAt: Date.now(),
+  })
+
+  return c.json({ uploadId, existingChunks })
+})
+
+// 分片上传：上传分片
+app.put('/api/upload/chunk', async (c) => {
+  const body = await c.req.parseBody()
+  const uploadId = body['uploadId'] as string
+  const chunkIndex = parseInt(body['chunkIndex'] as string, 10)
+  const chunk = body['chunk']
+
+  const session = uploadSessions.get(uploadId)
+  if (!session) {
+    return c.json({ error: '无效的 uploadId' }, 400)
+  }
+  if (!(chunk instanceof File)) {
+    return c.json({ error: '未提供分片' }, 400)
+  }
+  if (isNaN(chunkIndex) || chunkIndex < 0 || chunkIndex >= session.totalChunks) {
+    return c.json({ error: '无效的分片索引' }, 400)
+  }
+
+  const chunkPath = `${CHUNK_DIR}/${session.fingerprint}/chunk-${chunkIndex}`
+  await Bun.write(chunkPath, chunk)
+
+  return c.json({ ok: true })
+})
+
+// 分片上传：合并完成
+app.post('/api/upload/complete', async (c) => {
+  const body = await c.req.json()
+  const { uploadId, fileName } = body
+
+  const session = uploadSessions.get(uploadId)
+  if (!session) {
+    return c.json({ error: '无效的 uploadId' }, 400)
+  }
+
+  const chunkDir = `${CHUNK_DIR}/${session.fingerprint}`
+
+  // 校验所有分片
+  for (let i = 0; i < session.totalChunks; i++) {
+    const chunkFile = Bun.file(`${chunkDir}/chunk-${i}`)
+    if (!(await chunkFile.exists())) {
+      return c.json({ error: `缺少分片 ${i}` }, 400)
+    }
+  }
+
+  // 生成最终文件名
+  const ext = fileName.includes('.') ? '.' + fileName.split('.').pop() : ''
+  const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`
+  const finalPath = `./uploads/${uniqueName}`
+
+  // 拼接所有分片
+  const chunks: Buffer[] = []
+  for (let i = 0; i < session.totalChunks; i++) {
+    const buf = await Bun.file(`${chunkDir}/chunk-${i}`).arrayBuffer()
+    chunks.push(Buffer.from(buf))
+  }
+  await Bun.write(finalPath, Buffer.concat(chunks))
+
+  // 清理临时分片
+  try { rmSync(chunkDir, { recursive: true }) } catch { /* ignore */ }
+
+  uploadSessions.delete(uploadId)
+
+  const mediaType = /\.(mp4|webm|mov|avi|mkv)$/i.test(fileName) ? 'video' : 'image'
+
+  return c.json({
+    src: `/uploads/${uniqueName}`,
+    fileName,
+    mediaType,
+  })
+})
+
+// 分片上传：取消
+app.delete('/api/upload/cancel', async (c) => {
+  const body = await c.req.json()
+  const { uploadId } = body
+
+  const session = uploadSessions.get(uploadId)
+  if (!session) {
+    return c.json({ error: '无效的 uploadId' }, 400)
+  }
+
+  try { rmSync(`${CHUNK_DIR}/${session.fingerprint}`, { recursive: true }) } catch { /* ignore */ }
+  uploadSessions.delete(uploadId)
+
+  return c.json({ ok: true })
+})
 
 app.post('/api/upload', async (c) => {
   const body = await c.req.parseBody()

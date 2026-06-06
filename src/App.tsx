@@ -24,7 +24,6 @@ import type {
 } from './types'
 import {
   isValidUrl,
-  uploadFile,
   persistNode,
   persistNodePosition,
   persistNodeDelete,
@@ -34,6 +33,9 @@ import {
   getImageRenderHeight,
   getApiUrl,
   NODE_WIDTH,
+  uploadFileChunked,
+  registerUploadController,
+  cancelUpload,
 } from './utils'
 import './App.css'
 
@@ -102,6 +104,7 @@ function Canvas() {
     (changes) => {
       for (const change of changes) {
         if (change.type === 'remove') {
+          cancelUpload(change.id)
           persistNodeDelete(change.id)
         }
         // 拖拽结束时持久化位置（dragging 从 true 变 false）
@@ -241,11 +244,9 @@ function Canvas() {
     [loading, screenToFlowPosition],
   )
 
-  // ========== 文件节点（多文件局部瀑布流）==========
+  // ========== 文件节点（分片上传 + 进度节点）==========
   const addNodeFromFiles = useCallback(
-    async (files: FileList | File[], origin: { x: number; y: number }) => {
-      if (loading) return
-
+    (files: FileList | File[], origin: { x: number; y: number }) => {
       const validFiles = Array.from(files).filter(
         (f) => f.type.startsWith('image/') || f.type.startsWith('video/'),
       )
@@ -255,44 +256,110 @@ function Canvas() {
         return
       }
 
-      setLoading(true)
       setError(null)
-
       const layout = localWaterfallLayout(origin)
 
+      // 为每个文件立即创建进度节点，然后串行上传
+      let uploadChain: Promise<void> = Promise.resolve()
+
       for (const file of validFiles) {
-        try {
-          const result = await uploadFile(file)
+        const pos = layout.next(NODE_WIDTH)
+        const nodeId = `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+        const mediaType = file.type.startsWith('video/') ? 'video' : 'image'
 
-          // 获取实际渲染高度用于瀑布流定位
-          let height = NODE_WIDTH
-          if (result.mediaType === 'image') {
-            height = await getImageRenderHeight(getApiUrl(result.src))
-          }
-          const pos = layout.next(height)
-
-          const newNode: ImageNodeType | VideoNodeType = {
-            id: `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            type: result.mediaType === 'video' ? 'videoNode' : 'imageNode',
-            position: pos,
-            data: { src: result.src, fileName: result.fileName },
-          }
-
-          setNodes((prev) => {
-            const updated = [...prev, newNode]
-            nodesRef.current = updated
-            return updated
-          })
-          persistNode(newNode)
-        } catch (err) {
-          setError(err instanceof Error ? err.message : '上传失败')
-          setTimeout(() => setError(null), 3000)
+        // 立即创建带进度的节点
+        const newNode: ImageNodeType | VideoNodeType = {
+          id: nodeId,
+          type: mediaType === 'video' ? 'videoNode' : 'imageNode',
+          position: pos,
+          data: {
+            src: '',
+            fileName: file.name,
+            uploading: { progress: 0, fileName: file.name },
+          },
         }
-      }
 
-      setLoading(false)
+        setNodes((prev) => {
+          const updated = [...prev, newNode]
+          nodesRef.current = updated
+          return updated
+        })
+
+        // 串行链式上传
+        const currentFile = file
+        const currentNodeId = nodeId
+
+        uploadChain = uploadChain.then(() => {
+          const controller = new AbortController()
+          registerUploadController(currentNodeId, controller)
+
+          return uploadFileChunked(currentFile, {
+            onProgress: (progress) => {
+              setNodes((prev) =>
+                prev.map((n) => {
+                  if (n.id !== currentNodeId) return n
+                  if (n.type === 'urlNode') return n
+                  return {
+                    ...n,
+                    data: {
+                      ...n.data,
+                      uploading: { progress, fileName: currentFile.name },
+                    },
+                  }
+                }),
+              )
+            },
+            signal: controller.signal,
+          })
+            .then((result) => {
+              // 上传完成 → 转为正常节点
+              setNodes((prev) => {
+                const updated = prev.map((n) =>
+                  n.id === currentNodeId
+                    ? {
+                        ...n,
+                        type: result.mediaType === 'video' ? 'videoNode' as const : 'imageNode' as const,
+                        data: { src: result.src, fileName: result.fileName },
+                      }
+                    : n,
+                )
+                nodesRef.current = updated
+                return updated
+              })
+
+              persistNode({
+                id: currentNodeId,
+                type: result.mediaType === 'video' ? 'videoNode' : 'imageNode',
+                position: pos,
+                data: { src: result.src, fileName: result.fileName },
+              } as ImageNodeType | VideoNodeType)
+            })
+            .catch((err) => {
+              if (err instanceof DOMException && err.name === 'AbortError') {
+                // 取消 → 移除节点
+                setNodes((prev) => {
+                  const updated = prev.filter((n) => n.id !== currentNodeId)
+                  nodesRef.current = updated
+                  return updated
+                })
+              } else {
+                // 失败 → 移除节点 + 错误提示
+                setError(err instanceof Error ? err.message : '上传失败')
+                setTimeout(() => setError(null), 3000)
+                setNodes((prev) => {
+                  const updated = prev.filter((n) => n.id !== currentNodeId)
+                  nodesRef.current = updated
+                  return updated
+                })
+              }
+            })
+            .finally(() => {
+              cancelUpload(currentNodeId)
+            })
+        })
+      }
     },
-    [loading],
+    [],
   )
 
   // ========== 粘贴事件 ==========
