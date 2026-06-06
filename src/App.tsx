@@ -65,7 +65,7 @@ function Canvas() {
         setNodes(loaded)
         setInitialized(true)
         // 节点加载完后 fitView 展示全部
-        setTimeout(() => fitView({ padding: 0.2 }), 100)
+        setTimeout(() => fitView({ padding: 0.2 }), 200)
       })
       .catch((err) => {
         console.error('Failed to load nodes:', err)
@@ -259,6 +259,14 @@ function Canvas() {
     [addNodeFromUrl],
   )
 
+  if (!initialized) {
+    return (
+      <div className="canvas-loading">
+        <span>加载中...</span>
+      </div>
+    )
+  }
+
   return (
     <div
       className="canvas-container"
@@ -270,7 +278,6 @@ function Canvas() {
         onNodesChange={onNodesChange}
         onNodeDragStop={handleNodeDragStop}
         nodeTypes={nodeTypes}
-        fitView
         minZoom={0.01}
         maxZoom={4}
       >

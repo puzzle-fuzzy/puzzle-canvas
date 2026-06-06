@@ -5,6 +5,25 @@
   position: relative;
 }
 
+/* ========== 加载中 ========== */
+.canvas-loading {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #9ca3af;
+  background: #fafafa;
+}
+
+@media (prefers-color-scheme: dark) {
+  .canvas-loading {
+    color: #6b7280;
+    background: #111118;
+  }
+}
+
 /* ========== 顶部浮动输入栏 ========== */
 .url-input-bar {
   position: fixed;
