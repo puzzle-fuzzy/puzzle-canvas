@@ -48,28 +48,6 @@ function Canvas() {
   nodesRef.current = nodes
   const mouseRef = useRef({ x: 0, y: 0 })
   const { screenToFlowPosition, fitView } = useReactFlow()
-  const [spaceHeld, setSpaceHeld] = useState(false)
-
-  // 追踪空格键状态
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !e.repeat) {
-        e.preventDefault()
-        setSpaceHeld(true)
-      }
-    }
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
-        setSpaceHeld(false)
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    window.addEventListener('keyup', handleKeyUp)
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-      window.removeEventListener('keyup', handleKeyUp)
-    }
-  }, [])
 
   // 追踪鼠标位置
   useEffect(() => {
@@ -283,15 +261,13 @@ function Canvas() {
         nodeTypes={nodeTypes}
         minZoom={0.01}
         maxZoom={4}
-        panOnDrag={spaceHeld ? false : true}
-        selectionOnDrag={spaceHeld ? true : false}
+        panOnDrag
+        selectionKeyCode="Space"
+        deleteKeyCode="Delete"
+        multiSelectionKeyCode="Shift"
         zoomOnScroll
         zoomOnPinch
         zoomOnDoubleClick={false}
-        panOnScroll={false}
-        deleteKeyCode="Delete"
-        selectionKeyCode={['Shift', 'Space']}
-        multiSelectionKeyCode="Shift"
       >
         <Background />
         <Controls />
