@@ -1,4 +1,4 @@
-# 前端架构审查 TODO
+# 前端单元测试 + 边界处理 TODO
 
 > 审查时间：2026-06-06
 > 本项目处于初始阶段，所有修改不保留兼容代码，直接替换。
@@ -7,35 +7,66 @@
 
 ## ✅ 已完成
 
-### 1. `useCanvasActions.ts` 拆分 → `4a39d5a`
-拆为 useNodeActions + useDownload + useCanvasActions（事件桥接）
+### 测试基础设施
+### 1. 安装 vitest + jsdom → `602a419`
+新建 vitest.config.ts、src/test-setup.ts，添加 test/test:watch scripts
 
-### 2. `utils.ts` 拆分 → `00e29f9`
-拆为 utils/ 目录：constants / layout / media / upload / api / validation
+### 纯函数测试
+### 2. validation.test.ts → `e0123d1`
+isDangerousFile / isValidUrl / getDomain 共 15 个用例
+### 3. layout.test.ts → `e0123d1`
+localWaterfallLayout / selectionWaterfallLayout 共 10 个用例
+### 4. api.test.ts → `e0123d1` → `74b4928` 扩展
+getApiUrl + loadNodes 共 7 个用例
 
-### 3. 暗色模式双重同步 → `cc61d17`
-删除 useDarkModeSync.ts，保留 store 侧 syncDarkModeToDOM
+### 关键 bug 修复
+### 5. getImageFileHeight naturalWidth=0 → Infinity → `2a9575c`
+添加零值保护 ratio = naturalWidth ? ... : 1
+### 6. media timeout → `c961b99`
+添加 10s 超时防止损坏文件卡死
+### 7. media.test.ts → `915d911`
+4 个测试用例覆盖高度计算场景
+### 8. registerUploadController 泄漏 → `481fb65`
+重复注册时先 abort 旧控制器
+### 9. uploadFileChunked .json() 无 try/catch → `f43edca`
+init 和 complete 阶段 JSON 解析添加错误处理
+### 10. upload.test.ts → `1246640`
+4 个测试用例覆盖控制器注册/取消
+### 11. loadNodes 无 try/catch → `dadd658`
+整体包裹 try/catch，fallback 返回空数组
+### 12. isValidUrl 空 hostname → `01332ff`
+添加 url.hostname.length > 0 检查
+### 13. useDownload 不检查 res.ok → `79960cf`
+404/500 不再当作文件下载
+### 14. Space 键忽略输入框焦点 → `378718a`
+INPUT/TEXTAREA/isContentEditable 中不触发平移模式
+### 15. localStorage.setItem try/catch → `87bc0e3`
+uiStore + useCanvasActions 两处
 
-### 4. `showError` 定时器泄漏 → `4a90cb9`
-追踪 timer ID，调用前 clearTimeout
+### 中等优先级修复
+### 16. 上传进度 clamp 0-1 → `20e3d83`
+DocNode + MediaNode progress 范围限制
+### 17. formatFileSize 负数/NaN → `c6ea228` + `4bb645d`
+提取到 utils/format.ts，添加 8 个测试用例
+### 18. getApiUrl 路径规范化 → `3d29ee7`
+缺少前导斜杠自动补全
+### 19. addNodeFromUrl URL 长度限制 → `713bc46`
+超过 2048 字符拒绝
 
-### 5. `loadNodes` 失败静默 → `fd677a6`
-catch 中调用 showError 显示错误提示
+### UI fallback
+### 20. UrlNode img onError → `84dd8b5`
+favicon 加载失败回退 globe 图标，OG 图片失败隐藏
+### 21. MediaNode img onError → `1d93681`
+图片失败显示图标占位，视频失败隐藏播放器
 
-### 6. `SettingsModal` props 重构 → `bca0aad`
-改为内部 useUIStore 读取 darkMode，App.tsx 不再订阅
+---
 
-### 7. `App.css` 拆分 → `d73cd55`
-拆为 styles/ 目录：variables / toolbar / modal / nodes / canvas
+## 测试覆盖
 
-### 8. 节点 ID 生成 → `a3437dc`
-Date.now() + random → crypto.randomUUID()
-
-### 9. 死代码移除 → `4a39d5a`
-删除 uploadFile + getImageRenderHeight
-
-### 10. 上传链重写 → `1e23ed0`
-.then() 链 → async/await 两阶段（先创建进度节点，再串行上传）
-
-### 11. `handleOrganize` guard → `e55abd6`
-`selected.length < 1` → `< 2`
+共 **45 个前端测试**，覆盖：
+- `src/utils/validation.test.ts` — 15 tests
+- `src/utils/layout.test.ts` — 10 tests
+- `src/utils/api.test.ts` — 7 tests
+- `src/utils/media.test.ts` — 4 tests
+- `src/utils/upload.test.ts` — 4 tests
+- `src/utils/format.test.ts` — 8 tests（含 NaN/Infinity/负数边界）
