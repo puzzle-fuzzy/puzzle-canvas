@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Icon } from '@ricons/utils'
 import { useAppIcon } from '../icons'
 import { useCanvasStore } from '../stores/canvasStore'
@@ -25,6 +26,8 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
   const FullscreenIcon = useAppIcon('fullscreen')
   const CopyIcon = useAppIcon('copy')
 
+  const [copied, setCopied] = useState(false)
+
   // 判断选中节点中是否包含图片或视频
   const hasMedia = nodes.some(
     (n) => selectedNodeIds.includes(n.id) && (n.type === 'imageNode' || n.type === 'videoNode'),
@@ -41,7 +44,10 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
       (n) => ids.includes(n.id) && n.type === 'urlNode',
     ) as (typeof allNodes)[number] & { type: 'urlNode' } | undefined
     if (urlNode && 'url' in urlNode.data && urlNode.data.url) {
-      navigator.clipboard.writeText(urlNode.data.url)
+      navigator.clipboard.writeText(urlNode.data.url).then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 1500)
+      })
     }
   }
 
@@ -81,8 +87,11 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
         </button>
       )}
       {hasUrl && (
-        <button className="selection-toolbar-btn" onClick={handleCopyUrl} title="复制链接">
-          <Icon size={iconSize}><CopyIcon /></Icon>
+        <button className="selection-toolbar-btn" onClick={handleCopyUrl} title={copied ? '已复制' : '复制链接'}>
+          {copied
+            ? <span style={{ fontSize: '12px', fontWeight: 600 }}>✓</span>
+            : <Icon size={iconSize}><CopyIcon /></Icon>
+          }
         </button>
       )}
       <button className="selection-toolbar-btn" onClick={onDownload} title="下载">
