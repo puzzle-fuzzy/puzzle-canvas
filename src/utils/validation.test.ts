@@ -61,9 +61,10 @@ describe('isValidUrl', () => {
     expect(isValidUrl('example.com')).toBe(false)
   })
 
-  it('空 hostname 的 URL 在 Node 环境中直接抛异常返回 false', () => {
-    // 浏览器中 new URL('https://') 不抛错但 hostname 为空（bug）
-    // Node/jsdom 中直接抛异常，所以 isValidUrl 返回 false
+  it('空 hostname 的 URL 返回 false', () => {
+    // 浏览器中 new URL('https://') 不抛错但 hostname 为空
+    // Node/jsdom 中直接抛异常
+    // 两种情况都应返回 false
     expect(isValidUrl('https://')).toBe(false)
   })
 })
