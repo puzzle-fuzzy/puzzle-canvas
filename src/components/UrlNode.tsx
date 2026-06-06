@@ -29,7 +29,12 @@ function UrlNode({ data }: NodeProps<UrlNodeType>) {
       <div className="node-body">
         <h3 className="node-title">{title}</h3>
         {description && <p className="node-description">{description}</p>}
-        <p className="node-url">{url}</p>
+        <a
+          className="node-url"
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >{url}</a>
       </div>
     </div>
   )

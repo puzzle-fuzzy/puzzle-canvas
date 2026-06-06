@@ -248,11 +248,19 @@
 
 .node-url {
   font-size: 11px;
-  color: #9ca3af;
+  color: #3b82f6;
   margin-top: 8px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+}
+
+.node-url:hover {
+  color: #2563eb;
+  text-decoration: underline;
 }
 
 /* ========== 暗色模式 ========== */
@@ -285,7 +293,11 @@
   }
 
   .node-url {
-    color: #6b7280;
+    color: #60a5fa;
+  }
+
+  .node-url:hover {
+    color: #93bbfd;
   }
 }
 
