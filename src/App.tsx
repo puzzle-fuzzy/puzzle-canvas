@@ -95,19 +95,15 @@ function Canvas() {
     return () => window.removeEventListener('mousemove', track)
   }, [])
 
-  // Space 键自动切换到选择模式，松开回到拖拽模式
+  // Space 键追踪：仅影响工具栏图标显示，不改 interactionMode
+  const [spaceHeld, setSpaceHeld] = useState(false)
+
   useEffect(() => {
-    const prevModeRef = { current: interactionMode }
     const down = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !e.repeat) {
-        prevModeRef.current = interactionMode
-        setInteractionMode('select')
-      }
+      if (e.code === 'Space' && !e.repeat) setSpaceHeld(true)
     }
     const up = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
-        setInteractionMode(prevModeRef.current === 'pan' ? 'pan' : 'pan')
-      }
+      if (e.code === 'Space') setSpaceHeld(false)
     }
     window.addEventListener('keydown', down)
     window.addEventListener('keyup', up)
@@ -115,7 +111,7 @@ function Canvas() {
       window.removeEventListener('keydown', down)
       window.removeEventListener('keyup', up)
     }
-  }, [interactionMode])
+  }, [])
 
   // ========== 初始视口（渲染前从 localStorage 读取，避免闪烁）==========
   const savedViewport = useRef(() => {
@@ -716,14 +712,14 @@ function Canvas() {
       {/* 右侧模式切换工具栏 */}
       <div className={`mode-toolbar ${darkMode ? 'dark' : 'light'}`}>
         <button
-          className={`mode-toolbar-btn ${interactionMode === 'pan' ? 'active' : ''}`}
+          className={`mode-toolbar-btn ${interactionMode === 'pan' && !spaceHeld ? 'active' : ''}`}
           onClick={() => setInteractionMode('pan')}
           title="拖拽模式（Space 切换）"
         >
           <Hand size={20} />
         </button>
         <button
-          className={`mode-toolbar-btn ${interactionMode === 'select' ? 'active' : ''}`}
+          className={`mode-toolbar-btn ${interactionMode === 'select' || spaceHeld ? 'active' : ''}`}
           onClick={() => setInteractionMode('select')}
           title="选择模式（Space 切换）"
         >
