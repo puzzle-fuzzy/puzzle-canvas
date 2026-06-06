@@ -6,6 +6,9 @@ import { createTestApp } from '../setup'
 import { uploadSessions } from '../../utils/upload'
 import type { Hono } from 'hono'
 
+/** 从响应中解析 JSON 并断言类型 */
+const json = (res: Response) => res.json() as Promise<Record<string, unknown>>
+
 describe('上传路由', () => {
   let app: Hono
 
@@ -33,7 +36,7 @@ describe('上传路由', () => {
         body: JSON.stringify(validInit),
       })
       expect(res.status).toBe(200)
-      const data = await res.json()
+      const data = await json(res)
       expect(data.uploadId).toBeDefined()
       expect(data.existingChunks).toEqual([])
     })

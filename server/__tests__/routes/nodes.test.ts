@@ -5,6 +5,12 @@ import { describe, it, expect, beforeEach } from 'bun:test'
 import { createTestApp } from '../setup'
 import type { Hono } from 'hono'
 
+/** 从响应中解析 JSON 并断言类型 */
+const json = (res: Response) => res.json() as Promise<Record<string, unknown>>
+
+/** 从响应中解析 JSON 数组 */
+const jsonArray = (res: Response) => res.json() as Promise<Record<string, unknown>[]>
+
 describe('节点路由', () => {
   let app: Hono
 
@@ -19,7 +25,7 @@ describe('节点路由', () => {
     it('空列表返回 []', async () => {
       const res = await app.request('/api/nodes')
       expect(res.status).toBe(200)
-      expect(await res.json()).toEqual([])
+      expect(await jsonArray(res)).toEqual([])
     })
 
     it('返回已创建的节点', async () => {
@@ -36,7 +42,7 @@ describe('节点路由', () => {
 
       const res = await app.request('/api/nodes')
       expect(res.status).toBe(200)
-      const data = await res.json()
+      const data = await jsonArray(res)
       expect(data).toHaveLength(1)
       expect(data[0].id).toBe('node-1')
     })
@@ -59,7 +65,7 @@ describe('节点路由', () => {
         }),
       })
       expect(res.status).toBe(201)
-      const data = await res.json()
+      const data = await json(res)
       expect(data.id).toBe('node-1')
       expect(data.type).toBe('urlNode')
       expect(data.positionX).toBe(100)
@@ -119,7 +125,7 @@ describe('节点路由', () => {
         }),
       })
       expect(res.status).toBe(400)
-      const data = await res.json()
+      const data = await json(res)
       expect(data.error).toContain('无效的节点类型')
     })
 
@@ -158,7 +164,7 @@ describe('节点路由', () => {
         body: '{invalid json}',
       })
       expect(res.status).toBe(400)
-      const data = await res.json()
+      const data = await json(res)
       expect(data.error).toContain('JSON')
     })
 
@@ -207,7 +213,7 @@ describe('节点路由', () => {
         body: JSON.stringify({ positionX: 100, positionY: 200 }),
       })
       expect(res.status).toBe(200)
-      const data = await res.json()
+      const data = await json(res)
       expect(data.positionX).toBe(100)
       expect(data.positionY).toBe(200)
     })
@@ -230,7 +236,7 @@ describe('节点路由', () => {
         body: JSON.stringify({ title: '新标题' }),
       })
       expect(res.status).toBe(200)
-      expect((await res.json()).title).toBe('新标题')
+      expect((await json(res)).title).toBe('新标题')
     })
 
     it('空更新返回 400', async () => {
@@ -269,7 +275,7 @@ describe('节点路由', () => {
         body: JSON.stringify({ positionX: 50, role: 'admin' }),
       })
       expect(res.status).toBe(200)
-      expect((await res.json()).positionX).toBe(50)
+      expect((await json(res)).positionX).toBe(50)
     })
 
     it('positionX 为字符串返回 400', async () => {
@@ -332,7 +338,7 @@ describe('节点路由', () => {
       expect(res.status).toBe(204)
 
       const list = await app.request('/api/nodes')
-      expect(await list.json()).toEqual([])
+      expect(await jsonArray(list)).toEqual([])
     })
 
     it('删除不存在的节点返回 404', async () => {

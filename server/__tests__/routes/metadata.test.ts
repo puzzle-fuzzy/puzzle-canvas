@@ -181,7 +181,7 @@ describe('GET /api/metadata', () => {
   it('SSRF 私有 IP 被拦截', async () => {
     const res = await app.request('/api/metadata?url=http://192.168.1.1')
     expect(res.status).toBe(400)
-    const data = await res.json()
+    const data = await res.json() as Record<string, unknown>
     expect(data.error).toContain('私有网络')
   })
 

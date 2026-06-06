@@ -1,0 +1,1 @@
+{"root":["./server/__tests__/setup.ts","./server/__tests__/routes/ai.test.ts","./server/__tests__/routes/metadata.test.ts","./server/__tests__/routes/nodes.test.ts","./server/__tests__/routes/upload.test.ts","./server/__tests__/utils/upload.test.ts"],"version":"6.0.3"}
