@@ -1,5 +1,57 @@
 import type { AppNode } from './types'
 
+const MARGIN = 50
+const GAP = 24
+const COL_COUNT = 3
+const URL_NODE_HEIGHT = 280
+const MEDIA_NODE_WIDTH = 320
+
+/** 估算节点高度 */
+function getNodeHeight(node: AppNode): number {
+  // xyflow 渲染后会有 measured.height
+  const measured = (node as Record<string, unknown>).measured as { height?: number } | undefined
+  if (measured?.height) return measured.height
+  // URL 节点固定高度
+  if (node.type === 'urlNode') return URL_NODE_HEIGHT
+  // 媒体节点默认高度（正方形估算）
+  return MEDIA_NODE_WIDTH
+}
+
+/** 瀑布流布局：新节点放到最矮列的底部 */
+function getNextPosition(nodes: AppNode[]): { x: number; y: number } {
+  const stepX = MEDIA_NODE_WIDTH + GAP
+
+  if (nodes.length === 0) {
+    return { x: MARGIN, y: MARGIN }
+  }
+
+  // 构建每列的底部 y 坐标
+  const colTops: number[] = new Array(COL_COUNT).fill(MARGIN)
+
+  for (const node of nodes) {
+    const col = Math.round((node.position.x - MARGIN) / stepX)
+    const clampedCol = Math.max(0, Math.min(col, COL_COUNT - 1))
+    const height = getNodeHeight(node)
+    const bottom = node.position.y + height + GAP
+    if (bottom > colTops[clampedCol]) {
+      colTops[clampedCol] = bottom
+    }
+  }
+
+  // 找到最矮的列
+  let minCol = 0
+  for (let i = 1; i < COL_COUNT; i++) {
+    if (colTops[i] < colTops[minCol]) {
+      minCol = i
+    }
+  }
+
+  return {
+    x: MARGIN + minCol * stepX,
+    y: colTops[minCol],
+  }
+}
+
 /** 校验字符串是否为合法 HTTP/HTTPS URL */
 function isValidUrl(str: string): boolean {
   try {
@@ -17,39 +69,6 @@ function getDomain(url: string): string {
   } catch {
     return url
   }
-}
-
-/** 计算新节点的放置位置（网格布局，避免堆叠） */
-function getNextPosition(nodes: AppNode[]): { x: number; y: number } {
-  const CARD_WIDTH = 280
-  const GAP = 40
-  const STEP_X = CARD_WIDTH + GAP
-  const STEP_Y = 320
-  const MAX_X = 960 // 大约 3 列
-
-  if (nodes.length === 0) {
-    return { x: 50, y: 50 }
-  }
-
-  // 计算每个网格位置是否被占用
-  const occupied = new Set<string>()
-  for (const node of nodes) {
-    const col = Math.round((node.position.x - 50) / STEP_X)
-    const row = Math.round((node.position.y - 50) / STEP_Y)
-    occupied.add(`${col},${row}`)
-  }
-
-  // 找到第一个空位
-  for (let row = 0; row < 100; row++) {
-    for (let col = 0; col < Math.ceil(MAX_X / STEP_X); col++) {
-      if (!occupied.has(`${col},${row}`)) {
-        return { x: 50 + col * STEP_X, y: 50 + row * STEP_Y }
-      }
-    }
-  }
-
-  // fallback
-  return { x: 50, y: 50 }
 }
 
 /** 获取 API 基础 URL（开发环境直连后端，避免 Vite 代理问题） */
