@@ -62,7 +62,9 @@ export async function uploadFileChunked(
     const err = await initRes.json().catch(() => ({ error: '上传初始化失败' }))
     throw new Error(err.error ?? `上传初始化失败 (${initRes.status})`)
   }
-  const { uploadId, existingChunks }: UploadInitResponse = await initRes.json()
+  const { uploadId, existingChunks }: UploadInitResponse = await initRes.json().catch(() => {
+    throw new Error('上传初始化响应解析失败')
+  })
   const uploadedSet = new Set(existingChunks)
 
   // 3. 逐片上传（跳过已有分片）
@@ -130,5 +132,7 @@ export async function uploadFileChunked(
     throw new Error(err.error ?? `合并失败 (${completeRes.status})`)
   }
 
-  return await completeRes.json()
+  return await completeRes.json().catch(() => {
+    throw new Error('合并完成响应解析失败')
+  })
 }
