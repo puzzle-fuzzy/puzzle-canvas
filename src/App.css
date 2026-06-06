@@ -295,7 +295,6 @@
 
 .media-image-wrapper {
   width: 100%;
-  max-height: 280px;
   overflow: hidden;
   border-radius: 6px;
   display: flex;
@@ -307,8 +306,6 @@
 .media-image {
   width: 100%;
   height: auto;
-  max-height: 280px;
-  object-fit: contain;
   display: block;
 }
 
@@ -322,8 +319,6 @@
 .media-video {
   width: 100%;
   display: block;
-  max-height: 280px;
-  object-fit: contain;
 }
 
 /* 文件名在节点外左下角 */
