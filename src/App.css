@@ -1,3 +1,8 @@
+/* ========== 全局变量 ========== */
+:root {
+  --node-width: 320px;
+}
+
 /* ========== 画布容器 ========== */
 .canvas-container {
   width: 100vw;
@@ -114,7 +119,7 @@
 
 /* ========== 自定义 URL 节点卡片 ========== */
 .url-node {
-  width: 320px;
+  width: var(--node-width);
   background: #ffffff;
   border-radius: 6px;
   overflow: hidden;
@@ -261,7 +266,7 @@
 
 /* ========== 媒体节点（图片/视频）========== */
 .media-node {
-  width: 320px;
+  width: var(--node-width);
   position: relative;
   display: flex;
   flex-direction: column;

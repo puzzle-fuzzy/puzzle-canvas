@@ -3,7 +3,7 @@ import type { AppNode } from './types'
 const GAP_X = 16
 const GAP_Y = 36
 const COL_COUNT = 3
-const MEDIA_NODE_WIDTH = 320
+const NODE_WIDTH = 320
 
 /** 选区瀑布流布局参数（与上传多文件瀑布流一致） */
 const SEL_GAP_X = GAP_X
@@ -16,7 +16,7 @@ const SEL_COL_COUNT = COL_COUNT
  * 在起始点附近按 3 列瀑布流排列，互不重叠
  */
 function localWaterfallLayout(origin: { x: number; y: number }) {
-  const stepX = MEDIA_NODE_WIDTH + GAP_X
+  const stepX = NODE_WIDTH + GAP_X
   const colTops: number[] = new Array(COL_COUNT).fill(origin.y)
 
   return {
@@ -53,7 +53,7 @@ function selectionWaterfallLayout(
   // 获取节点默认尺寸（所有节点宽度统一 320px）
   const defaultSize = (n: AppNode) => {
     if (n.measured?.width && n.measured?.height) return n.measured
-    return { width: 320, height: 200 }
+    return { width: NODE_WIDTH, height: 200 }
   }
 
   // 按高度降序排列，让大块先放，布局更紧凑
@@ -93,9 +93,9 @@ function getImageRenderHeight(src: string): Promise<number> {
     const img = new Image()
     img.onload = () => {
       const ratio = img.naturalHeight / img.naturalWidth
-      resolve(Math.round(MEDIA_NODE_WIDTH * ratio))
+      resolve(Math.round(NODE_WIDTH * ratio))
     }
-    img.onerror = () => resolve(MEDIA_NODE_WIDTH)
+    img.onerror = () => resolve(NODE_WIDTH)
     img.src = src
   })
 }
@@ -218,4 +218,5 @@ export {
   persistNodePosition,
   persistNodeDelete,
   loadNodes,
+  NODE_WIDTH,
 }

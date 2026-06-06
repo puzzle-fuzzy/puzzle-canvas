@@ -33,6 +33,7 @@ import {
   selectionWaterfallLayout,
   getImageRenderHeight,
   getApiUrl,
+  NODE_WIDTH,
 } from './utils'
 import './App.css'
 
@@ -264,7 +265,7 @@ function Canvas() {
           const result = await uploadFile(file)
 
           // 获取实际渲染高度用于瀑布流定位
-          let height = 320
+          let height = NODE_WIDTH
           if (result.mediaType === 'image') {
             height = await getImageRenderHeight(getApiUrl(result.src))
           }
@@ -354,7 +355,7 @@ function Canvas() {
     let maxX = -Infinity
     let minY = Infinity
     for (const n of selected) {
-      const w = n.measured?.width ?? 320
+      const w = n.measured?.width ?? NODE_WIDTH
       maxX = Math.max(maxX, n.position.x + w)
       minY = Math.min(minY, n.position.y)
     }
