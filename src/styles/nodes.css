@@ -1,0 +1,454 @@
+/* ========== 自定义 URL 节点卡片 ========== */
+.url-node {
+  width: var(--node-width);
+  background: #ffffff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s ease;
+}
+
+.url-node:hover {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+/* 头部：favicon + 域名 */
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px 8px;
+}
+
+.node-favicon {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.node-favicon-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+}
+
+.node-domain {
+  font-size: 12px;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 图片区域 */
+.node-image-wrapper {
+  width: 100%;
+  height: 140px;
+  overflow: hidden;
+}
+
+.node-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 内容区域 */
+.node-body {
+  padding: 10px 14px 14px;
+}
+
+.node-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.4;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+
+.node-description {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin-top: 6px;
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.node-url {
+  font-size: 11px;
+  color: #3b82f6;
+  margin-top: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+}
+
+.node-url:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+/* ========== 暗色模式 ========== */
+html.dark {
+  .url-node {
+    background: #1e1f28;
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.2),
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+
+  .url-node:hover {
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.25),
+      0 8px 24px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  .node-domain {
+    color: #9ca3af;
+  }
+
+  .node-title {
+    color: #f3f4f6;
+  }
+
+  .node-description {
+    color: #9ca3af;
+  }
+
+  .node-url {
+    color: #60a5fa;
+  }
+
+  .node-url:hover {
+    color: #93bbfd;
+  }
+}
+
+/* ========== 文档节点 ========== */
+.doc-node {
+  width: var(--node-width);
+  background: #ffffff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease;
+}
+
+.doc-node:hover {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.doc-node-icon {
+  flex-shrink: 0;
+  color: #6366f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.doc-node-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.doc-node-filename {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.doc-node-size {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+html.dark {
+  .doc-node {
+    background: #1e1f28;
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.2),
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+
+  .doc-node:hover {
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.25),
+      0 8px 24px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  .doc-node-icon {
+    color: #818cf8;
+  }
+
+  .doc-node-filename {
+    color: #f3f4f6;
+  }
+
+  .doc-node-size {
+    color: #6b7280;
+  }
+}
+
+/* ========== 媒体节点（图片/视频）========== */
+.media-node {
+  width: var(--node-width);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+  overflow: visible;
+  background: #ffffff;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease;
+}
+
+.media-node:hover {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.media-image-wrapper {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+}
+
+.media-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.media-video-wrapper {
+  width: 100%;
+  background: #000;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.media-video {
+  width: 100%;
+  display: block;
+}
+
+/* 文件名在节点外左下角 */
+.media-file-name {
+  position: absolute;
+  left: 0;
+  bottom: -22px;
+  max-width: 100%;
+  font-size: 11px;
+  color: #9ca3af;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ========== 暗色模式 ========== */
+html.dark {
+  .media-node {
+    background: #1e1f28;
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.2),
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+
+  .media-node:hover {
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.25),
+      0 8px 24px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  .media-image-wrapper {
+    background: #374151;
+  }
+
+  .media-file-name {
+    color: #6b7280;
+  }
+}
+/* ========== 上传进度节点 ========== */
+.media-node--uploading {
+  width: var(--node-width);
+  height: calc(var(--node-width) / 1.618);
+  background: #ffffff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  padding-right: 36px;
+  position: relative;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease;
+}
+
+.media-node--uploading:hover {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.upload-progress-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.upload-progress-icon {
+  display: flex;
+  align-items: center;
+  color: #6366f1;
+}
+
+.upload-progress-filename {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upload-progress-bar-track {
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.upload-progress-bar-fill {
+  height: 100%;
+  background: #6366f1;
+  border-radius: 3px;
+  transition: width 0.2s ease;
+}
+
+.upload-progress-percent {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.upload-cancel-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.upload-cancel-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+html.dark {
+  .media-node--uploading {
+    background: #1e1f28;
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.2),
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+
+  .media-node--uploading:hover {
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.25),
+      0 8px 24px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  .upload-progress-filename {
+    color: #f3f4f6;
+  }
+
+  .upload-progress-bar-track {
+    background: #374151;
+  }
+
+  .upload-progress-bar-fill {
+    background: #818cf8;
+  }
+
+  .upload-progress-percent {
+    color: #9ca3af;
+  }
+
+  .upload-cancel-btn {
+    color: #6b7280;
+  }
+
+  .upload-cancel-btn:hover {
+    background: #450a0a;
+    color: #f87171;
+  }
+}

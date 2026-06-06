@@ -1,0 +1,138 @@
+/* ========== 右侧模式工具栏 ========== */
+.mode-toolbar {
+  position: fixed;
+  top: 45px;
+  right: 10px;
+  width: var(--mode-toolbar-size);
+  border-radius: var(--mode-toolbar-size);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 0;
+  z-index: 10;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+/* 暗色工具栏 */
+.mode-toolbar.dark {
+  background: #000;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.mode-toolbar.dark .mode-toolbar-btn {
+  color: #fff;
+}
+
+.mode-toolbar.dark .mode-toolbar-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mode-toolbar.dark .mode-toolbar-btn.active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.mode-toolbar.dark .mode-toolbar-divider {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* 亮色工具栏 */
+.mode-toolbar.light {
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.mode-toolbar.light .mode-toolbar-btn {
+  color: #000;
+}
+
+.mode-toolbar.light .mode-toolbar-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.mode-toolbar.light .mode-toolbar-btn.active {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.mode-toolbar.light .mode-toolbar-divider {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.mode-toolbar-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 30px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mode-toolbar-divider {
+  width: 32px;
+  height: 1px;
+  margin: 2px 0;
+}
+/* ========== 选区操作工具栏 ========== */
+.selection-toolbar {
+  z-index: 5;
+  pointer-events: auto;
+  display: flex;
+  gap: 2px;
+  border-radius: 50px;
+  padding: 4px;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.selection-toolbar.dark {
+  background: #000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.selection-toolbar.dark .selection-toolbar-btn {
+  color: #fff;
+}
+
+.selection-toolbar.dark .selection-toolbar-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.selection-toolbar.dark .selection-toolbar-btn--danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.selection-toolbar.light {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.selection-toolbar.light .selection-toolbar-btn {
+  color: #000;
+}
+
+.selection-toolbar.light .selection-toolbar-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.selection-toolbar.light .selection-toolbar-btn--danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.selection-toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}

@@ -1,0 +1,156 @@
+/* ========== 画布容器 ========== */
+.canvas-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+/* ========== 加载中 ========== */
+.canvas-loading {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #9ca3af;
+  background: #fafafa;
+}
+
+html.dark {
+  .canvas-loading {
+    color: #6b7280;
+    background: #111118;
+  }
+}
+
+/* ========== 处理中提示 ========== */
+.loading-indicator {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  font-size: 12px;
+  color: #6366f1;
+  padding: 6px 14px;
+  background: #eef2ff;
+  border-radius: 6px;
+}
+
+html.dark {
+  .loading-indicator {
+    color: #a5b4fc;
+    background: #312e81;
+  }
+}
+
+/* ========== 错误提示 ========== */
+.error-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+html.dark {
+  .error-toast {
+    background: #450a0a;
+    color: #fca5a5;
+    border-color: #7f1d1d;
+  }
+}
+
+/* ========== 空状态提示 ========== */
+.empty-hint {
+  position: fixed;
+  bottom: 50%;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  text-align: center;
+  color: #9ca3af;
+  pointer-events: none;
+  user-select: none;
+}
+
+.empty-hint p {
+  font-size: 16px;
+  margin: 4px 0;
+}
+
+.empty-hint-sub {
+  font-size: 13px;
+  color: #d1d5db;
+}
+
+html.dark {
+  .empty-hint {
+    color: #6b7280;
+  }
+  .empty-hint-sub {
+    color: #4b5563;
+  }
+}
+/* ========== xyflow 主题覆盖 ========== */
+.react-flow__background {
+  background-color: #fafafa;
+}
+
+.react-flow__minimap {
+  background-color: #f0f0f0;
+}
+
+html.dark {
+  .react-flow__background {
+    background-color: #111118;
+  }
+
+  .react-flow__minimap {
+    background-color: #1a1a24;
+  }
+
+  .react-flow__controls {
+    background: #1e1f28;
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .react-flow__controls-button {
+    background: #1e1f28;
+    border-color: rgba(255, 255, 255, 0.06);
+    fill: rgba(255, 255, 255, 0.6);
+  }
+
+  .react-flow__controls-button:hover {
+    background: rgba(255, 255, 255, 0.06);
+    fill: #fff;
+  }
+
+  .react-flow__attribution {
+    background: rgba(30, 31, 40, 0.8);
+  }
+
+  .react-flow__attribution a {
+    color: rgba(255, 255, 255, 0.4);
+  }
+}

@@ -37,11 +37,13 @@ export function registerNodeRoutes(app: Hono) {
     }
 
     // 插入数据库，未提供的可选字段默认为 null
+    // TODO: userId 后续从认证中间件获取当前用户 ID
     const result = db.insert(nodes).values({
       id: body.id,
       type: body.type,
       positionX: body.positionX,
       positionY: body.positionY,
+      userId: body.userId ?? 'temp',
       url: body.url ?? null,
       title: body.title ?? null,
       description: body.description ?? null,
