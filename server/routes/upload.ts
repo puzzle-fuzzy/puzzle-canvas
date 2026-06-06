@@ -18,7 +18,10 @@ import type { Hono } from 'hono'
 import { mkdirSync, readdirSync, rmSync } from 'node:fs'
 import {
   isDangerousFile,
+  isValidFingerprint,
+  isSafeFileName,
   MAX_FILE_SIZE,
+  MAX_CHUNK_SIZE,
   CHUNK_DIR,
   uploadSessions,
 } from '../utils/upload'
@@ -29,16 +32,39 @@ export function registerUploadRoutes(app: Hono) {
     const body = await c.req.json()
     const { fileName, fileSize, totalChunks, fingerprint } = body
 
-    if (!fileName || !fileSize || !totalChunks || !fingerprint) {
-      return c.json({ error: '缺少必要字段' }, 400)
+    // 校验必填字段存在性
+    if (!fileName || fileSize == null || totalChunks == null || !fingerprint) {
+      return c.json({ error: '缺少必要字段 (fileName, fileSize, totalChunks, fingerprint)' }, 400)
     }
 
+    // 校验文件名安全性
+    if (!isSafeFileName(fileName)) {
+      return c.json({ error: '文件名不合法' }, 400)
+    }
+
+    // 校验文件类型
     if (isDangerousFile(fileName)) {
       return c.json({ error: '不支持的文件类型' }, 400)
     }
 
+    // 校验 fileSize 为非负数字
+    if (typeof fileSize !== 'number' || isNaN(fileSize) || fileSize < 0) {
+      return c.json({ error: 'fileSize 必须为非负数字' }, 400)
+    }
+
+    // 校验文件大小上限
     if (fileSize > MAX_FILE_SIZE) {
       return c.json({ error: '文件过大（最大 800MB）' }, 413)
+    }
+
+    // 校验 totalChunks 为正整数
+    if (!Number.isInteger(totalChunks) || totalChunks <= 0) {
+      return c.json({ error: 'totalChunks 必须为正整数' }, 400)
+    }
+
+    // 校验 fingerprint 格式（仅允许 SHA-256 hex 字符，防止路径遍历）
+    if (typeof fingerprint !== 'string' || !isValidFingerprint(fingerprint)) {
+      return c.json({ error: 'fingerprint 格式无效' }, 400)
     }
 
     const uploadId = crypto.randomUUID()
@@ -80,6 +106,12 @@ export function registerUploadRoutes(app: Hono) {
     if (!(chunk instanceof File)) {
       return c.json({ error: '未提供分片' }, 400)
     }
+
+    // 校验单分片大小
+    if (chunk.size > MAX_CHUNK_SIZE) {
+      return c.json({ error: '分片大小超过限制（最大 100MB）' }, 413)
+    }
+
     if (isNaN(chunkIndex) || chunkIndex < 0 || chunkIndex >= session.totalChunks) {
       return c.json({ error: '无效的分片索引' }, 400)
     }
@@ -99,6 +131,17 @@ export function registerUploadRoutes(app: Hono) {
     const session = uploadSessions.get(uploadId)
     if (!session) {
       return c.json({ error: '无效的 uploadId' }, 400)
+    }
+
+    // 再次校验文件名（防止绕过 init 阶段）
+    if (!fileName || typeof fileName !== 'string') {
+      return c.json({ error: '缺少 fileName' }, 400)
+    }
+    if (!isSafeFileName(fileName)) {
+      return c.json({ error: '文件名不合法' }, 400)
+    }
+    if (isDangerousFile(fileName)) {
+      return c.json({ error: '不支持的文件类型' }, 400)
     }
 
     const chunkDir = `${CHUNK_DIR}/${session.fingerprint}`
