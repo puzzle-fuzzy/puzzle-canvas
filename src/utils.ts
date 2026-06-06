@@ -16,7 +16,6 @@ function localWaterfallLayout(origin: { x: number; y: number }) {
 
   return {
     next(height: number): { x: number; y: number } {
-      // 找最矮列
       let minCol = 0
       for (let i = 1; i < COL_COUNT; i++) {
         if (colTops[i] < colTops[minCol]) minCol = i
@@ -39,7 +38,7 @@ function getImageRenderHeight(src: string): Promise<number> {
       const ratio = img.naturalHeight / img.naturalWidth
       resolve(Math.round(MEDIA_NODE_WIDTH * ratio))
     }
-    img.onerror = () => resolve(MEDIA_NODE_WIDTH) // fallback 正方形
+    img.onerror = () => resolve(MEDIA_NODE_WIDTH)
     img.src = src
   })
 }
@@ -63,7 +62,7 @@ function getDomain(url: string): string {
   }
 }
 
-/** 获取 API 基础 URL（开发环境直连后端，避免 Vite 代理大文件 EPIPE 问题） */
+/** 获取 API 基础 URL（开发环境直连后端，用于上传避免 EPIPE） */
 function getApiUrl(path: string): string {
   if (import.meta.env.DEV) {
     return `http://localhost:3001${path}`
@@ -71,23 +70,23 @@ function getApiUrl(path: string): string {
   return path
 }
 
-/**
- * 非 upload 的 API 调用优先走 Vite proxy
- * 如果 proxy 不可用（后端未启动），fallback 到直连
- */
+/** 非 upload 的 API 路径（走 Vite proxy） */
 function getApiPath(path: string): string {
   return path
 }
 
-/** 带自动 fallback 的 fetch：proxy 失败则直连后端 */
+/** 带自动 fallback 的 fetch：proxy 返回 502/504 则直连后端 */
 async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
   try {
     const res = await fetch(path, init)
+    if (import.meta.env.DEV && (res.status === 502 || res.status === 504)) {
+      const fallback = await fetch(`http://localhost:3001${path}`, init)
+      return fallback
+    }
     return res
   } catch {
-    // proxy 失败，尝试直连后端
     if (import.meta.env.DEV) {
-      return fetch(`http://localhost:3001${path}`, init)
+      return await fetch(`http://localhost:3001${path}`, init)
     }
     throw new Error('请求失败')
   }
