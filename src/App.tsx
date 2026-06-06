@@ -25,7 +25,6 @@ import { useCanvasStore } from './stores/canvasStore'
 import { useUIStore } from './stores/uiStore'
 import { useCanvasActions } from './hooks/useCanvasActions'
 import { useInputListeners } from './hooks/useInputListeners'
-import { useDarkModeSync } from './hooks/useDarkModeSync'
 import { useNodeLoader } from './hooks/useNodeLoader'
 import { useSelectionToolbar } from './hooks/useSelectionToolbar'
 
@@ -41,7 +40,6 @@ const nodeTypes = {
 function Canvas() {
   useNodeLoader()
   useInputListeners()
-  useDarkModeSync()
 
   const initialized = useCanvasStore((s) => s.initialized)
   const nodes = useCanvasStore((s) => s.nodes)
