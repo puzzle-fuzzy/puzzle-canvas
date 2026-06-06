@@ -460,15 +460,7 @@ function Canvas() {
     [addNodeFromFiles, screenToFlowPosition],
   )
 
-  if (!initialized) {
-    return (
-      <div className="canvas-loading">
-        <span>加载中...</span>
-      </div>
-    )
-  }
-
-  // 计算选区工具栏位置（包围盒右上角，屏幕坐标）
+  // ========== AI 生图 ==========
   const toolbarPos = (() => {
     if (selectedNodeIds.length < 1) return null
     const selected = nodesRef.current.filter((n) => selectedNodeIds.includes(n.id))
