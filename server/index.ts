@@ -117,8 +117,11 @@ const DANGEROUS_EXTENSIONS = new Set([
 ])
 
 function isDangerousFile(fileName: string): boolean {
-  const ext = fileName.includes('.') ? fileName.split('.').pop()!.toLowerCase() : ''
-  return DANGEROUS_EXTENSIONS.has(ext)
+  const parts = fileName.toLowerCase().split('.')
+  for (let i = 1; i < parts.length; i++) {
+    if (DANGEROUS_EXTENSIONS.has(parts[i])) return true
+  }
+  return false
 }
 
 const MAX_FILE_SIZE = 800 * 1024 * 1024 // 800 MB

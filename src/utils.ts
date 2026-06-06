@@ -100,6 +100,43 @@ function getImageRenderHeight(src: string): Promise<number> {
   })
 }
 
+/** 从本地 File 预计算图片渲染高度 */
+function getImageFileHeight(file: File): Promise<number> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const ratio = img.naturalHeight / img.naturalWidth
+      resolve(Math.round(NODE_WIDTH * ratio))
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      resolve(NODE_WIDTH)
+    }
+    img.src = url
+  })
+}
+
+/** 从本地 File 预计算视频渲染高度 */
+function getVideoFileHeight(file: File): Promise<number> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file)
+    const video = document.createElement('video')
+    video.preload = 'metadata'
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(url)
+      const ratio = video.videoHeight / video.videoWidth
+      resolve(Math.round(NODE_WIDTH * (ratio || 1)))
+    }
+    video.onerror = () => {
+      URL.revokeObjectURL(url)
+      resolve(NODE_WIDTH)
+    }
+    video.src = url
+  })
+}
+
 /** 危险文件扩展名（与后端一致） */
 const DANGEROUS_EXTENSIONS = new Set([
   'exe', 'bat', 'cmd', 'com', 'scr', 'msi', 'dll', 'sys', 'vxd',
@@ -111,10 +148,14 @@ const DANGEROUS_EXTENSIONS = new Set([
   'hta', 'cpl',
 ])
 
-/** 判断文件是否为危险类型 */
+/** 判断文件是否为危险类型（检查所有扩展名，防止双扩展名绕过） */
 function isDangerousFile(fileName: string): boolean {
-  const ext = fileName.includes('.') ? fileName.split('.').pop()!.toLowerCase() : ''
-  return DANGEROUS_EXTENSIONS.has(ext)
+  const parts = fileName.toLowerCase().split('.')
+  // 检查每个扩展名段（跳过第一个，它是文件名主体）
+  for (let i = 1; i < parts.length; i++) {
+    if (DANGEROUS_EXTENSIONS.has(parts[i])) return true
+  }
+  return false
 }
 
 /** 校验字符串是否为合法 HTTP/HTTPS URL */
@@ -368,6 +409,8 @@ export {
   localWaterfallLayout,
   selectionWaterfallLayout,
   getImageRenderHeight,
+  getImageFileHeight,
+  getVideoFileHeight,
   uploadFile,
   uploadFileChunked,
   registerUploadController,

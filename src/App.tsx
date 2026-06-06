@@ -33,7 +33,8 @@ import {
   loadNodes,
   localWaterfallLayout,
   selectionWaterfallLayout,
-  getImageRenderHeight,
+  getImageFileHeight,
+  getVideoFileHeight,
   getApiUrl,
   NODE_WIDTH,
   uploadFileChunked,
@@ -250,7 +251,7 @@ function Canvas() {
 
   // ========== 文件节点（分片上传 + 进度节点）==========
   const addNodeFromFiles = useCallback(
-    (files: FileList | File[], origin: { x: number; y: number }) => {
+    async (files: FileList | File[], origin: { x: number; y: number }) => {
       const allFiles = Array.from(files)
       const validFiles = allFiles.filter((f) => !isDangerousFile(f.name))
       if (validFiles.length === 0) {
@@ -262,14 +263,23 @@ function Canvas() {
       setError(null)
       const layout = localWaterfallLayout(origin)
 
-      // 为每个文件立即创建进度节点，然后串行上传
+      // 为每个文件预计算高度并立即创建进度节点，然后串行上传
       let uploadChain: Promise<void> = Promise.resolve()
 
       for (const file of validFiles) {
-        const pos = layout.next(NODE_WIDTH)
-        const nodeId = `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
         const isVideo = file.type.startsWith('video/')
         const isImage = file.type.startsWith('image/')
+
+        // 从本地文件预计算渲染高度，用于瀑布流定位
+        let nodeHeight = 80 // 文档节点默认高度
+        if (isImage) {
+          nodeHeight = await getImageFileHeight(file)
+        } else if (isVideo) {
+          nodeHeight = await getVideoFileHeight(file)
+        }
+
+        const pos = layout.next(nodeHeight)
+        const nodeId = `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
         // 立即创建带进度的节点
         const newNode: AppNode = isVideo
