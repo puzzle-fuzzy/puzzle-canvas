@@ -1,6 +1,7 @@
 import { useRef, useCallback } from 'react'
 import type { NodeProps } from '@xyflow/react'
-import { X } from 'lucide-react'
+import { Icon } from '@ricons/utils'
+import { Dismiss20Regular, Video20Regular, Image20Regular } from '@ricons/fluent'
 import type { ImageNodeType, VideoNodeType } from '../types'
 import { cancelUpload } from '../utils'
 
@@ -33,7 +34,9 @@ function MediaNode({ data, type, id }: MediaNodeProps) {
     return (
       <div className="media-node media-node--uploading">
         <div className="upload-progress-content">
-          <span className="upload-progress-icon">{isVideo ? '🎬' : '🖼️'}</span>
+          <span className="upload-progress-icon">
+            <Icon size={20}>{isVideo ? <Video20Regular /> : <Image20Regular />}</Icon>
+          </span>
           <span className="upload-progress-filename">{data.uploading.fileName}</span>
           <div className="upload-progress-bar-track">
             <div
@@ -48,7 +51,7 @@ function MediaNode({ data, type, id }: MediaNodeProps) {
           onClick={handleCancel}
           title="取消上传"
         >
-          <X size={14} />
+          <Icon size={14}><Dismiss20Regular /></Icon>
         </button>
       </div>
     )

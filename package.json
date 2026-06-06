@@ -18,10 +18,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ricons/fluent": "^0.13.0",
+    "@ricons/utils": "^0.1.6",
     "@xyflow/react": "^12.11.0",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.12.23",
-    "lucide-react": "^1.17.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },

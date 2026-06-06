@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import type { NodeProps } from '@xyflow/react'
-import { X, FileText, FileCode, FileArchive } from 'lucide-react'
+import { Icon } from '@ricons/utils'
+import { Dismiss20Regular, DocumentText20Regular, DocumentJavascript20Regular, FolderZip20Regular } from '@ricons/fluent'
 import type { DocNodeType } from '../types'
 import { cancelUpload } from '../utils'
 
@@ -16,9 +17,9 @@ function getFileIcon(fileName: string) {
     'sh', 'bash', 'sql', 'graphql', 'vue', 'svelte',
   ]
 
-  if (archiveExts.includes(ext)) return <FileArchive size={28} />
-  if (codeExts.includes(ext)) return <FileCode size={28} />
-  return <FileText size={28} />
+  if (archiveExts.includes(ext)) return <Icon size={28}><FolderZip20Regular /></Icon>
+  if (codeExts.includes(ext)) return <Icon size={28}><DocumentJavascript20Regular /></Icon>
+  return <Icon size={28}><DocumentText20Regular /></Icon>
 }
 
 /** 格式化文件大小 */
@@ -56,7 +57,7 @@ function DocNode({ data, id }: DocNodeProps) {
           onClick={handleCancel}
           title="取消上传"
         >
-          <X size={14} />
+          <Icon size={14}><Dismiss20Regular /></Icon>
         </button>
       </div>
     )

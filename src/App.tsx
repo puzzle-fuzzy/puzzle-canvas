@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { LayoutGrid, Download, Trash2, Hand, MousePointer2, Sparkles, X, Loader2, Sun, Moon } from 'lucide-react'
+import { Icon } from '@ricons/utils'
+import { Board20Regular, ArrowDownload20Regular, Delete20Regular, HandRight20Regular, Cursor20Regular, Sparkle20Regular, Dismiss20Regular, SpinnerIos20Regular, WeatherSunny20Regular, WeatherMoon20Regular } from '@ricons/fluent'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -16,6 +17,7 @@ import '@xyflow/react/dist/style.css'
 import UrlNode from './components/UrlNode'
 import MediaNode from './components/MediaNode'
 import DocNode from './components/DocNode'
+import ModelSelect from './components/ModelSelect'
 import type {
   AppNode,
   UrlNodeType,
@@ -63,15 +65,30 @@ function Canvas() {
   const [aiPrompt, setAiPrompt] = useState('')
   const [aiModel, setAiModel] = useState('dall-e-3')
   const [aiGenerating, setAiGenerating] = useState(false)
-  // 日夜模式（默认跟随系统）
-  const [darkMode, setDarkMode] = useState(
-    () => window.matchMedia('(prefers-color-scheme: dark)').matches,
-  )
+  // 日夜模式（优先读取用户偏好，其次跟随系统）
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme')
+    if (saved) return saved === 'dark'
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
 
-  // 同步 darkMode 到 <html> class
+  // 同步 darkMode 到 <html> class 并持久化
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode)
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light')
   }, [darkMode])
+
+  // 监听系统主题变化（仅在用户未手动设置过时跟随）
+  useEffect(() => {
+    const mql = window.matchMedia('(prefers-color-scheme: dark)')
+    const handler = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem('theme')) {
+        setDarkMode(e.matches)
+      }
+    }
+    mql.addEventListener('change', handler)
+    return () => mql.removeEventListener('change', handler)
+  }, [])
   const nodesRef = useRef<AppNode[]>(nodes)
   nodesRef.current = nodes
   const mouseRef = useRef({ x: 0, y: 0 })
@@ -616,7 +633,6 @@ function Canvas() {
         <MiniMap
           pannable
           zoomable
-          style={{ background: 'var(--minimap-bg, #f0f0f0)' }}
         />
       </ReactFlow>
 
@@ -632,14 +648,14 @@ function Canvas() {
         >
           {selectedNodeIds.length > 1 && (
             <button className="selection-toolbar-btn" onClick={handleOrganize} title="整理">
-              <LayoutGrid size={15} />
+              <Icon size={15}><Board20Regular /></Icon>
             </button>
           )}
           <button className="selection-toolbar-btn" onClick={handleDownloadSelected} title="下载">
-            <Download size={15} />
+            <Icon size={15}><ArrowDownload20Regular /></Icon>
           </button>
           <button className="selection-toolbar-btn selection-toolbar-btn--danger" onClick={handleDeleteSelected} title="删除">
-            <Trash2 size={15} />
+            <Icon size={15}><Delete20Regular /></Icon>
           </button>
         </div>
       )}
@@ -652,18 +668,18 @@ function Canvas() {
 
       {initialized && nodes.length === 0 && !loading && (
         <div className="empty-hint">
-          <p>🌐 粘贴网址、图片或视频到画布上</p>
-          <p className="empty-hint-sub">支持 Ctrl+V / ⌘+V 粘贴，或拖拽文件</p>
+          <p>粘贴网址、图片或视频到画布上</p>
+          <p className="empty-hint-sub">支持 Ctrl+V / Cmd+V 粘贴，或拖拽文件</p>
         </div>
       )}
 
       {/* AI 生图弹窗 */}
       {showAIModal && (
         <div className="ai-modal-overlay" onClick={() => !aiGenerating && setShowAIModal(false)}>
-          <div className="ai-modal" onClick={(e) => e.stopPropagation()}>
+          <div className={`ai-modal ${darkMode ? 'dark' : 'light'}`} onClick={(e) => e.stopPropagation()}>
             <div className="ai-modal-header">
               <span className="ai-modal-title">
-                <Sparkles size={16} />
+                <Icon size={16}><Sparkle20Regular /></Icon>
                 AI 生图
               </span>
               <button
@@ -671,7 +687,7 @@ function Canvas() {
                 onClick={() => !aiGenerating && setShowAIModal(false)}
                 disabled={aiGenerating}
               >
-                <X size={16} />
+                <Icon size={16}><Dismiss20Regular /></Icon>
               </button>
             </div>
 
@@ -685,23 +701,24 @@ function Canvas() {
             />
 
             <div className="ai-modal-row">
-              <select
-                className="ai-modal-select"
+              <ModelSelect
+                options={[
+                  { value: 'dall-e-3', label: 'DALL·E 3' },
+                  { value: 'flux-1.1-pro', label: 'FLUX 1.1 Pro' },
+                  { value: 'stable-diffusion-xl', label: 'Stable Diffusion XL' },
+                ]}
                 value={aiModel}
-                onChange={(e) => setAiModel(e.target.value)}
+                onChange={setAiModel}
                 disabled={aiGenerating}
-              >
-                <option value="dall-e-3">DALL·E 3</option>
-                <option value="flux-1.1-pro">FLUX 1.1 Pro</option>
-                <option value="stable-diffusion-xl">Stable Diffusion XL</option>
-              </select>
+                darkMode={darkMode}
+              />
               <button
                 className="ai-modal-generate"
                 onClick={handleAIGenerate}
                 disabled={aiGenerating || !aiPrompt.trim()}
               >
                 {aiGenerating ? (
-                  <><Loader2 size={14} className="spin" /> 生成中...</>
+                  <><span className="spin"><Icon size={14}><SpinnerIos20Regular /></Icon></span> 生成中...</>
                 ) : '生成图片'}
               </button>
             </div>
@@ -716,14 +733,14 @@ function Canvas() {
           onClick={() => setInteractionMode('pan')}
           title="拖拽模式（Space 切换）"
         >
-          <Hand size={20} />
+          <Icon size={20}><HandRight20Regular /></Icon>
         </button>
         <button
           className={`mode-toolbar-btn ${interactionMode === 'select' || spaceHeld ? 'active' : ''}`}
           onClick={() => setInteractionMode('select')}
           title="选择模式（Space 切换）"
         >
-          <MousePointer2 size={20} />
+          <Icon size={20}><Cursor20Regular /></Icon>
         </button>
         <div className="mode-toolbar-divider" />
         <button
@@ -731,7 +748,7 @@ function Canvas() {
           onClick={() => setShowAIModal(true)}
           title="AI 生图"
         >
-          <Sparkles size={20} />
+          <Icon size={20}><Sparkle20Regular /></Icon>
         </button>
         <div className="mode-toolbar-divider" />
         <button
@@ -739,7 +756,7 @@ function Canvas() {
           onClick={() => setDarkMode((d) => !d)}
           title={darkMode ? '切换到日间模式' : '切换到夜间模式'}
         >
-          {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+          {darkMode ? <Icon size={20}><WeatherSunny20Regular /></Icon> : <Icon size={20} color="currentColor"><WeatherMoon20Regular /></Icon>}
         </button>
       </div>
     </div>

@@ -6,7 +6,7 @@
 FRONTEND_PORT=5175
 BACKEND_PORT=3001
 
-echo "🧹 清理旧进程..."
+echo "[清理] 清理旧进程..."
 
 for PORT in $FRONTEND_PORT $BACKEND_PORT; do
   PIDS=$(lsof -ti:$PORT 2>/dev/null)
@@ -22,7 +22,7 @@ done
 sleep 1
 
 echo ""
-echo "🚀 启动服务..."
+echo "[启动] 启动服务..."
 
 # 直接执行命令，不通过 bun run 包装
 bun --hot server/index.ts &
@@ -34,17 +34,17 @@ FRONTEND_PID=$!
 # 捕获 Ctrl+C 同时关闭两个进程
 cleanup() {
   echo ""
-  echo "👋 正在停止所有服务..."
+  echo "[停止] 正在停止所有服务..."
   kill $SERVER_PID $FRONTEND_PID 2>/dev/null
   wait $SERVER_PID $FRONTEND_PID 2>/dev/null
-  echo "✅ 已停止"
+  echo "[完成] 已停止"
   exit 0
 }
 trap cleanup SIGINT SIGTERM
 
 echo ""
-echo "✅ 前端: http://localhost:$FRONTEND_PORT"
-echo "✅ 后端: http://localhost:$BACKEND_PORT"
+echo "[就绪] 前端: http://localhost:$FRONTEND_PORT"
+echo "[就绪] 后端: http://localhost:$BACKEND_PORT"
 echo ""
 echo "按 Ctrl+C 停止所有服务"
 

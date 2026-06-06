@@ -1,7 +1,7 @@
 /* ========== 全局变量 ========== */
 :root {
   --node-width: 320px;
-  --mode-toolbar-size: 60px;
+  --mode-toolbar-size: 55px;
 }
 
 /* ========== 右侧模式工具栏 ========== */
@@ -28,16 +28,14 @@
 }
 
 .mode-toolbar.dark .mode-toolbar-btn {
-  color: rgba(255, 255, 255, 0.5);
+  color: #fff;
 }
 
 .mode-toolbar.dark .mode-toolbar-btn:hover {
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .mode-toolbar.dark .mode-toolbar-btn.active {
-  color: #fff;
   background: rgba(255, 255, 255, 0.15);
 }
 
@@ -52,16 +50,14 @@
 }
 
 .mode-toolbar.light .mode-toolbar-btn {
-  color: rgba(0, 0, 0, 0.45);
+  color: #000;
 }
 
 .mode-toolbar.light .mode-toolbar-btn:hover {
-  color: rgba(0, 0, 0, 0.75);
   background: rgba(0, 0, 0, 0.06);
 }
 
 .mode-toolbar.light .mode-toolbar-btn.active {
-  color: #000;
   background: rgba(0, 0, 0, 0.08);
 }
 
@@ -102,16 +98,74 @@
 
 .ai-modal {
   width: 420px;
-  background: #18181b;
   border-radius: 16px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* 暗色弹窗 */
+.ai-modal.dark {
+  background: #18181b;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.ai-modal.dark .ai-modal-title {
+  color: #fff;
+}
+
+.ai-modal.dark .ai-modal-close {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.ai-modal.dark .ai-modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.ai-modal.dark .ai-modal-input {
+  color: #f3f4f6;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.ai-modal.dark .ai-modal-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* 亮色弹窗 */
+.ai-modal.light {
+  background: #ffffff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.ai-modal.light .ai-modal-title {
+  color: #111827;
+}
+
+.ai-modal.light .ai-modal-close {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.ai-modal.light .ai-modal-close:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #111827;
+}
+
+.ai-modal.light .ai-modal-input {
+  color: #111827;
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.ai-modal.light .ai-modal-input::placeholder {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/* 共用弹窗子元素样式 */
 .ai-modal-header {
   display: flex;
   align-items: center;
@@ -124,7 +178,6 @@
   gap: 8px;
   font-size: 15px;
   font-weight: 600;
-  color: #fff;
 }
 
 .ai-modal-close {
@@ -136,23 +189,15 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   transition: all 0.15s;
-}
-
-.ai-modal-close:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
 }
 
 .ai-modal-input {
   width: 100%;
   padding: 10px 14px;
   font-size: 14px;
-  color: #f3f4f6;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid;
   border-radius: 10px;
   resize: none;
   outline: none;
@@ -164,30 +209,151 @@
   border-color: rgba(129, 140, 248, 0.5);
 }
 
-.ai-modal-input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
-}
-
 .ai-modal-row {
   display: flex;
   gap: 10px;
 }
 
-.ai-modal-select {
+/* ========== 自定义下拉选择 ========== */
+.model-select {
+  position: relative;
   flex: 1;
-  padding: 8px 12px;
-  font-size: 13px;
-  color: #e5e7eb;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  outline: none;
-  cursor: pointer;
+  min-width: 0;
 }
 
-.ai-modal-select option {
-  background: #18181b;
+.model-select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  border: 1px solid;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.model-select-trigger:disabled,
+.model-select.disabled .model-select-trigger {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.model-select-value {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.model-select-chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.model-select-chevron.rotated {
+  transform: rotate(180deg);
+}
+
+.model-select-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  border: 1px solid;
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 10;
+  animation: dropdown-in 0.15s ease;
+}
+
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.model-select-option {
+  width: 100%;
+  display: block;
+  padding: 8px 12px;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: all 0.1s;
+}
+
+/* 暗色下拉 */
+.model-select.dark .model-select-trigger {
   color: #e5e7eb;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.model-select.dark .model-select-trigger:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.model-select.dark .model-select-dropdown {
+  background: #1e1f28;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.model-select.dark .model-select-option {
+  color: #e5e7eb;
+  background: transparent;
+}
+
+.model-select.dark .model-select-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.model-select.dark .model-select-option.active {
+  color: #a5b4fc;
+  background: rgba(99, 102, 241, 0.15);
+}
+
+/* 亮色下拉 */
+.model-select.light .model-select-trigger {
+  color: #374151;
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.model-select.light .model-select-trigger:hover:not(:disabled) {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.model-select.light .model-select-dropdown {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.model-select.light .model-select-option {
+  color: #374151;
+  background: transparent;
+}
+
+.model-select.light .model-select-option:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.model-select.light .model-select-option.active {
+  color: #4f46e5;
+  background: rgba(99, 102, 241, 0.08);
 }
 
 .ai-modal-generate {
@@ -376,8 +542,10 @@ html.dark {
 }
 
 .node-favicon-fallback {
-  font-size: 14px;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
 }
 
 .node-domain {
@@ -677,6 +845,31 @@ html.dark {
   .react-flow__minimap {
     background-color: #1a1a24;
   }
+
+  .react-flow__controls {
+    background: #1e1f28;
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .react-flow__controls-button {
+    background: #1e1f28;
+    border-color: rgba(255, 255, 255, 0.06);
+    fill: rgba(255, 255, 255, 0.6);
+  }
+
+  .react-flow__controls-button:hover {
+    background: rgba(255, 255, 255, 0.06);
+    fill: #fff;
+  }
+
+  .react-flow__attribution {
+    background: rgba(30, 31, 40, 0.8);
+  }
+
+  .react-flow__attribution a {
+    color: rgba(255, 255, 255, 0.4);
+  }
 }
 
 /* ========== 选区操作工具栏 ========== */
@@ -696,12 +889,11 @@ html.dark {
 }
 
 .selection-toolbar.dark .selection-toolbar-btn {
-  color: rgba(255, 255, 255, 0.8);
+  color: #fff;
 }
 
 .selection-toolbar.dark .selection-toolbar-btn:hover {
   background: rgba(255, 255, 255, 0.15);
-  color: #fff;
 }
 
 .selection-toolbar.dark .selection-toolbar-btn--danger:hover {
@@ -715,12 +907,11 @@ html.dark {
 }
 
 .selection-toolbar.light .selection-toolbar-btn {
-  color: rgba(0, 0, 0, 0.6);
+  color: #000;
 }
 
 .selection-toolbar.light .selection-toolbar-btn:hover {
   background: rgba(0, 0, 0, 0.06);
-  color: #000;
 }
 
 .selection-toolbar.light .selection-toolbar-btn--danger:hover {
@@ -744,12 +935,12 @@ html.dark {
 /* ========== 上传进度节点 ========== */
 .media-node--uploading {
   width: var(--node-width);
-  min-height: 80px;
+  height: calc(var(--node-width) / 1.618);
   background: #ffffff;
   border-radius: 6px;
   display: flex;
   align-items: center;
-  padding: 14px 16px;
+  padding: 0 16px;
   padding-right: 36px;
   position: relative;
   box-shadow:
@@ -775,8 +966,9 @@ html.dark {
 }
 
 .upload-progress-icon {
-  font-size: 20px;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  color: #6366f1;
 }
 
 .upload-progress-filename {
