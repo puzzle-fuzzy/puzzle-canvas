@@ -27,6 +27,8 @@ import {
   persistNodeDelete,
   loadNodes,
   localWaterfallLayout,
+  getImageRenderHeight,
+  getApiUrl,
 } from './utils'
 import './App.css'
 
@@ -45,7 +47,7 @@ function Canvas() {
   const nodesRef = useRef<AppNode[]>(nodes)
   nodesRef.current = nodes
   const mouseRef = useRef({ x: 0, y: 0 })
-  const { screenToFlowPosition } = useReactFlow()
+  const { screenToFlowPosition, fitView } = useReactFlow()
 
   // 追踪鼠标位置
   useEffect(() => {
@@ -62,6 +64,8 @@ function Canvas() {
       .then((loaded) => {
         setNodes(loaded)
         setInitialized(true)
+        // 节点加载完后 fitView 展示全部
+        setTimeout(() => fitView({ padding: 0.2 }), 100)
       })
       .catch((err) => {
         console.error('Failed to load nodes:', err)
@@ -161,7 +165,13 @@ function Canvas() {
       for (const file of validFiles) {
         try {
           const result = await uploadFile(file)
-          const pos = layout.next()
+
+          // 获取实际渲染高度用于瀑布流定位
+          let height = 320
+          if (result.mediaType === 'image') {
+            height = await getImageRenderHeight(getApiUrl(result.src))
+          }
+          const pos = layout.next(height)
 
           const newNode: ImageNodeType | VideoNodeType = {
             id: `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,

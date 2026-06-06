@@ -3,11 +3,10 @@ import type { AppNode } from './types'
 const GAP = 16
 const COL_COUNT = 3
 const MEDIA_NODE_WIDTH = 320
-const DEFAULT_NODE_HEIGHT = 320
 
 /**
  * 局部瀑布流布局生成器
- * 给定起始坐标，每次调用 next() 返回下一个位置
+ * 给定起始坐标，每次调用 next(height) 传入实际节点高度
  * 在起始点附近按 3 列瀑布流排列，互不重叠
  */
 function localWaterfallLayout(origin: { x: number; y: number }) {
@@ -15,7 +14,7 @@ function localWaterfallLayout(origin: { x: number; y: number }) {
   const colTops: number[] = new Array(COL_COUNT).fill(origin.y)
 
   return {
-    next(): { x: number; y: number } {
+    next(height: number): { x: number; y: number } {
       // 找最矮列
       let minCol = 0
       for (let i = 1; i < COL_COUNT; i++) {
@@ -25,10 +24,23 @@ function localWaterfallLayout(origin: { x: number; y: number }) {
         x: origin.x + minCol * stepX,
         y: colTops[minCol],
       }
-      colTops[minCol] += DEFAULT_NODE_HEIGHT + GAP
+      colTops[minCol] += height + GAP
       return pos
     },
   }
+}
+
+/** 加载图片获取渲染高度（宽度固定 320px） */
+function getImageRenderHeight(src: string): Promise<number> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const ratio = img.naturalHeight / img.naturalWidth
+      resolve(Math.round(MEDIA_NODE_WIDTH * ratio))
+    }
+    img.onerror = () => resolve(MEDIA_NODE_WIDTH) // fallback 正方形
+    img.src = src
+  })
 }
 
 /** 校验字符串是否为合法 HTTP/HTTPS URL */
@@ -141,6 +153,7 @@ export {
   isValidUrl,
   getDomain,
   localWaterfallLayout,
+  getImageRenderHeight,
   uploadFile,
   getApiUrl,
   persistNode,
