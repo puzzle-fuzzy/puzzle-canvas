@@ -22,9 +22,7 @@ function MediaNode({ data, type }: MediaNodeProps) {
           <img className="media-image" src={data.src} alt={data.fileName} />
         </div>
       )}
-      <div className="media-node-body">
-        <p className="media-file-name">{data.fileName}</p>
-      </div>
+      <span className="media-file-name">{data.fileName}</span>
     </div>
   )
 }
