@@ -1,19 +1,81 @@
 import { describe, it, expect, vi } from 'vitest'
-import { getApiUrl } from './api'
+import { getApiUrl, loadNodes } from './api'
 
 describe('getApiUrl', () => {
   it('DEV 模式添加后端前缀', () => {
-    vi.stubEnv('DEV', true)
-    // import.meta.env 在 vitest 中可能需要间接测试
-    // 这里通过直接调用函数验证逻辑
-    // 注意：由于 import.meta.env 是静态替换，这里测试的是运行时行为
-    expect(getApiUrl('/api/nodes')).toContain('/api/nodes')
-    vi.unstubAllEnvs()
+    const result = getApiUrl('/api/nodes')
+    // vitest 中 import.meta.env.DEV 取决于 vite config
+    expect(result).toContain('/api/nodes')
   })
 
   it('路径带前导斜杠', () => {
     const result = getApiUrl('/api/nodes')
-    // DEV 模式下应包含 localhost 或直接是路径
     expect(result).toMatch(/\/api\/nodes$/)
+  })
+})
+
+describe('loadNodes', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('成功返回节点列表', async () => {
+    const mockRows = [
+      {
+        id: '1',
+        type: 'urlNode',
+        positionX: 100,
+        positionY: 200,
+        url: 'https://example.com',
+        title: 'Example',
+        description: 'Desc',
+        image: null,
+        favicon: null,
+      },
+    ]
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockRows),
+    }))
+
+    const nodes = await loadNodes()
+    expect(nodes).toHaveLength(1)
+    expect(nodes[0].id).toBe('1')
+    expect(nodes[0].type).toBe('urlNode')
+    expect(nodes[0].position).toEqual({ x: 100, y: 200 })
+    expect(nodes[0].data).toEqual({
+      url: 'https://example.com',
+      title: 'Example',
+      description: 'Desc',
+      image: null,
+      favicon: null,
+    })
+  })
+
+  it('非 OK 响应返回空数组', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+    }))
+
+    const nodes = await loadNodes()
+    expect(nodes).toEqual([])
+  })
+
+  it('畸形 JSON 返回空数组', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.reject(new SyntaxError('Unexpected token')),
+    }))
+
+    const nodes = await loadNodes()
+    expect(nodes).toEqual([])
+  })
+
+  it('网络错误返回空数组', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
+
+    const nodes = await loadNodes()
+    expect(nodes).toEqual([])
   })
 })
