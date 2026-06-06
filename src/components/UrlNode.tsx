@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { Icon } from '@ricons/utils'
 import { useAppIcon } from '../icons'
@@ -8,13 +9,22 @@ function UrlNode({ data }: NodeProps<UrlNodeType>) {
   const { url, title, description, image, favicon } = data
   const domain = getDomain(url)
   const GlobeIcon = useAppIcon('globe')
+  const ImageIcon = useAppIcon('image')
+
+  const [faviconError, setFaviconError] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
   return (
     <div className="url-node">
       {/* 头部：favicon + 域名 */}
       <div className="node-header">
-        {favicon ? (
-          <img className="node-favicon" src={favicon} alt="" />
+        {favicon && !faviconError ? (
+          <img
+            className="node-favicon"
+            src={favicon}
+            alt=""
+            onError={() => setFaviconError(true)}
+          />
         ) : (
           <span className="node-favicon-fallback">
             <Icon size={16}><GlobeIcon /></Icon>
@@ -24,9 +34,14 @@ function UrlNode({ data }: NodeProps<UrlNodeType>) {
       </div>
 
       {/* 图片 */}
-      {image && (
+      {image && !imageError && (
         <div className="node-image-wrapper">
-          <img className="node-image" src={image} alt={title} />
+          <img
+            className="node-image"
+            src={image}
+            alt={title}
+            onError={() => setImageError(true)}
+          />
         </div>
       )}
 
