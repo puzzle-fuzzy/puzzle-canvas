@@ -1,54 +1,33 @@
 import type { AppNode } from './types'
 
-const MARGIN = 50
-const GAP = 24
+const GAP = 16
 const COL_COUNT = 3
-const URL_NODE_HEIGHT = 280
 const MEDIA_NODE_WIDTH = 320
+const DEFAULT_NODE_HEIGHT = 320
 
-/** 估算节点高度 */
-function getNodeHeight(node: AppNode): number {
-  // xyflow 渲染后会有 measured.height
-  const measured = (node as Record<string, unknown>).measured as { height?: number } | undefined
-  if (measured?.height) return measured.height
-  // URL 节点固定高度
-  if (node.type === 'urlNode') return URL_NODE_HEIGHT
-  // 媒体节点默认高度（正方形估算）
-  return MEDIA_NODE_WIDTH
-}
-
-/** 瀑布流布局：新节点放到最矮列的底部 */
-function getNextPosition(nodes: AppNode[]): { x: number; y: number } {
+/**
+ * 局部瀑布流布局生成器
+ * 给定起始坐标，每次调用 next() 返回下一个位置
+ * 在起始点附近按 3 列瀑布流排列，互不重叠
+ */
+function localWaterfallLayout(origin: { x: number; y: number }) {
   const stepX = MEDIA_NODE_WIDTH + GAP
-
-  if (nodes.length === 0) {
-    return { x: MARGIN, y: MARGIN }
-  }
-
-  // 构建每列的底部 y 坐标
-  const colTops: number[] = new Array(COL_COUNT).fill(MARGIN)
-
-  for (const node of nodes) {
-    const col = Math.round((node.position.x - MARGIN) / stepX)
-    const clampedCol = Math.max(0, Math.min(col, COL_COUNT - 1))
-    const height = getNodeHeight(node)
-    const bottom = node.position.y + height + GAP
-    if (bottom > colTops[clampedCol]) {
-      colTops[clampedCol] = bottom
-    }
-  }
-
-  // 找到最矮的列
-  let minCol = 0
-  for (let i = 1; i < COL_COUNT; i++) {
-    if (colTops[i] < colTops[minCol]) {
-      minCol = i
-    }
-  }
+  const colTops: number[] = new Array(COL_COUNT).fill(origin.y)
 
   return {
-    x: MARGIN + minCol * stepX,
-    y: colTops[minCol],
+    next(): { x: number; y: number } {
+      // 找最矮列
+      let minCol = 0
+      for (let i = 1; i < COL_COUNT; i++) {
+        if (colTops[i] < colTops[minCol]) minCol = i
+      }
+      const pos = {
+        x: origin.x + minCol * stepX,
+        y: colTops[minCol],
+      }
+      colTops[minCol] += DEFAULT_NODE_HEIGHT + GAP
+      return pos
+    },
   }
 }
 
@@ -161,7 +140,7 @@ async function loadNodes(): Promise<AppNode[]> {
 export {
   isValidUrl,
   getDomain,
-  getNextPosition,
+  localWaterfallLayout,
   uploadFile,
   getApiUrl,
   persistNode,

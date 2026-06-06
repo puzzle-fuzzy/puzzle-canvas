@@ -1,9 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import {
   ReactFlow,
+  ReactFlowProvider,
   applyNodeChanges,
   Background,
   Controls,
+  useReactFlow,
   type OnNodesChange,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
@@ -19,23 +21,22 @@ import type {
 } from './types'
 import {
   isValidUrl,
-  getNextPosition,
   uploadFile,
   persistNode,
   persistNodePosition,
   persistNodeDelete,
   loadNodes,
+  localWaterfallLayout,
 } from './utils'
 import './App.css'
 
-// 必须定义在组件外部，避免 xyflow 不必要的重渲染
 const nodeTypes = {
   urlNode: UrlNode,
   imageNode: MediaNode,
   videoNode: MediaNode,
 }
 
-function App() {
+function Canvas() {
   const [nodes, setNodes] = useState<AppNode[]>([])
   const [loading, setLoading] = useState(false)
   const [initialized, setInitialized] = useState(false)
@@ -43,6 +44,17 @@ function App() {
   const inputRef = useRef<HTMLInputElement>(null)
   const nodesRef = useRef<AppNode[]>(nodes)
   nodesRef.current = nodes
+  const mouseRef = useRef({ x: 0, y: 0 })
+  const { screenToFlowPosition } = useReactFlow()
+
+  // 追踪鼠标位置
+  useEffect(() => {
+    const track = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY }
+    }
+    window.addEventListener('mousemove', track)
+    return () => window.removeEventListener('mousemove', track)
+  }, [])
 
   // ========== 初始加载节点 ==========
   useEffect(() => {
@@ -57,10 +69,9 @@ function App() {
       })
   }, [])
 
-  // ========== 节点变更（拖拽、删除等） ==========
+  // ========== 节点变更 ==========
   const onNodesChange: OnNodesChange<AppNode> = useCallback(
     (changes) => {
-      // 检测删除操作，同步到后端
       for (const change of changes) {
         if (change.type === 'remove') {
           persistNodeDelete(change.id)
@@ -75,10 +86,9 @@ function App() {
     [],
   )
 
-  // ========== 拖拽结束：持久化位置 ==========
+  // ========== 拖拽结束持久化 ==========
   const handleNodeDragStop = useCallback(
     (_event: MouseEvent | TouchEvent, node: AppNode) => {
-      // 从 ref 获取最新位置（避免 xyflow 已知的 stale position 问题）
       const latest = nodesRef.current.find((n) => n.id === node.id)
       if (latest) {
         persistNodePosition(latest.id, latest.position.x, latest.position.y)
@@ -87,30 +97,27 @@ function App() {
     [],
   )
 
-  // ========== 根据 URL 创建节点 ==========
+  // ========== URL 节点 ==========
   const addNodeFromUrl = useCallback(
     async (url: string) => {
       if (loading) return
-
       setLoading(true)
       setError(null)
 
       try {
-        const res = await fetch(
-          `/api/metadata?url=${encodeURIComponent(url)}`,
-        )
-
+        const res = await fetch(`/api/metadata?url=${encodeURIComponent(url)}`)
         if (!res.ok) {
           const err = await res.json().catch(() => ({ error: '请求失败' }))
           throw new Error(err.error ?? `请求失败 (${res.status})`)
         }
 
         const data: MetadataResponse = await res.json()
+        const pos = screenToFlowPosition(mouseRef.current)
 
         const newNode: UrlNodeType = {
           id: `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           type: 'urlNode',
-          position: getNextPosition(nodesRef.current),
+          position: pos,
           data: {
             url: data.url,
             title: data.title,
@@ -129,12 +136,12 @@ function App() {
         setLoading(false)
       }
     },
-    [loading],
+    [loading, screenToFlowPosition],
   )
 
-  // ========== 根据文件创建节点（支持多文件）==========
+  // ========== 文件节点（多文件局部瀑布流）==========
   const addNodeFromFiles = useCallback(
-    async (files: FileList | File[]) => {
+    async (files: FileList | File[], origin: { x: number; y: number }) => {
       if (loading) return
 
       const validFiles = Array.from(files).filter(
@@ -149,19 +156,18 @@ function App() {
       setLoading(true)
       setError(null)
 
-      // 逐个上传，每上传完一个立即显示
+      const layout = localWaterfallLayout(origin)
+
       for (const file of validFiles) {
         try {
           const result = await uploadFile(file)
+          const pos = layout.next()
 
           const newNode: ImageNodeType | VideoNodeType = {
             id: `node-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
             type: result.mediaType === 'video' ? 'videoNode' : 'imageNode',
-            position: getNextPosition(nodesRef.current),
-            data: {
-              src: result.src,
-              fileName: result.fileName,
-            },
+            position: pos,
+            data: { src: result.src, fileName: result.fileName },
           }
 
           setNodes((prev) => {
@@ -181,33 +187,26 @@ function App() {
     [loading],
   )
 
-  // ========== 全局粘贴事件 ==========
+  // ========== 粘贴事件 ==========
   const handlePaste = useCallback(
     (e: ClipboardEvent) => {
-      // 如果焦点在输入框中则跳过
-      if (
-        inputRef.current &&
-        inputRef.current === document.activeElement
-      ) {
-        return
-      }
+      if (inputRef.current && inputRef.current === document.activeElement) return
 
-      // 优先检查文件（图片/视频）
       const files = e.clipboardData?.files
       if (files && files.length > 0) {
         e.preventDefault()
-        addNodeFromFiles(files)
+        const origin = screenToFlowPosition(mouseRef.current)
+        addNodeFromFiles(files, origin)
         return
       }
 
-      // 回退到文本 URL
       const text = e.clipboardData?.getData('text')?.trim()
       if (text && isValidUrl(text)) {
         e.preventDefault()
         addNodeFromUrl(text)
       }
     },
-    [addNodeFromUrl, addNodeFromFiles],
+    [addNodeFromUrl, addNodeFromFiles, screenToFlowPosition],
   )
 
   useEffect(() => {
@@ -226,13 +225,14 @@ function App() {
       e.preventDefault()
       const files = e.dataTransfer.files
       if (files.length > 0) {
-        addNodeFromFiles(files)
+        const origin = screenToFlowPosition({ x: e.clientX, y: e.clientY })
+        addNodeFromFiles(files, origin)
       }
     },
-    [addNodeFromFiles],
+    [addNodeFromFiles, screenToFlowPosition],
   )
 
-  // ========== 输入框回车提交 ==========
+  // ========== 输入框 ==========
   const handleInputKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter') {
@@ -266,7 +266,6 @@ function App() {
         <Controls />
       </ReactFlow>
 
-      {/* 顶部浮动输入栏 */}
       <div className="url-input-bar">
         <input
           ref={inputRef}
@@ -278,10 +277,8 @@ function App() {
         {loading && <span className="loading-indicator">处理中...</span>}
       </div>
 
-      {/* 错误提示 */}
       {error && <div className="error-toast">{error}</div>}
 
-      {/* 空状态提示 */}
       {initialized && nodes.length === 0 && !loading && (
         <div className="empty-hint">
           <p>🌐 粘贴网址、图片或视频到画布上</p>
@@ -289,6 +286,14 @@ function App() {
         </div>
       )}
     </div>
+  )
+}
+
+function App() {
+  return (
+    <ReactFlowProvider>
+      <Canvas />
+    </ReactFlowProvider>
   )
 }
 
