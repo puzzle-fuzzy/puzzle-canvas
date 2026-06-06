@@ -23,9 +23,6 @@ function UrlNode({ data }: NodeProps<UrlNodeType>) {
     })
   }, [url])
 
-  const [faviconError, setFaviconError] = useState(false)
-  const [imageError, setImageError] = useState(false)
-
   return (
     <div className="url-node">
       {/* 复制链接按钮 */}
