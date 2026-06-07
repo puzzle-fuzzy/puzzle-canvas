@@ -22,8 +22,8 @@ import {
   signAccessToken,
   verifyAccessToken,
   generateRefreshToken,
-  isFirstUser,
   toPublicUser,
+  type PublicUser,
   REFRESH_TOKEN_EXPIRY_MS,
 } from '../utils/auth'
 
@@ -140,20 +140,23 @@ export function createAuthRoutes(deps: AuthRouteDeps = {}) {
       }
 
       // 判断是否首用户（自动成为 admin）
-      const admin = isFirstUser(db)
-
-      // 创建用户
+      // 在事务中执行 check + insert，防止并发注册时两人都成为 admin
       const userId = crypto.randomUUID()
       const passwordHash = await hashPassword(password)
 
+      let userRole: 'admin' | 'member' = 'member'
       try {
-        db.insert(users).values({
-          id: userId,
-          email,
-          username,
-          passwordHash,
-          role: admin ? 'admin' : 'member',
-        }).run()
+        db.transaction((tx) => {
+          const userCount = tx.select({ id: users.id }).from(users).limit(1).all()
+          userRole = userCount.length === 0 ? 'admin' : 'member'
+          tx.insert(users).values({
+            id: userId,
+            email,
+            username,
+            passwordHash,
+            role: userRole,
+          }).run()
+        })
       } catch (err: unknown) {
         // UNIQUE 约束冲突 → 邮箱已被注册（处理 check-then-insert 的竞态窗口）
         if (err instanceof Error && err.message?.includes('UNIQUE constraint')) {
@@ -215,32 +218,50 @@ export function createAuthRoutes(deps: AuthRouteDeps = {}) {
         return c.json({ error: '未提供刷新令牌' }, 401)
       }
 
-      // 查找 refresh token 记录
-      const record = db.select().from(refreshTokens).where(eq(refreshTokens.token, token)).get()
-      if (!record) {
+      // 用事务保证 token 查找、验证、删除、签发新 token 的原子性
+      let result: { user: PublicUser; accessToken: string } | null = null
+
+      db.transaction((tx) => {
+        const record = tx.select().from(refreshTokens).where(eq(refreshTokens.token, token)).get()
+        if (!record) return
+
+        // 检查是否过期
+        if (record.expiresAt < new Date()) {
+          tx.delete(refreshTokens).where(eq(refreshTokens.id, record.id)).run()
+          return
+        }
+
+        // 查找关联用户
+        const user = tx.select().from(users).where(eq(users.id, record.userId)).get()
+        if (!user || user.status === 'disabled') {
+          tx.delete(refreshTokens).where(eq(refreshTokens.id, record.id)).run()
+          return
+        }
+
+        // 旋转：删除旧 token + 签发新 token（原子操作，防止并发刷新重复签发）
+        tx.delete(refreshTokens).where(eq(refreshTokens.id, record.id)).run()
+
+        const publicUser = toPublicUser(user)
+        const accessToken = signAccessToken({ userId: user.id, email: user.email })
+        const newToken = generateRefreshToken()
+        const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS)
+        tx.insert(refreshTokens).values({
+          id: crypto.randomUUID(),
+          userId: user.id,
+          token: newToken,
+          expiresAt,
+        }).run()
+
+        setRefreshCookie(c, newToken)
+        result = { user: publicUser, accessToken }
+      })
+
+      if (!result) {
         clearRefreshCookie(c)
         return c.json({ error: '刷新令牌已失效' }, 401)
       }
 
-      // 检查是否过期
-      if (record.expiresAt < new Date()) {
-        db.delete(refreshTokens).where(eq(refreshTokens.id, record.id)).run()
-        clearRefreshCookie(c)
-        return c.json({ error: '刷新令牌已过期' }, 401)
-      }
-
-      // 查找关联用户
-      const user = db.select().from(users).where(eq(users.id, record.userId)).get()
-      if (!user || user.status === 'disabled') {
-        db.delete(refreshTokens).where(eq(refreshTokens.id, record.id)).run()
-        clearRefreshCookie(c)
-        return c.json({ error: '用户不存在或已被禁用' }, 401)
-      }
-
-      // 旋转 refresh token：删除旧的，签发新的
-      db.delete(refreshTokens).where(eq(refreshTokens.id, record.id)).run()
-
-      return c.json(buildAuthResponse(c, user, db), 200)
+      return c.json(result, 200)
     })
 
     // ===== 登出 =====

@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { useReactFlow } from '@xyflow/react'
 import { useInputStore } from '../stores/inputStore'
 import { useCanvasStore } from '../stores/canvasStore'
@@ -12,14 +12,13 @@ import type { AppNode } from '../types'
  * 组合 useNodeActions + useDownload，对外统一暴露
  */
 
-/** 拖拽起始位置缓存（groupNode 拖拽时用于同步移动成员） */
-let dragStartPositions: Record<string, { x: number; y: number }> = {}
-
-/** 标记成员节点是否已在本轮拖拽中脱离小组 */
-let dragRemovedFromGroup = false
-
 export function useCanvasActions() {
   const { screenToFlowPosition, getViewport } = useReactFlow()
+
+  // 拖拽起始位置缓存（跟随组件生命周期，避免模块级变量跨实例污染）
+  const dragStartPositionsRef = useRef<Record<string, { x: number; y: number }>>({})
+  // 标记成员节点是否已在本轮拖拽中脱离小组
+  const dragRemovedFromGroupRef = useRef(false)
   const { addNodeFromUrl, addNodeFromFiles, handleAIGenerate } = useNodeActions()
   const { handleDownloadSelected } = useDownload()
 
@@ -75,8 +74,8 @@ export function useCanvasActions() {
   // ========== 小组拖拽：记录起始位置 ==========
   const handleNodeDragStart = useCallback(
     (_event: MouseEvent | TouchEvent, node: AppNode) => {
-      dragStartPositions = {}
-      dragRemovedFromGroup = false
+      dragStartPositionsRef.current = {}
+      dragRemovedFromGroupRef.current = false
 
       if (node.type === 'groupNode') {
         // 记录小组节点和所有成员的起始位置
@@ -91,14 +90,14 @@ export function useCanvasActions() {
             .map((n) => n.id),
         )
 
-        dragStartPositions[node.id] = { ...node.position }
+        dragStartPositionsRef.current[node.id] = { ...node.position }
         for (const n of nodes) {
           if (memberIds.has(n.id)) {
-            dragStartPositions[n.id] = { ...n.position }
+            dragStartPositionsRef.current[n.id] = { ...n.position }
           }
         }
       } else {
-        dragStartPositions[node.id] = { ...node.position }
+        dragStartPositionsRef.current[node.id] = { ...node.position }
       }
     },
     [],
@@ -107,6 +106,8 @@ export function useCanvasActions() {
   // ========== 拖拽过程中：同步小组成员 / 检测成员脱离 ==========
   const handleNodeDrag = useCallback(
     (_event: MouseEvent | TouchEvent, node: AppNode) => {
+      const dragStartPositions = dragStartPositionsRef.current
+
       // 拖拽 groupNode → 同步移动所有成员
       if (node.type === 'groupNode') {
         const startPos = dragStartPositions[node.id]
@@ -144,7 +145,7 @@ export function useCanvasActions() {
       }
 
       // 拖拽成员节点 → 检测是否脱离小组
-      if (dragRemovedFromGroup) return
+      if (dragRemovedFromGroupRef.current) return
       const data = node.data as { groupId?: string }
       if (!data.groupId) return
 
@@ -165,7 +166,7 @@ export function useCanvasActions() {
         nodeCY < groupNode.position.y ||
         nodeCY > groupNode.position.y + gh
       ) {
-        dragRemovedFromGroup = true
+        dragRemovedFromGroupRef.current = true
         const gid = data.groupId
 
         useCanvasStore.getState().setNodes((prev) =>
@@ -210,6 +211,8 @@ export function useCanvasActions() {
   // ========== 拖拽结束持久化 ==========
   const handleNodeDragStop = useCallback(
     (_event: MouseEvent | TouchEvent, node: AppNode) => {
+      const dragStartPositions = dragStartPositionsRef.current
+
       if (node.type === 'groupNode') {
         const startPos = dragStartPositions[node.id]
         if (startPos) {
@@ -237,7 +240,7 @@ export function useCanvasActions() {
         persistNodePosition(node.id, node.position.x, node.position.y)
       }
 
-      dragStartPositions = {}
+      dragStartPositionsRef.current = {}
     },
     [],
   )

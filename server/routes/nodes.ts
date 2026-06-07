@@ -13,7 +13,8 @@
 import { Hono } from 'hono'
 import { db as defaultDb } from '../db'
 import { nodes } from '../db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
+import { unlinkSync } from 'node:fs'
 
 /** 合法的节点类型，对应前端的 nodeTypes 注册表 */
 const VALID_NODE_TYPES = ['urlNode', 'imageNode', 'videoNode', 'docNode', 'groupNode']
@@ -104,14 +105,8 @@ export function createNodeRoutes(deps: NodeRouteDeps = {}) {
       const id = c.req.param('id')
       const body = await c.req.json()
 
-      // 认证用户归属校验
+      // 认证用户归属校验 + 更新合并为原子操作（避免 check-then-act 竞态）
       const authUserId = c.get('userId') as string | undefined
-      if (authUserId) {
-        const existing = db.select({ userId: nodes.userId }).from(nodes).where(eq(nodes.id, id)).get()
-        if (existing && existing.userId !== authUserId) {
-          return c.json({ error: '无权操作此节点' }, 403)
-        }
-      }
 
       // 白名单过滤：只接受允许更新的字段
       const allowedFields = ['positionX', 'positionY', 'title', 'description', 'image', 'favicon', 'src', 'fileName', 'fileSize', 'groupId', 'width', 'height']
@@ -154,9 +149,17 @@ export function createNodeRoutes(deps: NodeRouteDeps = {}) {
         return c.json({ error: 'description 必须为字符串' }, 400)
       }
 
-      const result = db.update(nodes).set(updates).where(eq(nodes.id, id)).returning().get()
+      // 将 userId 条件合并到 WHERE 子句，保证校验与更新原子
+      const whereCondition = authUserId
+        ? and(eq(nodes.id, id), eq(nodes.userId, authUserId))
+        : eq(nodes.id, id)
+
+      const result = db.update(nodes).set(updates).where(whereCondition).returning().get()
       if (!result) {
-        return c.json({ error: '节点不存在' }, 404)
+        // 区分"不存在"和"无权操作"
+        const exists = db.select({ id: nodes.id }).from(nodes).where(eq(nodes.id, id)).get()
+        if (!exists) return c.json({ error: '节点不存在' }, 404)
+        return c.json({ error: '无权操作此节点' }, 403)
       }
 
       return c.json(result)
@@ -166,19 +169,26 @@ export function createNodeRoutes(deps: NodeRouteDeps = {}) {
     .delete('/:id', (c) => {
       const id = c.req.param('id')
 
-      // 认证用户归属校验
+      // 认证用户归属校验 + 删除合并为原子操作
       const authUserId = c.get('userId') as string | undefined
-      if (authUserId) {
-        const existing = db.select({ userId: nodes.userId }).from(nodes).where(eq(nodes.id, id)).get()
-        if (existing && existing.userId !== authUserId) {
-          return c.json({ error: '无权操作此节点' }, 403)
-        }
+      const whereCondition = authUserId
+        ? and(eq(nodes.id, id), eq(nodes.userId, authUserId))
+        : eq(nodes.id, id)
+
+      const result = db.delete(nodes).where(whereCondition).returning().get()
+      if (!result) {
+        const exists = db.select({ id: nodes.id }).from(nodes).where(eq(nodes.id, id)).get()
+        if (!exists) return c.json({ error: '节点不存在' }, 404)
+        return c.json({ error: '无权操作此节点' }, 403)
       }
 
-      const result = db.delete(nodes).where(eq(nodes.id, id)).returning().get()
-      if (!result) {
-        return c.json({ error: '节点不存在' }, 404)
+      // 清理磁盘上的关联文件（imageNode / videoNode / docNode）
+      if (result.src) {
+        try {
+          unlinkSync(`.${result.src}`)
+        } catch { /* 文件可能已不存在，忽略清理失败 */ }
       }
+
       return c.body(null, 204)
     })
 }

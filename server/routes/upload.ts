@@ -19,6 +19,7 @@
  */
 import { Hono } from 'hono'
 import { mkdirSync, readdirSync, rmSync } from 'node:fs'
+import { open } from 'node:fs/promises'
 import {
   isDangerousFile,
   isValidFingerprint,
@@ -178,13 +179,16 @@ export function createUploadRoutes(deps: UploadRouteDeps = {}) {
       const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`
       const finalPath = `./uploads/${uniqueName}`
 
-      // 按序拼接所有分片为最终文件
-      const chunks: Buffer[] = []
-      for (let i = 0; i < session.totalChunks; i++) {
-        const buf = await Bun.file(`${chunkDir}/chunk-${i}`).arrayBuffer()
-        chunks.push(Buffer.from(buf))
+      // 逐片读取并追加到最终文件，避免将整个文件载入内存
+      const fh = await open(finalPath, 'w')
+      try {
+        for (let i = 0; i < session.totalChunks; i++) {
+          const chunkBuf = Buffer.from(await Bun.file(`${chunkDir}/chunk-${i}`).arrayBuffer())
+          await fh.appendFile(chunkBuf)
+        }
+      } finally {
+        await fh.close()
       }
-      await Bun.write(finalPath, Buffer.concat(chunks))
 
       // 合并完成后清理临时分片目录
       try { rmSync(chunkDir, { recursive: true }) } catch { /* 清理失败不影响结果 */ }

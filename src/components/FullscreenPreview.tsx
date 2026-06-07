@@ -19,14 +19,18 @@ function FullscreenPreview({ src, fileName, mediaType, onClose }: FullscreenPrev
   const videoRef = useRef<HTMLVideoElement>(null)
   const trapRef = useFocusTrap(true)
 
-  // Escape 关闭
+  // 用 ref 保存 onClose，避免 Escape 监听器因回调引用变化而反复注册/注销
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+
+  // Escape 关闭（空依赖，只在挂载时注册一次）
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') onCloseRef.current()
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [onClose])
+  }, [])
 
   // 视频自动播放
   useEffect(() => {

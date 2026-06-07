@@ -27,9 +27,9 @@ const app = new Hono()
 
 // ===== 全局中间件 =====
 
-// CORS：允许所有来源，适配本地开发和生产部署
+// CORS：显式白名单，防止跨域攻击
 app.use('*', cors({
-  origin: '*',
+  origin: ['http://localhost:5175', 'http://localhost:3001'],
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   exposeHeaders: ['Content-Length'],

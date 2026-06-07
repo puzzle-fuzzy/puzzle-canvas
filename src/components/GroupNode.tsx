@@ -16,7 +16,7 @@ function GroupNode({ id, data }: NodeProps<GroupNodeType>) {
   return (
     <div
       className={`group-node ${focused ? 'group-node--focused' : ''}`}
-      style={{ width: data.width, height: data.height }}
+      style={{ width: data.width || 400, height: data.height || 300 }}
     >
       <span className="group-node-label">{data.label}</span>
     </div>

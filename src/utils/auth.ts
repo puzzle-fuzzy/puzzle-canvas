@@ -5,7 +5,7 @@
  * 这些函数使用原生 fetch（此时还没有 access token），
  * 成功后自动更新 authStore。
  */
-import { getApiUrl } from './api'
+import { getApiUrl, tryRefreshToken } from './api'
 import { useAuthStore, type AuthUser } from '../stores/authStore'
 import { useUIStore } from '../stores/uiStore'
 import { useCanvasStore } from '../stores/canvasStore'
@@ -69,23 +69,25 @@ export async function login(
 /**
  * 尝试用 httpOnly refresh cookie 恢复会话
  *
- * 页面加载时调用。如果 refresh cookie 仍有效，后端会签发新的
- * access token 并返回用户信息。失败时返回 null。
- *
- * 使用 api.ts 的全局 tryRefreshToken 锁，确保与 authFetch 的 401 重试
- * 共享同一个 Promise，避免并发刷新导致 token rotation 竞态。
+ * 页面加载时调用。复用 api.ts 的全局 tryRefreshToken 去重锁，
+ * 确保 checkAuth 与 authFetch 的 401 重试共享同一个 Promise，
+ * 避免并发刷新导致 token rotation 竞态。
  */
 export async function checkAuth(): Promise<AuthUser | null> {
   try {
-    const res = await fetch(getApiUrl('/api/auth/refresh'), {
-      method: 'POST',
-      credentials: 'include',
-    })
+    const token = await tryRefreshToken()
+    if (!token) return null
 
+    // Token 已刷新成功，获取用户信息
+    const res = await fetch(getApiUrl('/api/auth/me'), {
+      headers: { Authorization: `Bearer ${token}` },
+    })
     if (!res.ok) return null
 
-    const data: AuthResponse = await res.json()
-    useAuthStore.getState().setAuth(data.user, data.accessToken)
+    const data: { user: AuthUser } = await res.json()
+    if (!data.user) return null
+
+    useAuthStore.getState().setAuth(data.user, token)
     return data.user
   } catch {
     return null

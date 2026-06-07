@@ -17,6 +17,7 @@ interface State {
  * 防止单个节点渲染崩溃导致整个画布白屏。
  * - app 级别：包裹整个 Canvas，提供全局兜底
  * - node 级别：包裹单个节点类型，提供降级 UI
+ * 使用 CSS class 而非 inline style，支持暗色模式。
  */
 export default class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
@@ -37,42 +38,18 @@ export default class ErrorBoundary extends Component<Props, State> {
 
     if (this.props.level === 'node') {
       return (
-        <div style={{
-          padding: '12px 16px',
-          background: 'rgba(239, 68, 68, 0.08)',
-          border: '1px solid rgba(239, 68, 68, 0.2)',
-          borderRadius: 8,
-          color: '#ef4444',
-          fontSize: 13,
-          maxWidth: 300,
-        }}>
+        <div className="error-boundary-node">
           节点渲染出错
         </div>
       )
     }
 
     return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        gap: 16,
-        color: '#64748b',
-      }}>
-        <p style={{ fontSize: 16 }}>页面渲染出错，请刷新重试</p>
+      <div className="error-boundary-app">
+        <p>页面渲染出错，请刷新重试</p>
         <button
           onClick={() => {
             this.setState({ hasError: false, error: null })
-          }}
-          style={{
-            padding: '8px 24px',
-            borderRadius: 6,
-            border: '1px solid #e2e8f0',
-            background: '#fff',
-            cursor: 'pointer',
-            fontSize: 14,
           }}
         >
           重试

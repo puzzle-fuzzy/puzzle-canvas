@@ -7,7 +7,7 @@ import { useCanvasStore } from '../stores/canvasStore'
  * 将小组节点的右上角从 flow 坐标转换为屏幕像素坐标
  * 返回 null 表示无聚焦的小组
  */
-export function useGroupToolbar(): { x: number; y: number; groupId: string; darkMode: boolean } | null {
+export function useGroupToolbar(): { x: number; y: number; groupId: string } | null {
   const focusedGroupId = useCanvasStore((s) => s.focusedGroupId)
   const nodes = useCanvasStore((s) => s.nodes)
   const transform = useStore((s) => s.transform) // [x, y, zoom]
@@ -30,7 +30,6 @@ export function useGroupToolbar(): { x: number; y: number; groupId: string; dark
       x: rightX * zoom + vx,
       y: topY * zoom + vy,
       groupId: focusedGroupId,
-      darkMode: document.documentElement.classList.contains('dark'),
     }
   }, [focusedGroupId, nodes, transform])
 }

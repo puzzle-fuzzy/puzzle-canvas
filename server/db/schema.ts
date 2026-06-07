@@ -7,7 +7,7 @@
  *   refresh_tokens — JWT 刷新令牌（支持吊销）
  *   nodes          — 画布节点
  */
-import { sqliteTable, text, integer, real, unique } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, real, unique, index } from 'drizzle-orm/sqlite-core'
 
 // ==================== 用户与认证 ====================
 
@@ -112,9 +112,11 @@ export const nodes = sqliteTable('nodes', {
   height: real('height'),     // 小组节点高度
 
   // 所属用户（数据隔离）
-  userId: text('user_id').notNull().references(() => users.id),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
 
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),
-})
+}, (table) => ({
+  userIdIdx: index('nodes_user_id_idx').on(table.userId),
+}))

@@ -73,13 +73,12 @@ function LoginModal() {
       } else {
         await register(email, username, password)
       }
-      // 登录/注册成功 → 关闭弹窗
-      setShowLoginModal(false)
-      resetForm()
-
-      // 登录后加载节点
+      // 先加载节点再关闭弹窗，避免用户看到空白画布
       const loaded = await loadNodes()
       useCanvasStore.getState().setNodes(loaded)
+
+      setShowLoginModal(false)
+      resetForm()
     } catch (err) {
       setError(err instanceof Error ? err.message : '操作失败')
     } finally {

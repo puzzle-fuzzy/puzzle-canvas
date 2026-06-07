@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { Icon } from '@ricons/utils'
 import { useAppIcon } from '../icons'
@@ -14,6 +14,9 @@ function MediaNode({ data, type, id }: MediaNodeProps) {
   const VideoIcon = useAppIcon('video')
   const ImageIcon = useAppIcon('image')
   const [imageError, setImageError] = useState(false)
+
+  // src 变化时重置错误状态，允许重新加载
+  useEffect(() => setImageError(false), [data.src])
 
   const handleMouseEnter = useCallback(() => {
     videoRef.current?.play().catch(() => {})

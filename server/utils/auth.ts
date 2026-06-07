@@ -72,7 +72,7 @@ export function signAccessToken(payload: AccessTokenPayload): string {
 /** 验证 Access Token，成功返回载荷，失败返回 null */
 export function verifyAccessToken(token: string): AccessTokenPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as AccessTokenPayload
+    return jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }) as AccessTokenPayload
   } catch {
     return null
   }

@@ -65,6 +65,10 @@ function Canvas() {
   const groupNameModalTarget = useUIStore((s) => s.groupNameModalTarget)
   const closeGroupNameModal = useUIStore((s) => s.closeGroupNameModal)
 
+  // 稳定引用的 onClose 回调，避免子组件因回调引用变化反复注册/注销事件监听器
+  const handleSettingsClose = useCallback(() => setShowSettingsModal(false), [setShowSettingsModal])
+  const handleFullscreenClose = useCallback(() => setFullscreenPreview(null), [setFullscreenPreview])
+
   const actions = useCanvasActions()
   const toolbarPos = useSelectionToolbar()
   const groupToolbarPos = useGroupToolbar()
@@ -81,10 +85,15 @@ function Canvas() {
     return { x: 0, y: 0, zoom: 0.5 }
   }).current()
 
-  // 追踪选中的节点
+  // 追踪选中的节点（去重：ID 相同时不触发 store 更新）
   const handleSelectionChange: OnSelectionChangeFunc = useCallback(
     ({ nodes: sel }) => {
-      useCanvasStore.getState().setSelectedNodeIds(sel.map((n) => n.id))
+      const newIds = sel.map((n) => n.id)
+      const currentIds = useCanvasStore.getState().selectedNodeIds
+      if (newIds.length === currentIds.length && newIds.every((id) => currentIds.includes(id))) {
+        return
+      }
+      useCanvasStore.getState().setSelectedNodeIds(newIds)
     },
     [],
   )
@@ -146,10 +155,11 @@ function Canvas() {
         onNodeClick={(_e, node) => {
           const store = useCanvasStore.getState()
           if (node.type === 'groupNode') {
-            // 清除所有节点选中状态，避免 SelectionToolbar 和小组操作栏同时出现
+            // 清除所有节点选中状态 + selectedNodeIds，避免 SelectionToolbar 和小组操作栏同时出现
             store.setNodes((prev) =>
               prev.map((n) => ({ ...n, selected: false })),
             )
+            store.setSelectedNodeIds([])
             store.setFocusedGroupId(node.id)
           } else {
             store.setFocusedGroupId(null)
@@ -200,7 +210,7 @@ function Canvas() {
 
       {showSettingsModal && (
         <SettingsModal
-          onClose={() => setShowSettingsModal(false)}
+          onClose={handleSettingsClose}
         />
       )}
 
@@ -217,7 +227,7 @@ function Canvas() {
           src={fullscreenPreview.src}
           fileName={fullscreenPreview.fileName}
           mediaType={fullscreenPreview.mediaType}
-          onClose={() => setFullscreenPreview(null)}
+          onClose={handleFullscreenClose}
         />
       )}
     </div>
