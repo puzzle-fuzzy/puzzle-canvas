@@ -21,6 +21,8 @@ import {
   LogoutOutlined,
   FullscreenOutlined,
   CopyOutlined,
+  GroupOutlined,
+  EditOutlined,
 } from '@ricons/antd'
 import type { IconRegistry } from './index'
 
@@ -51,4 +53,6 @@ export const antdRegistry: IconRegistry = {
   signOut: wrap(LogoutOutlined),
   fullscreen: wrap(FullscreenOutlined),
   copy: wrap(CopyOutlined),
+  group: wrap(GroupOutlined),
+  edit: wrap(EditOutlined),
 }

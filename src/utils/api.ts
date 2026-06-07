@@ -117,6 +117,28 @@ export function persistNodeDelete(id: string): void {
   }).catch((err) => console.error('Failed to persist delete:', err))
 }
 
+/** 持久化：更新节点的 groupId（fire-and-forget） */
+export function persistNodeGroupId(nodeId: string, groupId: string | null): void {
+  authFetch(`/api/nodes/${nodeId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ groupId }),
+  }).catch((err) => console.error('Failed to persist groupId:', err))
+}
+
+/** 持久化：更新小组节点属性（fire-and-forget） */
+export function persistGroupUpdate(id: string, updates: { label?: string; width?: number; height?: number }): void {
+  const body: Record<string, unknown> = {}
+  if (updates.label !== undefined) body.title = updates.label
+  if (updates.width !== undefined) body.width = updates.width
+  if (updates.height !== undefined) body.height = updates.height
+  authFetch(`/api/nodes/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }).catch((err) => console.error('Failed to persist group update:', err))
+}
+
 /** 从后端加载当前用户的所有节点 */
 export async function loadNodes(): Promise<AppNode[]> {
   try {
@@ -125,29 +147,43 @@ export async function loadNodes(): Promise<AppNode[]> {
 
     const rows = await res.json()
 
-    return rows.map((row: Record<string, unknown>) => ({
+    const mapped: AppNode[] = rows.map((row: Record<string, unknown>) => ({
       id: row.id as string,
-      type: row.type as 'urlNode' | 'imageNode' | 'videoNode' | 'docNode',
+      type: row.type as AppNode['type'],
       position: { x: row.positionX as number, y: row.positionY as number },
-      data: row.type === 'urlNode'
+      ...(row.type === 'groupNode' ? { selectable: false } : {}),
+      data: row.type === 'groupNode'
         ? {
-            url: row.url as string,
-            title: row.title as string,
-            description: (row.description as string) ?? '',
-            image: (row.image as string) ?? null,
-            favicon: (row.favicon as string) ?? null,
+            label: (row.title as string) ?? '',
+            width: (row.width as number) ?? 0,
+            height: (row.height as number) ?? 0,
           }
-        : row.type === 'docNode'
+        : row.type === 'urlNode'
           ? {
-              src: row.src as string,
-              fileName: row.fileName as string,
-              fileSize: (row.fileSize as number) ?? 0,
+              url: row.url as string,
+              title: row.title as string,
+              description: (row.description as string) ?? '',
+              image: (row.image as string) ?? null,
+              favicon: (row.favicon as string) ?? null,
+              groupId: (row.groupId as string) ?? undefined,
             }
-          : {
-              src: row.src as string,
-              fileName: row.fileName as string,
-            },
+          : row.type === 'docNode'
+            ? {
+                src: row.src as string,
+                fileName: row.fileName as string,
+                fileSize: (row.fileSize as number) ?? 0,
+                groupId: (row.groupId as string) ?? undefined,
+              }
+            : {
+                src: row.src as string,
+                fileName: row.fileName as string,
+                groupId: (row.groupId as string) ?? undefined,
+              },
     }))
+    // 小组节点排在前面（渲染层级更低，避免遮挡内容节点）
+    const groups = mapped.filter((n) => n.type === 'groupNode')
+    const others = mapped.filter((n) => n.type !== 'groupNode')
+    return [...groups, ...others]
   } catch {
     return []
   }

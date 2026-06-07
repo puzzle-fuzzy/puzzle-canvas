@@ -1,5 +1,5 @@
 import type { AppNode } from '../types'
-import { NODE_WIDTH, GAP_X, GAP_Y, COL_COUNT } from './constants'
+import { NODE_WIDTH, GAP_X, GAP_Y, COL_COUNT, GROUP_PADDING } from './constants'
 
 /**
  * 局部瀑布流布局生成器
@@ -78,4 +78,37 @@ export function selectionWaterfallLayout(
   }
 
   return result
+}
+
+/**
+ * 计算一组节点的包围盒
+ * 返回 { x, y, width, height }，x/y 为左上角坐标
+ * padding 为包围盒额外内边距
+ */
+export function computeGroupBounds(
+  nodes: AppNode[],
+  padding: number = GROUP_PADDING,
+): { x: number; y: number; width: number; height: number } | null {
+  if (nodes.length === 0) return null
+
+  const defaultSize = (n: AppNode) => {
+    if (n.measured?.width && n.measured?.height) {
+      return { width: n.measured.width, height: n.measured.height }
+    }
+    return { width: NODE_WIDTH, height: 200 }
+  }
+
+  const minX = Math.min(...nodes.map((n) => n.position.x))
+  const minY = Math.min(...nodes.map((n) => n.position.y))
+  const maxX = Math.max(...nodes.map((n) => n.position.x + defaultSize(n).width))
+  const maxY = Math.max(...nodes.map((n) => n.position.y + defaultSize(n).height))
+
+  const bottomExtra = 20 // 底部额外间距，为节点名称留出空间
+
+  return {
+    x: minX - padding,
+    y: minY - padding,
+    width: maxX - minX + padding * 2,
+    height: maxY - minY + padding + bottomExtra + padding,
+  }
 }

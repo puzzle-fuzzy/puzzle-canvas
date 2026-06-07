@@ -162,7 +162,7 @@ export function useNodeActions() {
             onProgress: (progress) => {
               useCanvasStore.getState().setNodes((prev) =>
                 prev.map((n) => {
-                  if (n.id !== item.nodeId || n.type === 'urlNode') return n
+                  if (n.id !== item.nodeId || n.type === 'urlNode' || n.type === 'groupNode') return n
                   const nodeData =
                     n.type === 'docNode'
                       ? {

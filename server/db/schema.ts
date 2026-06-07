@@ -90,7 +90,7 @@ export const refreshTokens = sqliteTable('refresh_tokens', {
  */
 export const nodes = sqliteTable('nodes', {
   id: text('id').primaryKey(),
-  type: text('type', { enum: ['urlNode', 'imageNode', 'videoNode', 'docNode'] }).notNull(),
+  type: text('type', { enum: ['urlNode', 'imageNode', 'videoNode', 'docNode', 'groupNode'] }).notNull(),
   positionX: real('position_x').notNull(),
   positionY: real('position_y').notNull(),
 
@@ -105,6 +105,11 @@ export const nodes = sqliteTable('nodes', {
   src: text('src'),
   fileName: text('fileName'),
   fileSize: integer('file_size'),
+
+  // groupNode 字段
+  groupId: text('group_id'),  // 成员节点所属小组 ID
+  width: real('width'),       // 小组节点宽度
+  height: real('height'),     // 小组节点高度
 
   // 所属用户（数据隔离）
   userId: text('user_id').notNull().references(() => users.id),

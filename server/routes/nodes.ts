@@ -16,7 +16,7 @@ import { nodes } from '../db/schema'
 import { eq } from 'drizzle-orm'
 
 /** 合法的节点类型，对应前端的 nodeTypes 注册表 */
-const VALID_NODE_TYPES = ['urlNode', 'imageNode', 'videoNode', 'docNode']
+const VALID_NODE_TYPES = ['urlNode', 'imageNode', 'videoNode', 'docNode', 'groupNode']
 
 /** 认证中间件类型 */
 type AuthMiddleware = (c: import('hono').Context, next: import('hono').Next) => Promise<Response | void>
@@ -91,6 +91,9 @@ export function createNodeRoutes(deps: NodeRouteDeps = {}) {
         src: body.src ?? null,
         fileName: body.fileName ?? null,
         fileSize: body.fileSize ?? null,
+        groupId: body.groupId ?? null,
+        width: body.width ?? null,
+        height: body.height ?? null,
       }).returning().get()
 
       return c.json(result, 201)
@@ -111,7 +114,7 @@ export function createNodeRoutes(deps: NodeRouteDeps = {}) {
       }
 
       // 白名单过滤：只接受允许更新的字段
-      const allowedFields = ['positionX', 'positionY', 'title', 'description', 'image', 'favicon', 'src', 'fileName', 'fileSize']
+      const allowedFields = ['positionX', 'positionY', 'title', 'description', 'image', 'favicon', 'src', 'fileName', 'fileSize', 'groupId', 'width', 'height']
       const updates: Record<string, unknown> = {}
       for (const field of allowedFields) {
         if (field in body) {
@@ -132,6 +135,15 @@ export function createNodeRoutes(deps: NodeRouteDeps = {}) {
       }
       if ('fileSize' in updates && (typeof updates.fileSize !== 'number' || isNaN(updates.fileSize as number))) {
         return c.json({ error: 'fileSize 必须为有效数字' }, 400)
+      }
+      if ('width' in updates && updates.width !== null && (typeof updates.width !== 'number' || isNaN(updates.width as number))) {
+        return c.json({ error: 'width 必须为有效数字' }, 400)
+      }
+      if ('height' in updates && updates.height !== null && (typeof updates.height !== 'number' || isNaN(updates.height as number))) {
+        return c.json({ error: 'height 必须为有效数字' }, 400)
+      }
+      if ('groupId' in updates && updates.groupId !== null && typeof updates.groupId !== 'string') {
+        return c.json({ error: 'groupId 必须为字符串' }, 400)
       }
 
       // 校验字符串字段的类型

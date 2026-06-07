@@ -59,6 +59,9 @@ interface UIStore {
   aiPrompt: string
   aiModel: string
   aiGenerating: boolean
+  showGroupNameModal: boolean
+  groupNameModalMode: 'create' | 'rename'
+  groupNameModalTarget: string | null
 
   // Actions
   toggleDarkMode: () => void
@@ -75,6 +78,8 @@ interface UIStore {
   setAiPrompt: (v: string) => void
   setAiModel: (v: string) => void
   setAiGenerating: (v: boolean) => void
+  openGroupNameModal: (mode: 'create' | 'rename', target?: string) => void
+  closeGroupNameModal: () => void
 }
 
 let errorTimer: ReturnType<typeof setTimeout> | null = null
@@ -127,6 +132,9 @@ export const useUIStore = create<UIStore>((set) => {
     aiPrompt: '',
     aiModel: 'dall-e-3',
     aiGenerating: false,
+    showGroupNameModal: false,
+    groupNameModalMode: 'create',
+    groupNameModalTarget: null,
 
     // ========== Actions ==========
     toggleDarkMode: () => {
@@ -171,5 +179,16 @@ export const useUIStore = create<UIStore>((set) => {
     setAiPrompt: (v) => set({ aiPrompt: v }),
     setAiModel: (v) => set({ aiModel: v }),
     setAiGenerating: (v) => set({ aiGenerating: v }),
+
+    openGroupNameModal: (mode, target) => set({
+      showGroupNameModal: true,
+      groupNameModalMode: mode,
+      groupNameModalTarget: target,
+    }),
+    closeGroupNameModal: () => set({
+      showGroupNameModal: false,
+      groupNameModalMode: 'create',
+      groupNameModalTarget: null,
+    }),
   }
 })

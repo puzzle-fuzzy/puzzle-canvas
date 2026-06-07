@@ -437,3 +437,140 @@ html.dark {
     color: #f87171;
   }
 }
+
+/* ========== 小组节点 ========== */
+.group-node {
+  border-radius: 10px;
+  background: rgba(var(--color-primary-rgb), 0.06);
+  border: 2px dashed rgba(var(--color-primary-rgb), 0.4);
+  position: relative;
+  cursor: grab;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.group-node:active {
+  cursor: grabbing;
+}
+
+.group-node:hover {
+  border-color: rgba(var(--color-primary-rgb), 0.6);
+  background: rgba(var(--color-primary-rgb), 0.08);
+}
+
+.group-node-label {
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: #ffffff;
+  padding: 0 6px;
+  line-height: 1.3;
+  border-radius: 3px;
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: calc(100% - 24px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.group-node-actions {
+  position: absolute;
+  top: calc(var(--mode-toolbar-size) / -2 - 36px);
+  right: 12px;
+}
+
+html.dark {
+  .group-node {
+    background: rgba(var(--color-primary-rgb), 0.08);
+  }
+
+  .group-node:hover {
+    background: rgba(var(--color-primary-rgb), 0.12);
+  }
+
+  .group-node-label {
+    background: #1e1f28;
+  }
+}
+
+/* ========== 小组命名弹窗 ========== */
+.group-name-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  outline: none;
+  background: #ffffff;
+  color: #111827;
+  transition: border-color 0.15s;
+}
+
+.group-name-input:focus {
+  border-color: var(--color-primary);
+}
+
+.group-name-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.group-name-cancel {
+  padding: 6px 16px;
+  font-size: 13px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.group-name-cancel:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.group-name-confirm {
+  padding: 6px 16px;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  background: var(--color-primary);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.group-name-confirm:hover {
+  background: var(--color-primary-hover);
+}
+
+.group-name-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+html.dark {
+  .group-name-input {
+    background: #2a2b36;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #f3f4f6;
+  }
+
+  .group-name-input:focus {
+    border-color: var(--color-primary);
+  }
+
+  .group-name-cancel {
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #9ca3af;
+  }
+
+  .group-name-cancel:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+}

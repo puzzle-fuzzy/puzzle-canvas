@@ -5,3 +5,6 @@ export const NODE_WIDTH = 320
 export const GAP_X = 16
 export const GAP_Y = 36
 export const COL_COUNT = 3
+
+/** 小组容器内边距 */
+export const GROUP_PADDING = 24

@@ -12,12 +12,14 @@ import '@xyflow/react/dist/style.css'
 import UrlNode from './components/UrlNode'
 import MediaNode from './components/MediaNode'
 import DocNode from './components/DocNode'
+import GroupNode from './components/GroupNode'
 import SettingsModal from './components/SettingsModal'
 import SelectionToolbar from './components/SelectionToolbar'
 import ModeToolbar from './components/ModeToolbar'
 import AIModal from './components/AIModal'
 import LoginModal from './components/LoginModal'
 import FullscreenPreview from './components/FullscreenPreview'
+import GroupNameModal from './components/GroupNameModal'
 import ErrorToast from './components/ErrorToast'
 import LoadingIndicator from './components/LoadingIndicator'
 import EmptyHint from './components/EmptyHint'
@@ -33,6 +35,7 @@ import { useSelectionToolbar } from './hooks/useSelectionToolbar'
 import './App.css'
 
 const nodeTypes = {
+  groupNode: GroupNode,
   urlNode: UrlNode,
   imageNode: MediaNode,
   videoNode: MediaNode,
@@ -53,6 +56,10 @@ function Canvas() {
   const setShowSettingsModal = useUIStore((s) => s.setShowSettingsModal)
   const fullscreenPreview = useUIStore((s) => s.fullscreenPreview)
   const setFullscreenPreview = useUIStore((s) => s.setFullscreenPreview)
+  const showGroupNameModal = useUIStore((s) => s.showGroupNameModal)
+  const groupNameModalMode = useUIStore((s) => s.groupNameModalMode)
+  const groupNameModalTarget = useUIStore((s) => s.groupNameModalTarget)
+  const closeGroupNameModal = useUIStore((s) => s.closeGroupNameModal)
 
   const actions = useCanvasActions()
   const toolbarPos = useSelectionToolbar()
@@ -83,6 +90,31 @@ function Canvas() {
     return () => window.removeEventListener('paste', actions.handlePaste)
   }, [actions.handlePaste])
 
+  // 小组命名弹窗提交
+  const handleGroupNameSubmit = useCallback(
+    (name: string) => {
+      const store = useCanvasStore.getState()
+      if (groupNameModalMode === 'create') {
+        store.handleCreateGroup(name)
+      } else if (groupNameModalMode === 'rename' && groupNameModalTarget) {
+        store.handleRenameGroup(groupNameModalTarget, name)
+      }
+      closeGroupNameModal()
+    },
+    [groupNameModalMode, groupNameModalTarget, closeGroupNameModal],
+  )
+
+  // 获取小组重命名的初始值
+  const groupRenameInitialValue = (() => {
+    if (groupNameModalMode === 'rename' && groupNameModalTarget) {
+      const groupNode = nodes.find((n) => n.id === groupNameModalTarget)
+      if (groupNode && groupNode.type === 'groupNode') {
+        return (groupNode.data as { label: string }).label
+      }
+    }
+    return ''
+  })()
+
   if (!initialized) {
     return (
       <div className="canvas-loading">
@@ -100,6 +132,8 @@ function Canvas() {
       <ReactFlow
         nodes={nodes}
         onNodesChange={onNodesChange}
+        onNodeDragStart={actions.handleNodeDragStart}
+        onNodeDrag={actions.handleNodeDrag}
         onNodeDragStop={actions.handleNodeDragStop}
         onMoveEnd={actions.handleMoveEnd}
         onSelectionChange={handleSelectionChange}
@@ -143,6 +177,14 @@ function Canvas() {
       {showSettingsModal && (
         <SettingsModal
           onClose={() => setShowSettingsModal(false)}
+        />
+      )}
+
+      {showGroupNameModal && (
+        <GroupNameModal
+          onSubmit={handleGroupNameSubmit}
+          onCancel={closeGroupNameModal}
+          initialValue={groupRenameInitialValue}
         />
       )}
 

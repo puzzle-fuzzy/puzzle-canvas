@@ -88,6 +88,9 @@ export function createTestDb() {
       src TEXT,
       fileName TEXT,
       file_size INTEGER,
+      group_id TEXT,
+      width REAL,
+      height REAL,
       user_id TEXT NOT NULL REFERENCES users(id),
       created_at INTEGER NOT NULL DEFAULT (unixepoch())
     )

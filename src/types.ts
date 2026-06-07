@@ -7,6 +7,7 @@ export type UrlNodeData = {
   description: string
   image: string | null
   favicon: string | null
+  groupId?: string
 }
 
 export type UrlNodeType = Node<UrlNodeData, 'urlNode'>
@@ -16,6 +17,7 @@ export type ImageNodeData = {
   src: string
   fileName: string
   uploading?: UploadState
+  groupId?: string
 }
 
 export type ImageNodeType = Node<ImageNodeData, 'imageNode'>
@@ -25,6 +27,7 @@ export type VideoNodeData = {
   src: string
   fileName: string
   uploading?: UploadState
+  groupId?: string
 }
 
 export type VideoNodeType = Node<VideoNodeData, 'videoNode'>
@@ -35,12 +38,22 @@ export type DocNodeData = {
   fileName: string
   fileSize: number
   uploading?: UploadState
+  groupId?: string
 }
 
 export type DocNodeType = Node<DocNodeData, 'docNode'>
 
+// ========== 小组节点 ==========
+export type GroupNodeData = {
+  label: string
+  width: number
+  height: number
+}
+
+export type GroupNodeType = Node<GroupNodeData, 'groupNode'>
+
 // ========== 联合类型 ==========
-export type AppNode = UrlNodeType | ImageNodeType | VideoNodeType | DocNodeType
+export type AppNode = UrlNodeType | ImageNodeType | VideoNodeType | DocNodeType | GroupNodeType
 
 // ========== 上传状态 ==========
 export type UploadState = {
