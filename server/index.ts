@@ -29,7 +29,7 @@ const app = new Hono()
 
 // CORS：显式白名单，防止跨域攻击
 app.use('*', cors({
-  origin: ['http://localhost:5175', 'http://localhost:3001'],
+  origin: ['http://localhost:5175', 'http://localhost:4001'],
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   exposeHeaders: ['Content-Length'],
@@ -90,6 +90,6 @@ app.get('*', async (c) => {
 })
 
 export default {
-  port: 3001,
+  port: 4001,
   fetch: app.fetch,
 }
