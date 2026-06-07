@@ -154,6 +154,7 @@ function LoginModal() {
             type="password"
             placeholder="密码"
             aria-label="密码"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
             minLength={6}

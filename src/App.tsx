@@ -13,6 +13,7 @@ import UrlNode from './components/UrlNode'
 import MediaNode from './components/MediaNode'
 import DocNode from './components/DocNode'
 import GroupNode from './components/GroupNode'
+import ErrorBoundary from './components/ErrorBoundary'
 import SettingsModal from './components/SettingsModal'
 import SelectionToolbar from './components/SelectionToolbar'
 import ModeToolbar from './components/ModeToolbar'
@@ -36,12 +37,13 @@ import { useGroupToolbar } from './hooks/useGroupToolbar'
 
 import './App.css'
 
+// 用 ErrorBoundary 包裹节点组件，隔离单节点渲染崩溃
 const nodeTypes = {
   groupNode: GroupNode,
-  urlNode: UrlNode,
-  imageNode: MediaNode,
-  videoNode: MediaNode,
-  docNode: DocNode,
+  urlNode: (() => { const W = (props: any) => <ErrorBoundary level="node"><UrlNode {...props} /></ErrorBoundary>; W.displayName = 'UrlNode'; return W })(),
+  imageNode: (() => { const W = (props: any) => <ErrorBoundary level="node"><MediaNode {...props} /></ErrorBoundary>; W.displayName = 'ImageNode'; return W })(),
+  videoNode: (() => { const W = (props: any) => <ErrorBoundary level="node"><MediaNode {...props} /></ErrorBoundary>; W.displayName = 'VideoNode'; return W })(),
+  docNode: (() => { const W = (props: any) => <ErrorBoundary level="node"><DocNode {...props} /></ErrorBoundary>; W.displayName = 'DocNode'; return W })(),
 }
 
 function Canvas() {

@@ -133,7 +133,7 @@ export function createAuthRoutes(deps: AuthRouteDeps = {}) {
         return c.json({ error: '密码长度至少 6 个字符' }, 400)
       }
 
-      // 检查邮箱唯一性
+      // 检查邮箱唯一性（先快速检查，INSERT 时仍有 UNIQUE 约束兜底）
       const existing = db.select({ id: users.id }).from(users).where(eq(users.email, email)).all()
       if (existing.length > 0) {
         return c.json({ error: '邮箱已被注册' }, 409)
@@ -146,13 +146,21 @@ export function createAuthRoutes(deps: AuthRouteDeps = {}) {
       const userId = crypto.randomUUID()
       const passwordHash = await hashPassword(password)
 
-      db.insert(users).values({
-        id: userId,
-        email,
-        username,
-        passwordHash,
-        role: admin ? 'admin' : 'member',
-      }).run()
+      try {
+        db.insert(users).values({
+          id: userId,
+          email,
+          username,
+          passwordHash,
+          role: admin ? 'admin' : 'member',
+        }).run()
+      } catch (err: unknown) {
+        // UNIQUE 约束冲突 → 邮箱已被注册（处理 check-then-insert 的竞态窗口）
+        if (err instanceof Error && err.message?.includes('UNIQUE constraint')) {
+          return c.json({ error: '邮箱已被注册' }, 409)
+        }
+        throw err
+      }
 
       // 创建 credentials 账户关联
       db.insert(accounts).values({

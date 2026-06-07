@@ -57,8 +57,14 @@ export async function authFetch(path: string, options: RequestInit = {}): Promis
 /** 当前进行中的 refresh 请求（去重：多个 401 并发时只发一次刷新） */
 let tokenRefreshInFlight: Promise<string | null> | null = null
 
-/** 尝试刷新 access token，成功返回新 token，失败返回 null */
-function tryRefreshToken(): Promise<string | null> {
+/**
+ * 尝试刷新 access token
+ *
+ * 全局唯一锁：auth.ts 的 checkAuth() 和 api.ts 的 authFetch() 共享同一个 Promise，
+ * 确保并发调用不会发出多个刷新请求导致 token rotation 竞态。
+ * 成功返回新 token，失败返回 null。
+ */
+export function tryRefreshToken(): Promise<string | null> {
   if (tokenRefreshInFlight) return tokenRefreshInFlight
 
   tokenRefreshInFlight = _doTokenRefresh()
@@ -139,6 +145,76 @@ export function persistGroupUpdate(id: string, updates: { label?: string; width?
   }).catch((err) => console.error('Failed to persist group update:', err))
 }
 
+/** 校验 loadNodes 返回的行数据基本完整性，过滤掉无效行 */
+function isValidNodeRow(row: Record<string, unknown>): boolean {
+  if (typeof row.id !== 'string' || !row.id) return false
+  if (typeof row.type !== 'string' || !row.type) return false
+  if (typeof row.positionX !== 'number' || typeof row.positionY !== 'number') return false
+  return true
+}
+
+/** 将校验通过的后端行数据转换为前端 AppNode */
+function rowToAppNode(row: Record<string, unknown>): AppNode {
+  const id = row.id as string
+  const type = row.type as AppNode['type']
+  const position = { x: row.positionX as number, y: row.positionY as number }
+
+  switch (type) {
+    case 'groupNode':
+      return {
+        id, type, position,
+        selectable: false,
+        data: {
+          label: (row.title as string) ?? '',
+          width: (row.width as number) ?? 0,
+          height: (row.height as number) ?? 0,
+        },
+      }
+    case 'urlNode':
+      return {
+        id, type, position,
+        data: {
+          url: (row.url as string) ?? '',
+          title: (row.title as string) ?? '',
+          description: (row.description as string) ?? '',
+          image: (row.image as string) ?? null,
+          favicon: (row.favicon as string) ?? null,
+          groupId: (row.groupId as string) ?? undefined,
+        },
+      }
+    case 'docNode':
+      return {
+        id, type, position,
+        data: {
+          src: (row.src as string) ?? '',
+          fileName: (row.fileName as string) ?? '',
+          fileSize: (row.fileSize as number) ?? 0,
+          groupId: (row.groupId as string) ?? undefined,
+        },
+      }
+    case 'imageNode':
+    case 'videoNode':
+      return {
+        id, type, position,
+        data: {
+          src: (row.src as string) ?? '',
+          fileName: (row.fileName as string) ?? '',
+          groupId: (row.groupId as string) ?? undefined,
+        },
+      }
+    default:
+      // 未知类型兜底为 imageNode
+      return {
+        id, type: 'imageNode', position,
+        data: {
+          src: (row.src as string) ?? '',
+          fileName: (row.fileName as string) ?? '',
+          groupId: (row.groupId as string) ?? undefined,
+        },
+      }
+  }
+}
+
 /** 从后端加载当前用户的所有节点 */
 export async function loadNodes(): Promise<AppNode[]> {
   try {
@@ -147,39 +223,12 @@ export async function loadNodes(): Promise<AppNode[]> {
 
     const rows = await res.json()
 
-    const mapped: AppNode[] = rows.map((row: Record<string, unknown>) => ({
-      id: row.id as string,
-      type: row.type as AppNode['type'],
-      position: { x: row.positionX as number, y: row.positionY as number },
-      ...(row.type === 'groupNode' ? { selectable: false } : {}),
-      data: row.type === 'groupNode'
-        ? {
-            label: (row.title as string) ?? '',
-            width: (row.width as number) ?? 0,
-            height: (row.height as number) ?? 0,
-          }
-        : row.type === 'urlNode'
-          ? {
-              url: row.url as string,
-              title: row.title as string,
-              description: (row.description as string) ?? '',
-              image: (row.image as string) ?? null,
-              favicon: (row.favicon as string) ?? null,
-              groupId: (row.groupId as string) ?? undefined,
-            }
-          : row.type === 'docNode'
-            ? {
-                src: row.src as string,
-                fileName: row.fileName as string,
-                fileSize: (row.fileSize as number) ?? 0,
-                groupId: (row.groupId as string) ?? undefined,
-              }
-            : {
-                src: row.src as string,
-                fileName: row.fileName as string,
-                groupId: (row.groupId as string) ?? undefined,
-              },
-    }))
+    // 过滤掉后端返回的无效数据行，防止渲染崩溃
+    const validRows: Record<string, unknown>[] = Array.isArray(rows)
+      ? rows.filter((row: unknown) => row && typeof row === 'object' && isValidNodeRow(row as Record<string, unknown>))
+      : []
+
+    const mapped = validRows.map(rowToAppNode)
     // 小组节点排在前面（渲染层级更低，避免遮挡内容节点）
     const groups = mapped.filter((n) => n.type === 'groupNode')
     const others = mapped.filter((n) => n.type !== 'groupNode')

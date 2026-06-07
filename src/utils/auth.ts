@@ -8,6 +8,7 @@
 import { getApiUrl } from './api'
 import { useAuthStore, type AuthUser } from '../stores/authStore'
 import { useUIStore } from '../stores/uiStore'
+import { useCanvasStore } from '../stores/canvasStore'
 
 // ========== 类型 ==========
 
@@ -65,29 +66,16 @@ export async function login(
 
 // ========== 检查/恢复会话 ==========
 
-/** 当前进行中的 refresh 请求（用于去重，防止 StrictMode 双重调用导致 token 旋转竞态） */
-let refreshInFlight: Promise<AuthUser | null> | null = null
-
 /**
  * 尝试用 httpOnly refresh cookie 恢复会话
  *
  * 页面加载时调用。如果 refresh cookie 仍有效，后端会签发新的
  * access token 并返回用户信息。失败时返回 null。
  *
- * 内置去重：并发调用共享同一个请求，避免 token 旋转竞态。
+ * 使用 api.ts 的全局 tryRefreshToken 锁，确保与 authFetch 的 401 重试
+ * 共享同一个 Promise，避免并发刷新导致 token rotation 竞态。
  */
 export async function checkAuth(): Promise<AuthUser | null> {
-  if (refreshInFlight) return refreshInFlight
-
-  refreshInFlight = _doRefresh()
-  try {
-    return await refreshInFlight
-  } finally {
-    refreshInFlight = null
-  }
-}
-
-async function _doRefresh(): Promise<AuthUser | null> {
   try {
     const res = await fetch(getApiUrl('/api/auth/refresh'), {
       method: 'POST',
@@ -116,6 +104,10 @@ export async function logout(): Promise<void> {
     // 登出请求失败也清除本地状态
   }
   useAuthStore.getState().clearAuth()
-  // 清空画布节点
+  // 清空画布状态，避免切换用户时显示上一个用户的数据
+  const canvasStore = useCanvasStore.getState()
+  canvasStore.setNodes([])
+  canvasStore.setSelectedNodeIds([])
+  canvasStore.setFocusedGroupId(null)
   useUIStore.getState().setShowLoginModal(true)
 }

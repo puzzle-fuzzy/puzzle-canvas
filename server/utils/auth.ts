@@ -17,8 +17,18 @@ export const ACCESS_TOKEN_EXPIRY = '15m'
 /** Refresh Token 有效期（7 天），单位毫秒 */
 export const REFRESH_TOKEN_EXPIRY_MS = 7 * 24 * 3600 * 1000
 
-/** JWT 签名密钥（生产环境应通过环境变量设置） */
-const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-secret-change-me'
+/** JWT 签名密钥 */
+const JWT_SECRET = (() => {
+  const secret = process.env.JWT_SECRET
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET 环境变量在生产环境中必须设置')
+    }
+    console.warn('⚠️  使用默认 JWT_SECRET，生产环境请设置环境变量')
+    return 'dev-secret-change-me'
+  }
+  return secret
+})()
 
 /** 密码哈希 salt rounds */
 const SALT_ROUNDS = 12
@@ -77,7 +87,12 @@ export function generateRefreshToken(): string {
 
 // ========== 辅助函数 ==========
 
-/** 查询 users 表是否为空（用于首用户自动成为 admin 的判断） */
+/**
+ * 查询 users 表是否为空（用于首用户自动成为 admin 的判断）
+ *
+ * 使用事务保证 check + insert 的原子性，防止并发注册时两人都成为 admin。
+ * 调用方应将后续的 INSERT 包裹在同一个事务中。
+ */
 export function isFirstUser(db: ReturnType<typeof drizzle>): boolean {
   const result = db.select({ id: users.id }).from(users).limit(1).all()
   return result.length === 0

@@ -80,10 +80,13 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   onNodesChange: (changes) => {
     const state = get()
 
+    // 预建节点索引 Map，将 .find() 从 O(n) 降为 O(1)
+    const nodeMap = new Map(state.nodes.map((n) => [n.id, n]))
+
     // 忽略 groupNode 的选中变更（groupNode 不可选中）
     const filtered = changes.filter((c) => {
       if (c.type === 'select') {
-        const node = state.nodes.find((n) => n.id === c.id)
+        const node = nodeMap.get(c.id)
         return node?.type !== 'groupNode'
       }
       return true
@@ -95,7 +98,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     const groupRemovalIds = new Set<string>()
     for (const c of filtered) {
       if (isRemoveChange(c)) {
-        const node = state.nodes.find((n) => n.id === c.id)
+        const node = nodeMap.get(c.id)
         if (node?.type === 'groupNode') {
           groupRemovalIds.add(c.id)
         }

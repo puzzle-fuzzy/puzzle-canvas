@@ -44,12 +44,25 @@ app.onError((err, c) => {
   if (err instanceof SyntaxError) {
     return c.json({ error: '请求体 JSON 格式错误' }, 400)
   }
-  return c.json({ error: err.message || '服务器内部错误' }, 500)
+  // 生产环境不暴露内部错误详情，避免泄露 SQL 语句、文件路径等
+  const message = process.env.NODE_ENV === 'production'
+    ? '服务器内部错误'
+    : err.message || '服务器内部错误'
+  return c.json({ error: message }, 500)
 })
 
 // ===== 静态文件服务 =====
 
 // 上传文件：/uploads/* → ./uploads/*
+// 添加安全头，防止上传的 HTML/SVG 在同源执行 JS（存储型 XSS）
+app.use('/uploads/*', async (c, next) => {
+  await next()
+  const res = c.res
+  if (res.status === 200) {
+    res.headers.set('X-Content-Type-Options', 'nosniff')
+    res.headers.set('Content-Disposition', 'attachment')
+  }
+})
 app.use('/uploads/*', serveStatic({ root: './' }))
 
 // ===== 业务路由 =====
