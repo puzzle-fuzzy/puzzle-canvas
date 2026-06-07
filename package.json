@@ -16,6 +16,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "start": "NODE_ENV=production bun server/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:server": "bun test server/"
