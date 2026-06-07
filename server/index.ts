@@ -25,7 +25,13 @@ import { createAuthMiddleware } from './middleware/auth'
 
 const app = new Hono()
 
-// ===== 全局中间件 =====
+// ===== 启动日志 =====
+const PORT = 4001
+const isProd = process.env.NODE_ENV === 'production'
+console.log(`\n🚀 Puzzle Canvas 服务启动`)
+console.log(`   环境: ${isProd ? '生产' : '开发'}`)
+console.log(`   端口: ${PORT}`)
+console.log(`   前端: ${Bun.file('./dist/index.html').size > 0 ? '✅ dist/ 已构建' : '⚠️  dist/ 不存在，请先运行 bun run build'}\n`)
 
 // CORS：显式白名单，防止跨域攻击
 app.use('*', cors({
