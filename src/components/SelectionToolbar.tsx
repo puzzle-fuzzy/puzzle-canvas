@@ -56,8 +56,8 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
     // 找到第一个选中的图片或视频节点
     const mediaNode = allNodes.find(
       (n) => ids.includes(n.id) && (n.type === 'imageNode' || n.type === 'videoNode'),
-    )
-    if (mediaNode && mediaNode.data.src) {
+    ) as Extract<(typeof allNodes)[number], { type: 'imageNode' | 'videoNode' }> | undefined
+    if (mediaNode) {
       setFullscreenPreview({
         src: mediaNode.data.src,
         fileName: mediaNode.data.fileName,

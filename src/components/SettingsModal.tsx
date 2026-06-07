@@ -33,7 +33,6 @@ function SettingsModal({ onClose }: SettingsModalProps) {
   const trapRef = useFocusTrap(true)
 
   const DismissIcon = useAppIcon('dismiss')
-  const SignOutIcon = useAppIcon('signOut')
 
   // Escape 关闭
   useEffect(() => {
