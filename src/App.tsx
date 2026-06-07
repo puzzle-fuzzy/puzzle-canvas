@@ -20,6 +20,7 @@ import AIModal from './components/AIModal'
 import LoginModal from './components/LoginModal'
 import FullscreenPreview from './components/FullscreenPreview'
 import GroupNameModal from './components/GroupNameModal'
+import GroupToolbar from './components/GroupToolbar'
 import ErrorToast from './components/ErrorToast'
 import LoadingIndicator from './components/LoadingIndicator'
 import EmptyHint from './components/EmptyHint'
@@ -31,6 +32,7 @@ import { useCanvasActions } from './hooks/useCanvasActions'
 import { useInputListeners } from './hooks/useInputListeners'
 import { useNodeLoader } from './hooks/useNodeLoader'
 import { useSelectionToolbar } from './hooks/useSelectionToolbar'
+import { useGroupToolbar } from './hooks/useGroupToolbar'
 
 import './App.css'
 
@@ -63,6 +65,7 @@ function Canvas() {
 
   const actions = useCanvasActions()
   const toolbarPos = useSelectionToolbar()
+  const groupToolbarPos = useGroupToolbar()
 
   // 初始视口（渲染前从 localStorage 读取，避免闪烁）
   const savedViewport = useRef(() => {
@@ -137,6 +140,19 @@ function Canvas() {
         onNodeDragStop={actions.handleNodeDragStop}
         onMoveEnd={actions.handleMoveEnd}
         onSelectionChange={handleSelectionChange}
+        onPaneClick={() => useCanvasStore.getState().setFocusedGroupId(null)}
+        onNodeClick={(_e, node) => {
+          const store = useCanvasStore.getState()
+          if (node.type === 'groupNode') {
+            // 清除所有节点选中状态，避免 SelectionToolbar 和小组操作栏同时出现
+            store.setNodes((prev) =>
+              prev.map((n) => ({ ...n, selected: false })),
+            )
+            store.setFocusedGroupId(node.id)
+          } else {
+            store.setFocusedGroupId(null)
+          }
+        }}
         nodeTypes={nodeTypes}
         defaultViewport={savedViewport}
         minZoom={0.01}
@@ -163,6 +179,12 @@ function Canvas() {
           position={toolbarPos}
           selectedCount={selectedNodeIds.length}
           onDownload={actions.handleDownloadSelected}
+        />
+      )}
+
+      {groupToolbarPos && (
+        <GroupToolbar
+          position={{ x: groupToolbarPos.x, y: groupToolbarPos.y, groupId: groupToolbarPos.groupId }}
         />
       )}
 

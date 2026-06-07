@@ -452,6 +452,11 @@ html.dark {
   cursor: grabbing;
 }
 
+.group-node--focused {
+  border-style: solid;
+  border-color: var(--color-primary);
+}
+
 .group-node:hover {
   border-color: rgba(var(--color-primary-rgb), 0.6);
   background: rgba(var(--color-primary-rgb), 0.08);
@@ -473,12 +478,6 @@ html.dark {
   max-width: calc(100% - 24px);
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.group-node-actions {
-  position: absolute;
-  top: calc(var(--mode-toolbar-size) / -2 - 36px);
-  right: 12px;
 }
 
 html.dark {

@@ -32,6 +32,7 @@ interface CanvasStore {
   initialized: boolean
   selectedNodeIds: string[]
   interactionMode: 'pan' | 'select'
+  focusedGroupId: string | null
 
   // Actions
   setNodes: (updater: AppNode[] | ((prev: AppNode[]) => AppNode[])) => void
@@ -39,6 +40,7 @@ interface CanvasStore {
   setLoading: (v: boolean) => void
   setInitialized: (v: boolean) => void
   setInteractionMode: (mode: 'pan' | 'select') => void
+  setFocusedGroupId: (id: string | null) => void
   onNodesChange: OnNodesChange<AppNode>
   handleOrganize: () => void
   handleDeleteSelected: () => void
@@ -60,6 +62,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   initialized: false,
   selectedNodeIds: [],
   interactionMode: 'pan',
+  focusedGroupId: null,
 
   // ========== Actions ==========
   setNodes: (updater) => {
@@ -72,6 +75,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   setLoading: (v) => set({ loading: v }),
   setInitialized: (v) => set({ initialized: v }),
   setInteractionMode: (mode) => set({ interactionMode: mode }),
+  setFocusedGroupId: (id) => set({ focusedGroupId: id }),
 
   onNodesChange: (changes) => {
     const state = get()
