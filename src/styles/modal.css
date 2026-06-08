@@ -1136,6 +1136,41 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
+.appearance-position-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.appearance-position-btn {
+  padding: 8px 0;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  background: transparent;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.appearance-position-btn.active {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+}
+
+.appearance-panel.dark .appearance-position-btn {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #9ca3af;
+}
+
+.appearance-panel.dark .appearance-position-btn.active {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+}
+
 /* ========== Focus visible (所有弹窗按钮) ========== */
 button:focus-visible {
   outline: 2px solid var(--color-primary);

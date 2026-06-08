@@ -1,18 +1,31 @@
 /* ========== 右侧模式工具栏 ========== */
 .mode-toolbar {
   position: fixed;
-  top: 45px;
-  right: 10px;
-  width: var(--mode-toolbar-size);
-  border-radius: var(--mode-toolbar-size);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
   padding: 8px 0;
+  width: var(--mode-toolbar-size);
+  border-radius: var(--mode-toolbar-size);
   z-index: 10;
   transition: background 0.3s, box-shadow 0.3s;
+  user-select: none;
+}
+
+.mode-toolbar--horizontal {
+  flex-direction: row;
+  height: var(--mode-toolbar-size);
+  width: auto;
+  padding: 0 8px;
+}
+
+.mode-toolbar--dragging {
+  transition: none !important;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transform: scale(1.05);
 }
 
 /* 暗色工具栏 */

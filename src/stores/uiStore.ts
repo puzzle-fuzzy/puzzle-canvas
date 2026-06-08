@@ -45,6 +45,8 @@ function hexToRgb(hex: string): string {
   return `${r}, ${g}, ${b}`
 }
 
+export type ToolbarPosition = 'top' | 'bottom' | 'left' | 'right'
+
 interface UIStore {
   // State
   darkMode: boolean
@@ -56,6 +58,7 @@ interface UIStore {
   fullscreenPreview: { src: string; fileName: string; mediaType: 'image' | 'video' } | null
   themeColor: string
   toolbarIconSize: number
+  toolbarPosition: ToolbarPosition
   aiPrompt: string
   aiModel: string
   aiGenerating: boolean
@@ -78,6 +81,7 @@ interface UIStore {
   setFullscreenPreview: (v: { src: string; fileName: string; mediaType: 'image' | 'video' } | null) => void
   setThemeColor: (v: string) => void
   setToolbarIconSize: (v: number) => void
+  setToolbarPosition: (v: ToolbarPosition) => void
   setAiPrompt: (v: string) => void
   setAiModel: (v: string) => void
   setAiGenerating: (v: boolean) => void
@@ -102,6 +106,7 @@ function initToolbarIconSize(size: number) {
 
 const defaultThemeColor = '#6366f1'
 const defaultToolbarIconSize = 20
+const defaultToolbarPosition: ToolbarPosition = 'right'
 
 export const useUIStore = create<UIStore>((set) => {
   // 从 localStorage 恢复外观设置并同步到 DOM
@@ -114,6 +119,14 @@ export const useUIStore = create<UIStore>((set) => {
       const v = localStorage.getItem('toolbarIconSize')
       return v ? parseInt(v, 10) : defaultToolbarIconSize
     } catch { return defaultToolbarIconSize }
+  })()
+
+  const savedToolbarPosition = (() => {
+    try {
+      const v = localStorage.getItem('toolbarPosition')
+      if (v && ['top', 'bottom', 'left', 'right'].includes(v)) return v as ToolbarPosition
+      return defaultToolbarPosition
+    } catch { return defaultToolbarPosition }
   })()
 
   // 初始化 CSS 变量
@@ -135,6 +148,7 @@ export const useUIStore = create<UIStore>((set) => {
     fullscreenPreview: null,
     themeColor: savedColor,
     toolbarIconSize: savedIconSize,
+    toolbarPosition: savedToolbarPosition,
     aiPrompt: '',
     aiModel: 'dall-e-3',
     aiGenerating: false,
@@ -183,6 +197,10 @@ export const useUIStore = create<UIStore>((set) => {
     setToolbarIconSize: (v) => {
       syncToolbarIconSizeToDOM(v)
       set({ toolbarIconSize: v })
+    },
+    setToolbarPosition: (v) => {
+      try { localStorage.setItem('toolbarPosition', v) } catch { /* */ }
+      set({ toolbarPosition: v })
     },
 
     setAiPrompt: (v) => set({ aiPrompt: v }),

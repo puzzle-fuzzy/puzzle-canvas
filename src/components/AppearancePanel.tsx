@@ -1,6 +1,6 @@
 import { Icon } from '@ricons/utils'
 import { useAppIcon } from '../icons'
-import { useUIStore } from '../stores/uiStore'
+import { useUIStore, type ToolbarPosition } from '../stores/uiStore'
 
 /** 预设主题色 */
 const PRESET_COLORS = [
@@ -14,6 +14,13 @@ const PRESET_COLORS = [
   { id: 'teal',    hex: '#14b8a6', label: '青色' },
 ]
 
+const TOOLBAR_POSITIONS: { id: ToolbarPosition; label: string }[] = [
+  { id: 'top', label: '顶部' },
+  { id: 'bottom', label: '底部' },
+  { id: 'left', label: '左侧' },
+  { id: 'right', label: '右侧' },
+]
+
 interface AppearancePanelProps {
   darkMode: boolean
 }
@@ -23,6 +30,8 @@ function AppearancePanel({ darkMode }: AppearancePanelProps) {
   const setThemeColor = useUIStore((s) => s.setThemeColor)
   const toolbarIconSize = useUIStore((s) => s.toolbarIconSize)
   const setToolbarIconSize = useUIStore((s) => s.setToolbarIconSize)
+  const toolbarPosition = useUIStore((s) => s.toolbarPosition)
+  const setToolbarPosition = useUIStore((s) => s.setToolbarPosition)
 
   const CheckIcon = useAppIcon('sparkle')
 
@@ -67,6 +76,23 @@ function AppearancePanel({ darkMode }: AppearancePanelProps) {
         <div className="appearance-slider-labels">
           <span>小</span>
           <span>大</span>
+        </div>
+      </div>
+
+      {/* 工具栏位置 */}
+      <div className="appearance-section">
+        <div className="appearance-section-title">工具栏位置</div>
+        <div className="appearance-position-grid">
+          {TOOLBAR_POSITIONS.map((p) => (
+            <button
+              key={p.id}
+              className={`appearance-position-btn ${toolbarPosition === p.id ? 'active' : ''}`}
+              onClick={() => setToolbarPosition(p.id)}
+              type="button"
+            >
+              {p.label}
+            </button>
+          ))}
         </div>
       </div>
     </div>
