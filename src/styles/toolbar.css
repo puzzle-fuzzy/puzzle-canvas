@@ -24,8 +24,7 @@
 .mode-toolbar--dragging {
   transition: none !important;
   z-index: 100;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* 暗色工具栏 */
@@ -91,7 +90,7 @@
 }
 
 .mode-toolbar-divider {
-  width: 32px;
+  width: 24px;
   height: 1px;
   margin: 2px 0;
 }

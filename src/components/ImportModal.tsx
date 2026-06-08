@@ -125,10 +125,16 @@ export default function ImportModal() {
 
   return (
     <div className="share-overlay" onClick={handleClose}>
-      <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="share-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="导入节点"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="share-modal-header">
           <span className="share-modal-title">导入节点</span>
-          <button className="share-modal-close" onClick={handleClose}>✕</button>
+          <button className="share-modal-close" onClick={handleClose} aria-label="关闭">✕</button>
         </div>
         <div className="share-modal-body">
           <p className="share-modal-desc">粘贴同事分享的密钥或链接，导入到你的画布。</p>
@@ -137,6 +143,7 @@ export default function ImportModal() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="输入分享密钥或链接"
+            aria-label="分享密钥或链接"
             autoFocus
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleImport()

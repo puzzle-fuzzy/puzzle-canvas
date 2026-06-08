@@ -79,7 +79,7 @@ function SettingsModal({ onClose }: SettingsModalProps) {
             <span className="settings-content-title">
               {sections.find((s) => s.id === activeSection)?.label}
             </span>
-            <button className="settings-close-btn" onClick={onClose} type="button">
+            <button className="settings-close-btn" onClick={onClose} type="button" aria-label="关闭">
               <Icon size={18}><DismissIcon /></Icon>
             </button>
           </div>

@@ -1,4 +1,4 @@
-/* ========== 全局变量 ========== */
+/* ========== 语义色彩令牌 ========== */
 :root {
   /* 节点 */
   --node-width: 320px;
@@ -11,4 +11,66 @@
   --color-primary: #6366f1;
   --color-primary-hover: #818cf8;
   --color-primary-rgb: 99, 102, 241;
+
+  /* 亮色模式 — 表面 */
+  --surface-bg: #fafafa;
+  --surface-card: #ffffff;
+  --surface-elevated: #ffffff;
+  --surface-muted: #f3f4f6;
+  --surface-sidebar: rgba(0, 0, 0, 0.02);
+
+  /* 亮色模式 — 文本 */
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #737373;
+  --text-placeholder: rgba(0, 0, 0, 0.55);
+  --text-link: #3b82f6;
+  --text-link-hover: #2563eb;
+  --text-on-primary: #ffffff;
+  --text-close: rgba(0, 0, 0, 0.55);
+
+  /* 亮色模式 — 边框 */
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-medium: rgba(0, 0, 0, 0.1);
+
+  /* 亮色模式 — 阴影 */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 3px 8px rgba(0, 0, 0, 0.1);
+  --shadow-modal: 0 4px 16px rgba(0, 0, 0, 0.12);
+
+  /* 语义色 */
+  --color-error: #ef4444;
+  --color-error-bg: #fef2f2;
+  --color-error-border: #fecaca;
+  --color-error-text: #991b1b;
+}
+
+/* 暗色模式令牌覆盖 */
+html.dark {
+  --surface-bg: #111118;
+  --surface-card: #1e1f28;
+  --surface-elevated: #18181b;
+  --surface-muted: #374151;
+  --surface-sidebar: rgba(255, 255, 255, 0.03);
+
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #9ca3af;
+  --text-placeholder: rgba(255, 255, 255, 0.5);
+  --text-link: #60a5fa;
+  --text-link-hover: #93bbfd;
+  --text-on-primary: #ffffff;
+  --text-close: rgba(255, 255, 255, 0.5);
+
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.1);
+
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-card-hover: 0 3px 8px rgba(0, 0, 0, 0.3);
+  --shadow-modal: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+  --color-error: #f87171;
+  --color-error-bg: #450a0a;
+  --color-error-border: #7f1d1d;
+  --color-error-text: #fca5a5;
 }

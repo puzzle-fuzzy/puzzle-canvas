@@ -88,7 +88,7 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
       }}
     >
       {selectedCount > 1 && (
-        <button className="selection-toolbar-btn" onClick={handleOrganize} title="整理">
+        <button className="selection-toolbar-btn" onClick={handleOrganize} aria-label="整理">
           <Icon size={iconSize}><BoardIcon /></Icon>
         </button>
       )}
@@ -96,34 +96,34 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
         <button
           className="selection-toolbar-btn"
           onClick={() => openGroupNameModal('create')}
-          title="设置小组"
+          aria-label="设置小组"
         >
           <Icon size={iconSize}><GroupIcon /></Icon>
         </button>
       )}
       {hasMedia && (
-        <button className="selection-toolbar-btn" onClick={handleFullscreen} title="全屏预览">
+        <button className="selection-toolbar-btn" onClick={handleFullscreen} aria-label="全屏预览">
           <Icon size={iconSize}><FullscreenIcon /></Icon>
         </button>
       )}
       {hasUrl && (
-        <button className="selection-toolbar-btn" onClick={handleCopyUrl} title={copied ? '已复制' : '复制链接'}>
+        <button className="selection-toolbar-btn" onClick={handleCopyUrl} aria-label={copied ? '已复制' : '复制链接'}>
           {copied
             ? <span style={{ fontSize: '12px', fontWeight: 600 }}>✓</span>
             : <Icon size={iconSize}><CopyIcon /></Icon>
           }
         </button>
       )}
-      <button className="selection-toolbar-btn" onClick={() => setShowShareModal(true)} title="分享">
+      <button className="selection-toolbar-btn" onClick={() => setShowShareModal(true)} aria-label="分享">
         <Icon size={iconSize}><ShareIcon /></Icon>
       </button>
-      <button className="selection-toolbar-btn" onClick={onDownload} title="下载">
+      <button className="selection-toolbar-btn" onClick={onDownload} aria-label="下载">
         <Icon size={iconSize}><DownloadIcon /></Icon>
       </button>
       <button
         className="selection-toolbar-btn selection-toolbar-btn--danger"
         onClick={handleDeleteSelected}
-        title="删除"
+        aria-label="删除"
       >
         <Icon size={iconSize}><DeleteIcon /></Icon>
       </button>

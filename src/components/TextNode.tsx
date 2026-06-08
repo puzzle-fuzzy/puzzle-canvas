@@ -21,13 +21,25 @@ function TextNode({ data }: TextNodeProps) {
     setTextPreview(data.description)
   }, [data.description, setTextPreview])
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      setTextPreview(data.description)
+    }
+  }, [data.description, setTextPreview])
+
   return (
-    <div className="text-node" onClick={handleClick}>
+    <button
+      className="text-node"
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      aria-label="展开文本"
+    >
       <div className="text-node-content" ref={contentRef}>
         {data.description}
       </div>
-      {overflowing && <div className="text-node-fade" />}
-    </div>
+      {overflowing && <div className="text-node-fade" aria-hidden="true" />}
+    </button>
   )
 }
 

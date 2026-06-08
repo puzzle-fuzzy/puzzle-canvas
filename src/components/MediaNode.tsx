@@ -90,6 +90,7 @@ function MediaNode({ data, type, id }: MediaNodeProps) {
             className="media-image"
             src={data.src}
             alt={data.fileName}
+            loading="lazy"
             onError={() => setImageError(true)}
           />
         </div>

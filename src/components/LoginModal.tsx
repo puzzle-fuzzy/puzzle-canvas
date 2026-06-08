@@ -101,7 +101,7 @@ function LoginModal() {
             <Icon size={16}><UserIcon /></Icon>
             {tab === 'login' ? '登录' : '注册'}
           </span>
-          <button className="auth-modal-close" onClick={handleClose} disabled={loading}>
+          <button className="auth-modal-close" onClick={handleClose} disabled={loading} aria-label="关闭">
             <Icon size={16}><DismissIcon /></Icon>
           </button>
         </div>

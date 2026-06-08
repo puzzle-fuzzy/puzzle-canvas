@@ -5,7 +5,7 @@ function ErrorToast() {
 
   if (!error) return null
 
-  return <div className="error-toast">{error}</div>
+  return <div className="error-toast" role="alert">{error}</div>
 }
 
 export default ErrorToast

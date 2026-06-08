@@ -67,6 +67,7 @@ function AppearancePanel({ darkMode }: AppearancePanelProps) {
         <input
           type="range"
           className="appearance-slider"
+          aria-label="工具栏图标大小"
           min={14}
           max={28}
           step={1}

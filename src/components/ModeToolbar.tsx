@@ -128,46 +128,46 @@ function ModeToolbar() {
       <button
         className={`mode-toolbar-btn ${interactionMode === 'pan' && !spaceHeld ? 'active' : ''}`}
         onClick={() => setInteractionMode('pan')}
-        title="拖拽模式（Space 切换）"
+        aria-label="拖拽模式（Space 切换）"
       >
         <Icon size={iconSize}><HandIcon /></Icon>
       </button>
       <button
         className={`mode-toolbar-btn ${interactionMode === 'select' || spaceHeld ? 'active' : ''}`}
         onClick={() => setInteractionMode('select')}
-        title="选择模式（Space 切换）"
+        aria-label="选择模式（Space 切换）"
       >
         <Icon size={iconSize}><CursorIcon /></Icon>
       </button>
-      <div className="mode-toolbar-divider" style={dividerStyle} />
+      <div className="mode-toolbar-divider" style={dividerStyle} aria-hidden="true" />
       <button
         className="mode-toolbar-btn"
         onClick={() => setShowAIModal(true)}
-        title="AI 生图"
+        aria-label="AI 生图"
       >
         <Icon size={iconSize}><SparkleIcon /></Icon>
       </button>
-      <div className="mode-toolbar-divider" style={dividerStyle} />
+      <div className="mode-toolbar-divider" style={dividerStyle} aria-hidden="true" />
       <button
         className="mode-toolbar-btn"
         onClick={() => toggleDarkMode()}
-        title={darkMode ? '切换到日间模式' : '切换到夜间模式'}
+        aria-label={darkMode ? '切换到日间模式' : '切换到夜间模式'}
       >
         {darkMode ? <Icon size={iconSize}><SunIcon /></Icon> : <Icon size={iconSize}><MoonIcon /></Icon>}
       </button>
-      <div className="mode-toolbar-divider" style={dividerStyle} />
+      <div className="mode-toolbar-divider" style={dividerStyle} aria-hidden="true" />
       <button
         className="mode-toolbar-btn"
         onClick={() => setShowImportModal(true)}
-        title="导入节点"
+        aria-label="导入节点"
       >
         <Icon size={iconSize}><ImportIcon /></Icon>
       </button>
-      <div className="mode-toolbar-divider" style={dividerStyle} />
+      <div className="mode-toolbar-divider" style={dividerStyle} aria-hidden="true" />
       <button
         className="mode-toolbar-btn"
         onClick={() => setShowSettingsModal(true)}
-        title="设置"
+        aria-label="设置"
       >
         <Icon size={iconSize}><SettingsIcon /></Icon>
       </button>

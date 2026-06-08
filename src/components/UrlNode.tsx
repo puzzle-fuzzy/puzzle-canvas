@@ -22,6 +22,7 @@ function UrlNode({ data }: NodeProps<UrlNodeType>) {
             className="node-favicon"
             src={favicon}
             alt=""
+            loading="lazy"
             onError={() => setFaviconError(true)}
           />
         ) : (
@@ -39,6 +40,7 @@ function UrlNode({ data }: NodeProps<UrlNodeType>) {
             className="node-image"
             src={image}
             alt={title}
+            loading="lazy"
             onError={() => setImageError(true)}
           />
         </div>

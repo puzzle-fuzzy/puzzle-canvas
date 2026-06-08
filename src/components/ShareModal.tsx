@@ -82,10 +82,16 @@ export default function ShareModal() {
 
   return (
     <div className="share-overlay" onClick={handleClose}>
-      <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="share-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="分享节点"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="share-modal-header">
           <span className="share-modal-title">分享节点</span>
-          <button className="share-modal-close" onClick={handleClose}>✕</button>
+          <button className="share-modal-close" onClick={handleClose} aria-label="关闭">✕</button>
         </div>
 
         {!shareKey ? (
@@ -104,7 +110,7 @@ export default function ShareModal() {
             <p className="share-modal-desc">分享密钥已生成，复制后发送给同事即可。</p>
             <div className="share-modal-key-row">
               <code className="share-modal-key">{shareKey}</code>
-              <button className="share-modal-copy-btn" onClick={handleCopy}>
+              <button className="share-modal-copy-btn" onClick={handleCopy} aria-label="复制分享密钥">
                 {copied ? '✓' : <Icon size={16}><CopyIcon /></Icon>}
               </button>
             </div>

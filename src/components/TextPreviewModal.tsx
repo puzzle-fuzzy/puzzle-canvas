@@ -26,6 +26,9 @@ export default function TextPreviewModal() {
     <div className="text-preview-overlay" onClick={() => setTextPreview(null)}>
       <div
         className="text-preview-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="文本预览"
         ref={modalRef}
         onClick={(e) => e.stopPropagation()}
       >

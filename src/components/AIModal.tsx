@@ -45,6 +45,7 @@ function AIModal({ onGenerate }: AIModalProps) {
             className="ai-modal-close"
             onClick={() => !aiGenerating && setShowAIModal(false)}
             disabled={aiGenerating}
+            aria-label="关闭"
           >
             <Icon size={16}><DismissIcon /></Icon>
           </button>
