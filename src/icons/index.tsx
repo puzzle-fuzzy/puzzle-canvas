@@ -28,6 +28,8 @@ export type IconName =
   | 'copy'
   | 'group'
   | 'edit'
+  | 'share'
+  | 'arrowDownload'
 
 export type IconSet = 'fluent' | 'lucide' | 'antd'
 export type IconRegistry = Record<IconName, ComponentType>

@@ -16,6 +16,7 @@ import { createNodeRoutes } from '../routes/nodes'
 import { createUploadRoutes } from '../routes/upload'
 import { createMetadataRoutes } from '../routes/metadata'
 import { createAIRoutes } from '../routes/ai'
+import { createShareRoutes } from '../routes/shares'
 import { createAuthMiddleware } from '../middleware/auth'
 import { signAccessToken } from '../utils/auth'
 
@@ -95,6 +96,17 @@ export function createTestDb() {
       created_at INTEGER NOT NULL DEFAULT (unixepoch())
     )
   `)
+  sqlite.run(`
+    CREATE TABLE shares (
+      id TEXT PRIMARY KEY,
+      share_key TEXT NOT NULL UNIQUE,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      nodes_snapshot TEXT NOT NULL,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch())
+    )
+  `)
+  sqlite.run('CREATE INDEX shares_share_key_idx ON shares(share_key)')
+  sqlite.run('CREATE INDEX shares_user_id_idx ON shares(user_id)')
 
   // 插入测试用户（nodes 外键依赖）
   sqlite.run('INSERT INTO users (id, email, username) VALUES (?, ?, ?)', [
@@ -139,6 +151,7 @@ export function createTestApp() {
     .route('/api/upload', createUploadRoutes())
     .route('/api/metadata', createMetadataRoutes())
     .route('/api/generate-image', createAIRoutes())
+    .route('/api/shares', createShareRoutes({ db }))
 
   return { app: fullApp, db, sqlite }
 }
@@ -167,8 +180,10 @@ export function createAuthenticatedTestApp() {
     .route('/api/auth', createAuthRoutes({ db }))
     .route('/api/nodes', createNodeRoutes({ db, auth }))
     .route('/api/upload', createUploadRoutes({ auth }))
+    .route('/api/shares', createShareRoutes({ db, auth }))
     .route('/api/metadata', createMetadataRoutes())
     .route('/api/generate-image', createAIRoutes())
+    .route('/api/shares', createShareRoutes({ db }))
 
   return { app: fullApp, db, sqlite }
 }

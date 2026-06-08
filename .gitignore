@@ -32,5 +32,8 @@ puzzle-canvas.db-wal
 puzzle-canvas.db-shm
 drizzle/
 
+# TypeScript build info (auto-generated, not for version control)
+*.tsbuildinfo
+
 # Environment
 .env

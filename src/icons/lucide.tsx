@@ -23,6 +23,8 @@ import {
   Copy,
   Group,
   Pencil,
+  Share2,
+  ArrowDownToLine,
 } from 'lucide-react'
 import type { IconRegistry } from './index'
 
@@ -58,4 +60,6 @@ export const lucideRegistry: IconRegistry = {
   copy: wrap(Copy),
   group: wrap(Group),
   edit: wrap(Pencil),
+  share: wrap(Share2),
+  arrowDownload: wrap(ArrowDownToLine),
 }

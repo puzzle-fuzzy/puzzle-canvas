@@ -17,6 +17,7 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
   const handleOrganize = useCanvasStore((s) => s.handleOrganize)
   const handleDeleteSelected = useCanvasStore((s) => s.handleDeleteSelected)
   const openGroupNameModal = useUIStore((s) => s.openGroupNameModal)
+  const setShowShareModal = useUIStore((s) => s.setShowShareModal)
 
   const nodes = useCanvasStore((s) => s.nodes)
   const selectedNodeIds = useCanvasStore((s) => s.selectedNodeIds)
@@ -27,6 +28,7 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
   const FullscreenIcon = useAppIcon('fullscreen')
   const CopyIcon = useAppIcon('copy')
   const GroupIcon = useAppIcon('group')
+  const ShareIcon = useAppIcon('share')
 
   const [copied, setCopied] = useState(false)
 
@@ -112,6 +114,9 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
           }
         </button>
       )}
+      <button className="selection-toolbar-btn" onClick={() => setShowShareModal(true)} title="分享">
+        <Icon size={iconSize}><ShareIcon /></Icon>
+      </button>
       <button className="selection-toolbar-btn" onClick={onDownload} title="下载">
         <Icon size={iconSize}><DownloadIcon /></Icon>
       </button>

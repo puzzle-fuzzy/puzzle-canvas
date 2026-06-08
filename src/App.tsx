@@ -24,6 +24,8 @@ import FullscreenPreview from './components/FullscreenPreview'
 import GroupNameModal from './components/GroupNameModal'
 import GroupToolbar from './components/GroupToolbar'
 import TextPreviewModal from './components/TextPreviewModal'
+import ShareModal from './components/ShareModal'
+import ImportModal from './components/ImportModal'
 import ErrorToast from './components/ErrorToast'
 import LoadingIndicator from './components/LoadingIndicator'
 import EmptyHint from './components/EmptyHint'
@@ -209,6 +211,8 @@ function Canvas() {
 
       <AIModal onGenerate={actions.handleAIGenerate} />
       <TextPreviewModal />
+      <ShareModal />
+      <ImportModal />
       <LoginModal />
       <ModeToolbar />
 

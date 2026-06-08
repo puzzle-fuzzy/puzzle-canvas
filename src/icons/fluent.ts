@@ -23,6 +23,8 @@ import {
   Copy20Regular,
   GroupList24Regular,
   Edit20Regular,
+  Share20Regular,
+  ArrowDownload20Regular as ArrowDownloadIcon,
 } from '@ricons/fluent'
 import type { IconRegistry } from './index'
 
@@ -51,4 +53,6 @@ export const fluentRegistry: IconRegistry = {
   copy: Copy20Regular,
   group: GroupList24Regular,
   edit: Edit20Regular,
+  share: Share20Regular,
+  arrowDownload: ArrowDownloadIcon,
 }

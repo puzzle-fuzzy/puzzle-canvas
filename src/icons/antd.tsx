@@ -23,6 +23,8 @@ import {
   CopyOutlined,
   GroupOutlined,
   EditOutlined,
+  ShareAltOutlined,
+  ImportOutlined,
 } from '@ricons/antd'
 import type { IconRegistry } from './index'
 
@@ -55,4 +57,6 @@ export const antdRegistry: IconRegistry = {
   copy: wrap(CopyOutlined),
   group: wrap(GroupOutlined),
   edit: wrap(EditOutlined),
+  share: wrap(ShareAltOutlined),
+  arrowDownload: wrap(ImportOutlined),
 }

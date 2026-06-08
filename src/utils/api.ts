@@ -132,6 +132,46 @@ export function persistNodeGroupId(nodeId: string, groupId: string | null): void
   }).catch((err) => console.error('Failed to persist groupId:', err))
 }
 
+// ========== 分享 ==========
+
+export interface NodeSnapshot {
+  type: string
+  url?: string
+  title?: string
+  description?: string
+  image?: string | null
+  favicon?: string | null
+  src?: string
+  fileName?: string
+  fileSize?: number
+}
+
+/** 创建分享，返回密钥 */
+export async function createShare(nodes: NodeSnapshot[]): Promise<string> {
+  const res = await authFetch('/api/shares', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nodes }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: '分享失败' }))
+    throw new Error(err.error ?? `分享失败 (${res.status})`)
+  }
+  const data = await res.json()
+  return data.shareKey
+}
+
+/** 通过密钥获取分享的节点（公开接口，无需认证） */
+export async function fetchShare(key: string): Promise<NodeSnapshot[]> {
+  const res = await fetch(`/api/shares/${encodeURIComponent(key)}`)
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: '获取失败' }))
+    throw new Error(err.error ?? `获取失败 (${res.status})`)
+  }
+  const data = await res.json()
+  return data.nodes
+}
+
 /** 持久化：更新小组节点属性（fire-and-forget） */
 export function persistGroupUpdate(id: string, updates: { label?: string; width?: number; height?: number }): void {
   const body: Record<string, unknown> = {}

@@ -79,6 +79,26 @@ export const refreshTokens = sqliteTable('refresh_tokens', {
     .$defaultFn(() => new Date()),
 })
 
+/**
+ * 节点分享表
+ *
+ * 用户选中节点后生成分享快照，返回短密钥供他人导入。
+ * nodesSnapshot 存 JSON 字符串，结构为节点元数据数组。
+ * GET /api/shares/:key 无需认证，方便跨团队导入。
+ */
+export const shares = sqliteTable('shares', {
+  id: text('id').primaryKey(),
+  shareKey: text('share_key').notNull().unique(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  nodesSnapshot: text('nodes_snapshot').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+}, (table) => ({
+  shareKeyIdx: index('shares_share_key_idx').on(table.shareKey),
+  userIdIdx: index('shares_user_id_idx').on(table.userId),
+}))
+
 // ==================== 画布数据 ====================
 
 /**

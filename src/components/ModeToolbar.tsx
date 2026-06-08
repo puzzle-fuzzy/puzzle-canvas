@@ -12,6 +12,7 @@ function ModeToolbar() {
   const toggleDarkMode = useUIStore((s) => s.toggleDarkMode)
   const setShowAIModal = useUIStore((s) => s.setShowAIModal)
   const setShowSettingsModal = useUIStore((s) => s.setShowSettingsModal)
+  const setShowImportModal = useUIStore((s) => s.setShowImportModal)
   const iconSize = useUIStore((s) => s.toolbarIconSize)
   const spaceHeld = useInputStore((s) => s.spaceHeld)
 
@@ -24,6 +25,7 @@ function ModeToolbar() {
   const SunIcon = useAppIcon('sun')
   const MoonIcon = useAppIcon('moon')
   const SettingsIcon = useAppIcon('settings')
+  const ImportIcon = useAppIcon('arrowDownload')
 
   return (
     <div className={`mode-toolbar ${darkMode ? 'dark' : 'light'}`}>
@@ -66,6 +68,14 @@ function ModeToolbar() {
         title={darkMode ? '切换到日间模式' : '切换到夜间模式'}
       >
         {darkMode ? <Icon size={iconSize}><SunIcon /></Icon> : <Icon size={iconSize}><MoonIcon /></Icon>}
+      </button>
+      <div className="mode-toolbar-divider" />
+      <button
+        className="mode-toolbar-btn"
+        onClick={() => setShowImportModal(true)}
+        title="导入节点"
+      >
+        <Icon size={iconSize}><ImportIcon /></Icon>
       </button>
       <div className="mode-toolbar-divider" />
       <button

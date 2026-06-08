@@ -63,6 +63,8 @@ interface UIStore {
   groupNameModalMode: 'create' | 'rename'
   groupNameModalTarget: string | null
   textPreview: string | null
+  showShareModal: boolean
+  showImportModal: boolean
 
   // Actions
   toggleDarkMode: () => void
@@ -82,6 +84,8 @@ interface UIStore {
   openGroupNameModal: (mode: 'create' | 'rename', target?: string) => void
   closeGroupNameModal: () => void
   setTextPreview: (v: string | null) => void
+  setShowShareModal: (v: boolean) => void
+  setShowImportModal: (v: boolean) => void
 }
 
 let errorTimer: ReturnType<typeof setTimeout> | null = null
@@ -138,6 +142,8 @@ export const useUIStore = create<UIStore>((set) => {
     groupNameModalMode: 'create',
     groupNameModalTarget: null,
     textPreview: null,
+    showShareModal: false,
+    showImportModal: false,
 
     // ========== Actions ==========
     toggleDarkMode: () => {
@@ -194,5 +200,7 @@ export const useUIStore = create<UIStore>((set) => {
       groupNameModalTarget: null,
     }),
     setTextPreview: (v) => set({ textPreview: v }),
+    setShowShareModal: (v) => set({ showShareModal: v }),
+    setShowImportModal: (v) => set({ showImportModal: v }),
   }
 })
