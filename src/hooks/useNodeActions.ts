@@ -7,6 +7,7 @@ import type {
   AppNode,
   UrlNodeType,
   ImageNodeType,
+  TextNodeType,
   MetadataResponse,
 } from '../types'
 import {
@@ -74,6 +75,27 @@ export function useNodeActions() {
       } finally {
         useCanvasStore.getState().setLoading(false)
       }
+    },
+    [screenToFlowPosition],
+  )
+
+  // ========== 文本节点 ==========
+  const addNodeFromText = useCallback(
+    (text: string) => {
+      const mouse = useInputStore.getState().mousePosition
+      const pos = screenToFlowPosition(mouse)
+
+      const newNode: TextNodeType = {
+        id: crypto.randomUUID(),
+        type: 'textNode',
+        position: pos,
+        data: {
+          description: text,
+        },
+      }
+
+      useCanvasStore.getState().setNodes((prev) => [...prev, newNode])
+      persistNode(newNode)
     },
     [screenToFlowPosition],
   )
@@ -162,7 +184,7 @@ export function useNodeActions() {
             onProgress: (progress) => {
               useCanvasStore.getState().setNodes((prev) =>
                 prev.map((n) => {
-                  if (n.id !== item.nodeId || n.type === 'urlNode' || n.type === 'groupNode') return n
+                  if (n.id !== item.nodeId || n.type === 'urlNode' || n.type === 'groupNode' || n.type === 'textNode') return n
                   const nodeData =
                     n.type === 'docNode'
                       ? {
@@ -328,5 +350,5 @@ export function useNodeActions() {
     }
   }, [screenToFlowPosition])
 
-  return { addNodeFromUrl, addNodeFromFiles, handleAIGenerate }
+  return { addNodeFromUrl, addNodeFromText, addNodeFromFiles, handleAIGenerate }
 }

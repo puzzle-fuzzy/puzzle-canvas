@@ -182,6 +182,14 @@ function rowToAppNode(row: Record<string, unknown>): AppNode {
           groupId: (row.groupId as string) ?? undefined,
         },
       }
+    case 'textNode':
+      return {
+        id, type, position,
+        data: {
+          description: (row.description as string) ?? '',
+          groupId: (row.groupId as string) ?? undefined,
+        },
+      }
     case 'docNode':
       return {
         id, type, position,

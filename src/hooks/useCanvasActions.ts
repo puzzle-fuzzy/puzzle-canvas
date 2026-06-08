@@ -19,7 +19,7 @@ export function useCanvasActions() {
   const dragStartPositionsRef = useRef<Record<string, { x: number; y: number }>>({})
   // 标记成员节点是否已在本轮拖拽中脱离小组
   const dragRemovedFromGroupRef = useRef(false)
-  const { addNodeFromUrl, addNodeFromFiles, handleAIGenerate } = useNodeActions()
+  const { addNodeFromUrl, addNodeFromText, addNodeFromFiles, handleAIGenerate } = useNodeActions()
   const { handleDownloadSelected } = useDownload()
 
   // ========== 粘贴事件 ==========
@@ -38,9 +38,12 @@ export function useCanvasActions() {
       if (text && isValidUrl(text)) {
         e.preventDefault()
         addNodeFromUrl(text)
+      } else if (text) {
+        e.preventDefault()
+        addNodeFromText(text)
       }
     },
-    [addNodeFromUrl, addNodeFromFiles, screenToFlowPosition],
+    [addNodeFromUrl, addNodeFromText, addNodeFromFiles, screenToFlowPosition],
   )
 
   // ========== 拖拽事件 ==========

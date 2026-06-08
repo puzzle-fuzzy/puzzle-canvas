@@ -43,6 +43,14 @@ export type DocNodeData = {
 
 export type DocNodeType = Node<DocNodeData, 'docNode'>
 
+// ========== 文本节点 ==========
+export type TextNodeData = {
+  description: string
+  groupId?: string
+}
+
+export type TextNodeType = Node<TextNodeData, 'textNode'>
+
 // ========== 小组节点 ==========
 export type GroupNodeData = {
   label: string
@@ -53,7 +61,7 @@ export type GroupNodeData = {
 export type GroupNodeType = Node<GroupNodeData, 'groupNode'>
 
 // ========== 联合类型 ==========
-export type AppNode = UrlNodeType | ImageNodeType | VideoNodeType | DocNodeType | GroupNodeType
+export type AppNode = UrlNodeType | ImageNodeType | VideoNodeType | DocNodeType | TextNodeType | GroupNodeType
 
 // ========== 上传状态 ==========
 export type UploadState = {

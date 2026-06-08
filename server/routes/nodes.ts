@@ -17,7 +17,7 @@ import { eq, and } from 'drizzle-orm'
 import { unlinkSync } from 'node:fs'
 
 /** 合法的节点类型，对应前端的 nodeTypes 注册表 */
-const VALID_NODE_TYPES = ['urlNode', 'imageNode', 'videoNode', 'docNode', 'groupNode']
+const VALID_NODE_TYPES = ['urlNode', 'imageNode', 'videoNode', 'docNode', 'textNode', 'groupNode']
 
 /** 认证中间件类型 */
 type AuthMiddleware = (c: import('hono').Context, next: import('hono').Next) => Promise<Response | void>

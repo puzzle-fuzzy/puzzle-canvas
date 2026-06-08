@@ -12,6 +12,7 @@ import '@xyflow/react/dist/style.css'
 import UrlNode from './components/UrlNode'
 import MediaNode from './components/MediaNode'
 import DocNode from './components/DocNode'
+import TextNode from './components/TextNode'
 import GroupNode from './components/GroupNode'
 import ErrorBoundary from './components/ErrorBoundary'
 import SettingsModal from './components/SettingsModal'
@@ -22,6 +23,7 @@ import LoginModal from './components/LoginModal'
 import FullscreenPreview from './components/FullscreenPreview'
 import GroupNameModal from './components/GroupNameModal'
 import GroupToolbar from './components/GroupToolbar'
+import TextPreviewModal from './components/TextPreviewModal'
 import ErrorToast from './components/ErrorToast'
 import LoadingIndicator from './components/LoadingIndicator'
 import EmptyHint from './components/EmptyHint'
@@ -44,6 +46,7 @@ const nodeTypes = {
   imageNode: (() => { const W = (props: any) => <ErrorBoundary level="node"><MediaNode {...props} /></ErrorBoundary>; W.displayName = 'ImageNode'; return W })(),
   videoNode: (() => { const W = (props: any) => <ErrorBoundary level="node"><MediaNode {...props} /></ErrorBoundary>; W.displayName = 'VideoNode'; return W })(),
   docNode: (() => { const W = (props: any) => <ErrorBoundary level="node"><DocNode {...props} /></ErrorBoundary>; W.displayName = 'DocNode'; return W })(),
+  textNode: (() => { const W = (props: any) => <ErrorBoundary level="node"><TextNode {...props} /></ErrorBoundary>; W.displayName = 'TextNode'; return W })(),
 }
 
 function Canvas() {
@@ -205,6 +208,7 @@ function Canvas() {
       <EmptyHint />
 
       <AIModal onGenerate={actions.handleAIGenerate} />
+      <TextPreviewModal />
       <LoginModal />
       <ModeToolbar />
 

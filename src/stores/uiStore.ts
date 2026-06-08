@@ -62,6 +62,7 @@ interface UIStore {
   showGroupNameModal: boolean
   groupNameModalMode: 'create' | 'rename'
   groupNameModalTarget: string | null
+  textPreview: string | null
 
   // Actions
   toggleDarkMode: () => void
@@ -80,6 +81,7 @@ interface UIStore {
   setAiGenerating: (v: boolean) => void
   openGroupNameModal: (mode: 'create' | 'rename', target?: string) => void
   closeGroupNameModal: () => void
+  setTextPreview: (v: string | null) => void
 }
 
 let errorTimer: ReturnType<typeof setTimeout> | null = null
@@ -135,6 +137,7 @@ export const useUIStore = create<UIStore>((set) => {
     showGroupNameModal: false,
     groupNameModalMode: 'create',
     groupNameModalTarget: null,
+    textPreview: null,
 
     // ========== Actions ==========
     toggleDarkMode: () => {
@@ -190,5 +193,6 @@ export const useUIStore = create<UIStore>((set) => {
       groupNameModalMode: 'create',
       groupNameModalTarget: null,
     }),
+    setTextPreview: (v) => set({ textPreview: v }),
   }
 })

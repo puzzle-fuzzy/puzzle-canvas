@@ -438,6 +438,112 @@ html.dark {
   }
 }
 
+/* ========== 文本节点 ========== */
+.text-node {
+  width: var(--node-width);
+  max-height: calc(var(--node-width) * 1.618);
+  background: #ffffff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.06);
+  position: relative;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.text-node:hover {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.text-node-content {
+  padding: 14px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #111827;
+  white-space: pre-wrap;
+  word-break: break-word;
+  height: 100%;
+  overflow: hidden;
+}
+
+.text-node-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(transparent, #ffffff);
+  pointer-events: none;
+}
+
+html.dark {
+  .text-node {
+    background: #1e1f28;
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.2),
+      0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .text-node:hover {
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.25),
+      0 8px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  .text-node-content {
+    color: #f3f4f6;
+  }
+
+  .text-node-fade {
+    background: linear-gradient(transparent, #1e1f28);
+  }
+}
+
+/* ========== 文本预览弹窗 ========== */
+.text-preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.text-preview-modal {
+  width: min(600px, 90vw);
+  max-height: 80vh;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+}
+
+.text-preview-body {
+  padding: 24px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #111827;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+html.dark {
+  .text-preview-modal {
+    background: #1e1f28;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  .text-preview-body {
+    color: #f3f4f6;
+  }
+}
+
 /* ========== 小组节点 ========== */
 .group-node {
   border-radius: 10px;

@@ -90,7 +90,7 @@ export const refreshTokens = sqliteTable('refresh_tokens', {
  */
 export const nodes = sqliteTable('nodes', {
   id: text('id').primaryKey(),
-  type: text('type', { enum: ['urlNode', 'imageNode', 'videoNode', 'docNode', 'groupNode'] }).notNull(),
+  type: text('type', { enum: ['urlNode', 'imageNode', 'videoNode', 'docNode', 'textNode', 'groupNode'] }).notNull(),
   positionX: real('position_x').notNull(),
   positionY: real('position_y').notNull(),
 
