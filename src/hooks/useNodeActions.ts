@@ -50,8 +50,8 @@ export function useNodeActions() {
         }
 
         const data: MetadataResponse = await res.json()
-        const mouse = useInputStore.getState().mousePosition
-        const pos = screenToFlowPosition(mouse)
+        const { mouseX, mouseY } = useInputStore.getState()
+        const pos = screenToFlowPosition({ x: mouseX, y: mouseY })
 
         const newNode: UrlNodeType = {
           id: crypto.randomUUID(),
@@ -82,8 +82,8 @@ export function useNodeActions() {
   // ========== 文本节点 ==========
   const addNodeFromText = useCallback(
     (text: string) => {
-      const mouse = useInputStore.getState().mousePosition
-      const pos = screenToFlowPosition(mouse)
+      const { mouseX, mouseY } = useInputStore.getState()
+      const pos = screenToFlowPosition({ x: mouseX, y: mouseY })
 
       const newNode: TextNodeType = {
         id: crypto.randomUUID(),

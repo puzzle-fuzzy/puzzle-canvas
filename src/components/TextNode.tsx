@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, useEffect } from 'react'
+import { useCallback, useRef, useState, useEffect, memo } from 'react'
 import type { NodeProps } from '@xyflow/react'
 import type { TextNodeType } from '../types'
 import { useUIStore } from '../stores/uiStore'
@@ -43,4 +43,4 @@ function TextNode({ data }: TextNodeProps) {
   )
 }
 
-export default TextNode
+export default memo(TextNode)

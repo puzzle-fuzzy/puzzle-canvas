@@ -28,8 +28,8 @@ export function useCanvasActions() {
       const files = e.clipboardData?.files
       if (files && files.length > 0) {
         e.preventDefault()
-        const mouse = useInputStore.getState().mousePosition
-        const origin = screenToFlowPosition(mouse)
+        const { mouseX, mouseY } = useInputStore.getState()
+        const origin = screenToFlowPosition({ x: mouseX, y: mouseY })
         addNodeFromFiles(files, origin)
         return
       }

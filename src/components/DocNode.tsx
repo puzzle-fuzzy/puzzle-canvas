@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, memo } from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { Icon } from '@ricons/utils'
 import { useAppIcon } from '../icons'
@@ -8,6 +8,13 @@ import { formatFileSize } from '../utils/format'
 
 type DocNodeProps = NodeProps<DocNodeType>
 
+const archiveExts = ['zip', 'rar', '7z', 'tar', 'gz', 'bz2', 'xz', 'tgz']
+const codeExts = [
+  'js', 'ts', 'jsx', 'tsx', 'html', 'css', 'scss', 'less', 'json', 'xml',
+  'yaml', 'yml', 'md', 'py', 'rb', 'go', 'rs', 'java', 'c', 'cpp', 'h',
+  'sh', 'bash', 'sql', 'graphql', 'vue', 'svelte',
+]
+
 /** 根据扩展名返回文件图标组件 */
 function getFileIcon(
   fileName: string,
@@ -16,12 +23,6 @@ function getFileIcon(
   DocumentTextIcon: React.ComponentType,
 ) {
   const ext = fileName.includes('.') ? fileName.split('.').pop()!.toLowerCase() : ''
-  const archiveExts = ['zip', 'rar', '7z', 'tar', 'gz', 'bz2', 'xz', 'tgz']
-  const codeExts = [
-    'js', 'ts', 'jsx', 'tsx', 'html', 'css', 'scss', 'less', 'json', 'xml',
-    'yaml', 'yml', 'md', 'py', 'rb', 'go', 'rs', 'java', 'c', 'cpp', 'h',
-    'sh', 'bash', 'sql', 'graphql', 'vue', 'svelte',
-  ]
 
   if (archiveExts.includes(ext)) return <Icon size={28}><FolderZipIcon /></Icon>
   if (codeExts.includes(ext)) return <Icon size={28}><DocumentCodeIcon /></Icon>
@@ -78,4 +79,4 @@ function DocNode({ data, id }: DocNodeProps) {
   )
 }
 
-export default DocNode
+export default memo(DocNode)

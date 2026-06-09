@@ -20,11 +20,12 @@ export default function ShareModal() {
   useFocusTrap(showShareModal)
 
   const selectedCount = useCanvasStore((s) => {
-    const nonGroup = s.selectedNodeIds.filter((id) => {
+    let count = 0
+    for (const id of s.selectedNodeIds) {
       const node = s.nodes.find((n) => n.id === id)
-      return node && node.type !== 'groupNode'
-    })
-    return nonGroup.length
+      if (node && node.type !== 'groupNode') count++
+    }
+    return count
   })
 
   const handleClose = useCallback(() => {

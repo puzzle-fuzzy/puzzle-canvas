@@ -9,8 +9,8 @@
   padding: 8px 0;
   width: var(--mode-toolbar-size);
   border-radius: var(--mode-toolbar-size);
-  z-index: 10;
-  transition: background 0.3s, box-shadow 0.3s;
+  z-index: var(--z-selection-toolbar);
+  transition: background 0.3s;
   user-select: none;
 }
 
@@ -23,7 +23,7 @@
 
 .mode-toolbar--dragging {
   transition: none !important;
-  z-index: 100;
+  z-index: var(--z-modal);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
@@ -81,7 +81,7 @@
   border-radius: 30px;
   background: transparent;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s;
 }
 
 .mode-toolbar-btn:focus-visible {
@@ -120,7 +120,7 @@
 }
 /* ========== 选区操作工具栏 ========== */
 .selection-toolbar {
-  z-index: 5;
+  z-index: var(--z-toolbar);
   pointer-events: auto;
   display: flex;
   align-items: center;
@@ -128,7 +128,7 @@
   padding: 0 8px;
   border-radius: 50px;
   height: var(--mode-toolbar-size);
-  transition: background 0.3s, box-shadow 0.3s;
+  transition: background 0.3s;
 }
 
 .selection-toolbar.dark {
@@ -145,8 +145,8 @@
 }
 
 .selection-toolbar.dark .selection-toolbar-btn--danger:hover {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  background: rgba(var(--color-error-rgb), 0.2);
+  color: var(--color-error);
 }
 
 .selection-toolbar.light {
@@ -163,8 +163,8 @@
 }
 
 .selection-toolbar.light .selection-toolbar-btn--danger:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: rgba(var(--color-error-rgb), 0.1);
+  color: var(--color-error);
 }
 
 .selection-toolbar-btn {
@@ -177,7 +177,7 @@
   border-radius: 50px;
   background: transparent;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 
 .selection-toolbar-btn:focus-visible {

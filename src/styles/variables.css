@@ -7,6 +7,17 @@
   --mode-toolbar-size: 55px;
   --toolbar-icon-size: 20px;
 
+  /* 圆角 */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+
+  /* z-index 层级 */
+  --z-toolbar: 5;
+  --z-selection-toolbar: 10;
+  --z-modal: 100;
+  --z-fullscreen: 200;
+
   /* 主色调 */
   --color-primary: #6366f1;
   --color-primary-hover: #818cf8;
@@ -40,6 +51,7 @@
 
   /* 语义色 */
   --color-error: #ef4444;
+  --color-error-rgb: 239, 68, 68;
   --color-error-bg: #fef2f2;
   --color-error-border: #fecaca;
   --color-error-text: #991b1b;

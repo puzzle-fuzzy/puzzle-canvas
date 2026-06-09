@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo, memo } from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { Icon } from '@ricons/utils'
 import { useAppIcon } from '../icons'
@@ -7,7 +7,7 @@ import { getDomain } from '../utils'
 
 function UrlNode({ data }: NodeProps<UrlNodeType>) {
   const { url, title, description, image, favicon } = data
-  const domain = getDomain(url)
+  const domain = useMemo(() => getDomain(url), [url])
   const GlobeIcon = useAppIcon('globe')
 
   const [faviconError, setFaviconError] = useState(false)
@@ -61,4 +61,4 @@ function UrlNode({ data }: NodeProps<UrlNodeType>) {
   )
 }
 
-export default UrlNode
+export default memo(UrlNode)

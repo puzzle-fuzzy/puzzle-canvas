@@ -2,12 +2,11 @@
 .url-node {
   width: var(--node-width);
   background: var(--surface-card);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
-  transition: box-shadow 0.2s ease;
 }
 
 .url-node:hover {
@@ -109,13 +108,12 @@
 .doc-node {
   width: var(--node-width);
   background: var(--surface-card);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 16px;
   box-shadow: var(--shadow-card);
-  transition: box-shadow 0.2s ease;
 }
 
 .doc-node:hover {
@@ -164,11 +162,10 @@ html.dark {
   position: relative;
   display: flex;
   flex-direction: column;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   overflow: visible;
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
-  transition: box-shadow 0.2s ease;
 }
 
 .media-node:hover {
@@ -178,7 +175,7 @@ html.dark {
 .media-image-wrapper {
   width: 100%;
   overflow: hidden;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -194,7 +191,7 @@ html.dark {
 .media-video-wrapper {
   width: 100%;
   background: #000;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
@@ -222,14 +219,13 @@ html.dark {
   width: var(--node-width);
   height: calc(var(--node-width) / 1.618);
   background: var(--surface-card);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   padding: 0 16px;
   padding-right: 36px;
   position: relative;
   box-shadow: var(--shadow-card);
-  transition: box-shadow 0.2s ease;
 }
 
 .media-node--uploading:hover {
@@ -262,7 +258,7 @@ html.dark {
 .upload-progress-bar-track {
   width: 100%;
   height: 6px;
-  background: #e5e7eb;
+  background: var(--border-medium);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -294,11 +290,11 @@ html.dark {
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 
 .upload-cancel-btn:hover {
-  background: #fee2e2;
+  background: var(--color-error-bg);
   color: var(--color-error);
 }
 
@@ -321,7 +317,7 @@ html.dark {
   width: var(--node-width);
   max-height: calc(var(--node-width) * 1.618);
   background: var(--surface-card);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   box-shadow: var(--shadow-card);
   position: relative;
@@ -330,7 +326,6 @@ html.dark {
   text-align: left;
   font-family: inherit;
   padding: 0;
-  transition: box-shadow 0.2s ease;
 }
 
 .text-node:hover {
@@ -366,14 +361,14 @@ html.dark {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-modal);
 }
 
 .text-preview-modal {
   width: min(600px, 90vw);
   max-height: 80vh;
   background: var(--surface-card);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-modal);
   overflow-y: auto;
 }
@@ -395,13 +390,13 @@ html.dark {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-modal);
 }
 
 .share-modal {
   width: min(440px, 90vw);
   background: var(--surface-card);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-modal);
 }
 
@@ -426,17 +421,25 @@ html.dark {
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: transparent;
-  color: #4b5563;
+  color: var(--text-close);
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 
 .share-modal-close:hover {
   background: rgba(0, 0, 0, 0.06);
   color: var(--text-primary);
+}
+
+html.dark .share-modal-close {
+  color: var(--text-secondary);
+}
+
+html.dark .share-modal-close:hover {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .share-modal-body {
@@ -458,7 +461,7 @@ html.dark {
   font-size: 13px;
   font-weight: 500;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--color-primary);
   color: var(--text-on-primary);
   cursor: pointer;
@@ -489,7 +492,7 @@ html.dark {
   letter-spacing: 2px;
   text-align: center;
   background: var(--surface-muted);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   color: var(--color-primary);
 }
 
@@ -500,11 +503,11 @@ html.dark {
   align-items: center;
   justify-content: center;
   border: 1px solid var(--border-medium);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--surface-card);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
   flex-shrink: 0;
 }
 
@@ -538,7 +541,7 @@ html.dark {
   padding: 10px 14px;
   font-size: 14px;
   border: 1px solid var(--border-medium);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   outline: none;
   background: var(--surface-card);
   color: var(--text-primary);
@@ -551,14 +554,6 @@ html.dark {
 }
 
 html.dark {
-  .share-modal-close {
-    color: #9ca3af;
-  }
-
-  .share-modal-close:hover {
-    background: rgba(255, 255, 255, 0.06);
-  }
-
   .share-modal-copy-btn {
     background: var(--surface-muted);
   }
@@ -566,15 +561,11 @@ html.dark {
   .share-modal-input {
     background: var(--surface-muted);
   }
-
-  .share-modal-input:focus {
-    border-color: var(--color-primary);
-  }
 }
 
 /* ========== 小组节点 ========== */
 .group-node {
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: rgba(var(--color-primary-rgb), 0.06);
   border: 2px dashed rgba(var(--color-primary-rgb), 0.4);
   position: relative;
@@ -630,7 +621,7 @@ html.dark {
   padding: 8px 12px;
   font-size: 14px;
   border: 1px solid var(--border-medium);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   outline: none;
   background: var(--surface-card);
   color: var(--text-primary);
@@ -652,11 +643,11 @@ html.dark {
   padding: 6px 16px;
   font-size: 13px;
   border: 1px solid var(--border-medium);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 
 .group-name-cancel:hover {
@@ -667,11 +658,11 @@ html.dark {
   padding: 6px 16px;
   font-size: 13px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--color-primary);
   color: var(--text-on-primary);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s;
 }
 
 .group-name-confirm:hover {

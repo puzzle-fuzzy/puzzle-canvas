@@ -1,11 +1,11 @@
 import { useCanvasStore } from '../stores/canvasStore'
 
 function EmptyHint() {
-  const nodes = useCanvasStore((s) => s.nodes)
+  const nodeCount = useCanvasStore((s) => s.nodes.length)
   const loading = useCanvasStore((s) => s.loading)
   const initialized = useCanvasStore((s) => s.initialized)
 
-  if (!initialized || nodes.length > 0 || loading) return null
+  if (!initialized || nodeCount > 0 || loading) return null
 
   return (
     <div className="empty-hint">

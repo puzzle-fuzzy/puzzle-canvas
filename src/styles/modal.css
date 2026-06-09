@@ -6,12 +6,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: var(--z-modal);
 }
 
 .ai-modal {
   width: 420px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -36,10 +36,10 @@
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: transparent;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
   color: var(--text-close);
 }
 
@@ -60,7 +60,7 @@
   padding: 10px 14px;
   font-size: 14px;
   border: 1px solid var(--border-medium);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   resize: none;
   outline: none;
   font-family: inherit;
@@ -105,9 +105,9 @@
   padding: 8px 12px;
   font-size: 13px;
   border: 1px solid var(--border-medium);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s;
   font-family: inherit;
   color: var(--text-primary);
 }
@@ -141,9 +141,9 @@
   left: 0;
   right: 0;
   border: 1px solid var(--border-medium);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  z-index: 10;
+  z-index: var(--z-modal);
   animation: dropdown-in 0.15s ease;
   background: var(--surface-card);
 }
@@ -168,7 +168,7 @@
   cursor: pointer;
   text-align: left;
   font-family: inherit;
-  transition: all 0.1s;
+  transition: background 0.1s;
   color: var(--text-primary);
   background: transparent;
 }
@@ -227,9 +227,9 @@
   color: var(--text-on-primary);
   background: var(--color-primary);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s;
   white-space: nowrap;
 }
 
@@ -258,13 +258,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: var(--z-modal);
 }
 
 .settings-modal {
   width: 932px;
   height: 576px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   display: flex;
   overflow: hidden;
   background: var(--surface-elevated);
@@ -296,12 +296,12 @@
   padding: 8px 10px;
   font-size: 13px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: transparent;
   cursor: pointer;
   text-align: left;
   font-family: inherit;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
   color: var(--text-secondary);
 }
 
@@ -357,10 +357,10 @@
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: transparent;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
   color: var(--text-close);
 }
 
@@ -397,12 +397,12 @@
 
 .icon-set-card {
   padding: 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: 2px solid var(--border-subtle);
   cursor: pointer;
   text-align: left;
   font-family: inherit;
-  transition: all 0.15s;
+  transition: background 0.15s;
 }
 
 .icon-set-card.dark {
@@ -469,7 +469,7 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 
 .icon-set-card.dark .icon-set-preview-item {
@@ -490,12 +490,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: var(--z-modal);
 }
 
 .auth-modal {
   width: 380px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -520,10 +520,10 @@
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: transparent;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s;
   color: var(--text-close);
 }
 
@@ -543,7 +543,7 @@
   display: flex;
   gap: 4px;
   padding: 3px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
 }
 
 .auth-modal.dark .auth-modal-tabs {
@@ -561,10 +561,10 @@
   font-weight: 500;
   text-align: center;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: transparent;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
   font-family: inherit;
   color: var(--text-secondary);
 }
@@ -605,7 +605,7 @@
   padding: 10px 14px;
   font-size: 14px;
   border: 1px solid var(--border-medium);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   outline: none;
   font-family: inherit;
   transition: border-color 0.15s;
@@ -641,9 +641,9 @@
   color: var(--text-on-primary);
   background: var(--color-primary);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s;
   font-family: inherit;
 }
 
@@ -681,7 +681,7 @@
   align-items: center;
   gap: 14px;
   padding: 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
 }
 
@@ -730,7 +730,7 @@
 .account-role-badge {
   font-size: 11px;
   padding: 3px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-weight: 500;
   flex-shrink: 0;
 }
@@ -755,32 +755,32 @@
   font-size: 13px;
   font-weight: 500;
   border: 1px solid;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 
 .account-panel.dark .account-logout-btn {
-  color: #f87171;
-  background: rgba(239, 68, 68, 0.08);
-  border-color: rgba(239, 68, 68, 0.15);
+  color: var(--color-error);
+  background: rgba(var(--color-error-rgb), 0.08);
+  border-color: rgba(var(--color-error-rgb), 0.15);
 }
 
 .account-panel.dark .account-logout-btn:hover {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: rgba(239, 68, 68, 0.25);
+  background: rgba(var(--color-error-rgb), 0.15);
+  border-color: rgba(var(--color-error-rgb), 0.25);
 }
 
 .account-panel.light .account-logout-btn {
-  color: #dc2626;
-  background: rgba(239, 68, 68, 0.04);
-  border-color: rgba(239, 68, 68, 0.12);
+  color: var(--color-error);
+  background: rgba(var(--color-error-rgb), 0.04);
+  border-color: rgba(var(--color-error-rgb), 0.12);
 }
 
 .account-panel.light .account-logout-btn:hover {
-  background: rgba(239, 68, 68, 0.08);
-  border-color: rgba(239, 68, 68, 0.2);
+  background: rgba(var(--color-error-rgb), 0.08);
+  border-color: rgba(var(--color-error-rgb), 0.2);
 }
 
 /* ========== 全屏预览遮罩 ========== */
@@ -791,7 +791,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 200;
+  z-index: var(--z-fullscreen);
   cursor: pointer;
 }
 
@@ -855,14 +855,14 @@
 .appearance-color-swatch {
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   border: 2px solid transparent;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-on-primary);
-  transition: all 0.15s;
+  transition: opacity 0.15s;
 }
 
 .appearance-color-swatch:hover {
@@ -932,10 +932,10 @@
   font-size: 13px;
   font-weight: 500;
   border: 1px solid var(--border-medium);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: transparent;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s;
   color: var(--text-secondary);
 }
 

@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { NodeProps } from '@xyflow/react'
 import type { GroupNodeType } from '../types'
 import { useCanvasStore } from '../stores/canvasStore'
@@ -23,4 +24,4 @@ function GroupNode({ id, data }: NodeProps<GroupNodeType>) {
   )
 }
 
-export default GroupNode
+export default memo(GroupNode)

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Icon } from '@ricons/utils'
 import { useAppIcon } from '../icons'
 import { useCanvasStore } from '../stores/canvasStore'
@@ -32,22 +32,20 @@ function SelectionToolbar({ position, selectedCount, onDownload }: SelectionTool
 
   const [copied, setCopied] = useState(false)
 
-  // 获取选中的节点
-  const selectedNodes = nodes.filter((n) => selectedNodeIds.includes(n.id))
+  const selectedIdSet = useMemo(() => new Set(selectedNodeIds), [selectedNodeIds])
 
-  // 判断是否可以创建小组（2+ 非小组节点，且没有 groupId）
-  const nonGroupSelected = selectedNodes.filter(
-    (n) => n.type !== 'groupNode' && !(n.data as { groupId?: string }).groupId,
-  )
-  const canCreateGroup = nonGroupSelected.length >= 2
-
-  // 判断选中节点中是否包含图片或视频
-  const hasMedia = selectedNodes.some(
-    (n) => n.type === 'imageNode' || n.type === 'videoNode',
-  )
-
-  // 判断选中节点中是否包含 URL 节点
-  const hasUrl = selectedNodes.some((n) => n.type === 'urlNode')
+  // 获取选中的节点并派生操作条件
+  const { canCreateGroup, hasMedia, hasUrl } = useMemo(() => {
+    const selectedNodes = nodes.filter((n) => selectedIdSet.has(n.id))
+    const nonGroupSelected = selectedNodes.filter(
+      (n) => n.type !== 'groupNode' && !(n.data as { groupId?: string }).groupId,
+    )
+    return {
+      canCreateGroup: nonGroupSelected.length >= 2,
+      hasMedia: selectedNodes.some((n) => n.type === 'imageNode' || n.type === 'videoNode'),
+      hasUrl: selectedNodes.some((n) => n.type === 'urlNode'),
+    }
+  }, [nodes, selectedIdSet])
 
   const handleCopyUrl = () => {
     const { nodes: allNodes, selectedNodeIds: ids } = useCanvasStore.getState()

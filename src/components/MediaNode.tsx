@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from 'react'
+import { useRef, useState, useCallback, useEffect, memo } from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { Icon } from '@ricons/utils'
 import { useAppIcon } from '../icons'
@@ -104,4 +104,4 @@ function MediaNode({ data, type, id }: MediaNodeProps) {
   )
 }
 
-export default MediaNode
+export default memo(MediaNode)

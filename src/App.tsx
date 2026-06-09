@@ -1,4 +1,4 @@
-import { useCallback, useRef, useEffect } from 'react'
+import { useCallback, useRef, useEffect, useMemo, memo } from 'react'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -42,13 +42,20 @@ import { useGroupToolbar } from './hooks/useGroupToolbar'
 import './App.css'
 
 // 用 ErrorBoundary 包裹节点组件，隔离单节点渲染崩溃
+// memo 包裹确保 ReactFlow 对 props 做浅比较，减少不必要的重渲染
+const MemoUrlNode = memo((props: any) => <ErrorBoundary level="node"><UrlNode {...props} /></ErrorBoundary>)
+const MemoImageNode = memo((props: any) => <ErrorBoundary level="node"><MediaNode {...props} /></ErrorBoundary>)
+const MemoVideoNode = memo((props: any) => <ErrorBoundary level="node"><MediaNode {...props} /></ErrorBoundary>)
+const MemoDocNode = memo((props: any) => <ErrorBoundary level="node"><DocNode {...props} /></ErrorBoundary>)
+const MemoTextNode = memo((props: any) => <ErrorBoundary level="node"><TextNode {...props} /></ErrorBoundary>)
+
 const nodeTypes = {
   groupNode: GroupNode,
-  urlNode: (() => { const W = (props: any) => <ErrorBoundary level="node"><UrlNode {...props} /></ErrorBoundary>; W.displayName = 'UrlNode'; return W })(),
-  imageNode: (() => { const W = (props: any) => <ErrorBoundary level="node"><MediaNode {...props} /></ErrorBoundary>; W.displayName = 'ImageNode'; return W })(),
-  videoNode: (() => { const W = (props: any) => <ErrorBoundary level="node"><MediaNode {...props} /></ErrorBoundary>; W.displayName = 'VideoNode'; return W })(),
-  docNode: (() => { const W = (props: any) => <ErrorBoundary level="node"><DocNode {...props} /></ErrorBoundary>; W.displayName = 'DocNode'; return W })(),
-  textNode: (() => { const W = (props: any) => <ErrorBoundary level="node"><TextNode {...props} /></ErrorBoundary>; W.displayName = 'TextNode'; return W })(),
+  urlNode: MemoUrlNode,
+  imageNode: MemoImageNode,
+  videoNode: MemoVideoNode,
+  docNode: MemoDocNode,
+  textNode: MemoTextNode,
 }
 
 function Canvas() {
@@ -124,7 +131,7 @@ function Canvas() {
   )
 
   // 获取小组重命名的初始值
-  const groupRenameInitialValue = (() => {
+  const groupRenameInitialValue = useMemo(() => {
     if (groupNameModalMode === 'rename' && groupNameModalTarget) {
       const groupNode = nodes.find((n) => n.id === groupNameModalTarget)
       if (groupNode && groupNode.type === 'groupNode') {
@@ -132,7 +139,7 @@ function Canvas() {
       }
     }
     return ''
-  })()
+  }, [groupNameModalMode, groupNameModalTarget, nodes])
 
   if (!initialized) {
     return (
